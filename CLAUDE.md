@@ -15,7 +15,7 @@ Read this file, `docs/BLUEPRINT.md`, and `MISTAKES.md` at the start of every ses
 4. **Build test-first** with the test-driven-development skill: failing test → code → passing test → commit.
 5. **Test real journeys** with the webapp-testing skill (Playwright) at 390, 768, and 1280px for anything a person sees.
 6. **Verify and review** with Superpowers' verification and code-review skills before calling anything done.
-7. Work on the `staging` branch. Only merge to `main` (production) when I say so.
+7. Work on the `staging` git branch. Only merge to `main` (production) when I say so.
 
 ## Definition of done
 - A task is DONE only when its tests pass and you show the evidence (test output, screenshots). Otherwise it is PARTIAL or NOT DONE.
@@ -37,7 +37,9 @@ Read this file, `docs/BLUEPRINT.md`, and `MISTAKES.md` at the start of every ses
 ## Working habits
 - Log every mistake in `MISTAKES.md`: symptom / root cause / fix / prevention. Never repeat a logged mistake.
 - Never run `next build` while `npm run dev` is running.
-- Database changes go through migration files in the repo (Supabase CLI), applied to staging first, then production.
+- Database changes go through migration files in the repo (Supabase CLI), never the SQL editor.
+- Until the pilot there is ONE Supabase project (production) and development runs on localhost. Before running any migration, back up the database. Tests that create users or businesses clean them up afterward.
+- A separate staging Supabase project must exist before the pilot phase (Phase 4).
 - Test data uses only @example.com emails or the owner's own email and 0917-000-xxxx style numbers. Never type a real person's contact details.
 
 ## FINAL REPORT format (end of every task)

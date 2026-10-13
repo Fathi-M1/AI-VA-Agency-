@@ -1,4 +1,6 @@
-# PHASE 0 — Foundation: git, staging, Google sign-in, data rules, one data model
+# PHASE 0 — Foundation: git, Google sign-in, data rules, one data model
+
+> **Change of plan (Oct 13, 2026, approved by the owner):** no separate staging Supabase project yet. We have no real users and the site is locked, so Phase 0 works against the current project (production) from localhost. Guardrails: every database change is a migration file in the repo (Supabase CLI), never the SQL editor; back up the database before running any migration; tests that create users or businesses clean them up; Google sign-in redirect URLs are localhost and the production URL only. A staging Supabase project must exist before the pilot phase (Phase 4). The repo already exists (public), so it isn't created again. The emergency site lock stays until Google sign-in replaces it.
 
 > Paste instruction for Claude Code: "Read PHASE-0-foundation.md and follow CLAUDE.md. Start with Superpowers brainstorming, then show me the plan before building."
 
@@ -7,9 +9,9 @@ Turn the deployed prototype into a real product foundation. **No new features an
 - owners sign in with Google and can only see their own business,
 - the database itself blocks one business from reading another's data,
 - every screen reads one consistent data model,
-- every change goes through git, staging, and tests.
+- every change goes through git (the `staging` branch), migrations, and tests.
 
-**Gate to pass:** the security test suite (section 12) is green on staging.
+**Gate to pass:** the security test suite (section 12) is green against the current project, run from localhost.
 
 Read first: `CLAUDE.md`, `docs/BLUEPRINT.md` (sections: Surfaces, Data model, Security and production readiness, Glossary, Scope and how we build), `MISTAKES.md`.
 
@@ -17,10 +19,10 @@ Read first: `CLAUDE.md`, `docs/BLUEPRINT.md` (sections: Surfaces, Data model, Se
 
 ## 1. Manual steps I (the owner) must do — guide me, then verify
 Give me exact click-by-click instructions for each, wait for me to say "done", then verify what you can.
-1. **GitHub:** create a private repository and connect this project to it.
-2. **Staging database:** create a second Supabase project named `ai-va-agency-staging`. The current project becomes production.
-3. **Google sign-in:** in Google Cloud Console create an OAuth client (Web application) and an OAuth consent screen with only the email and profile scopes. Add both Supabase projects' Google callback URLs as redirect URIs. Enable the Google provider in Supabase Auth for staging and production, and set the allowed redirect URLs for localhost, the staging URL, and the production URL.
-4. **Vercel:** production deploys from `main`; a staging deployment deploys from the `staging` branch with the staging Supabase keys.
+1. **GitHub:** ~~create a private repository~~ done: the repo exists (public) and is connected.
+2. **Staging database:** skipped until before the pilot (see the change of plan above).
+3. **Google sign-in:** in Google Cloud Console create an OAuth client (Web application) and an OAuth consent screen with only the email and profile scopes. Add the Supabase project's Google callback URL as the redirect URI. Enable the Google provider in Supabase Auth, and set the allowed redirect URLs for localhost and the production URL only.
+4. **Vercel:** production deploys from `main` (already set up). No separate staging deployment until the staging project exists.
 5. **Skills:** install Superpowers and Anthropic's skills in Claude Code (commands are in section 13).
 
 ---
@@ -33,8 +35,8 @@ Give me exact click-by-click instructions for each, wait for me to say "done", t
 
 ## 3. Database migrations in the repo
 - Move from "paste SQL in the editor" to Supabase CLI migrations stored in `supabase/migrations/`.
-- Capture the current production schema as the baseline migration, so staging can be rebuilt from the repo.
-- From now on: write migration → apply to staging → test → I approve → apply to production.
+- Capture the current production schema as the baseline migration, so the database can be rebuilt from the repo.
+- From now on: write migration → I approve → back up the database → apply → test.
 
 ## 4. Google sign-in
 - Use Supabase Auth with the Google provider and `@supabase/ssr` for server-side sessions in Next.js.
@@ -46,7 +48,7 @@ Give me exact click-by-click instructions for each, wait for me to say "done", t
 - Add `memberships` (user_id, business_id, role `owner`|`staff`, status, created_at).
 - After sign-in: no membership → onboarding (the existing `/setup` flow, moved to `/app/onboarding`; Phase 1 redesigns it). One membership → that business's Home. Several → a simple business picker at `/app/businesses`.
 - Finishing onboarding creates the business AND an owner membership in the same transaction.
-- **Claim existing businesses once:** a one-time, server-only script assigns every existing business to the Google account whose email is in `OWNER_CLAIM_EMAIL`, as owner. Run it on staging, then production, then delete the script and the variable.
+- **Claim existing businesses once:** a one-time, server-only script assigns every existing business to the Google account whose email is in `OWNER_CLAIM_EMAIL`, as owner. Run it once (after a backup), then delete the script and the variable.
 - Staff invites are Phase 1; just make the `staff` role exist and be enforced.
 
 ## 6. Remove the demo scaffolding
@@ -84,7 +86,7 @@ Write migrations that keep all existing data and align names and structures with
 - GitHub Actions: run type-check, lint, unit tests, and the security suite on every push to `staging` and on pull requests to `main`.
 
 ## 12. Security test suite (this is the gate)
-Write these as automated tests (unit/integration with two seeded test users and two businesses on staging, plus Playwright where a browser is needed):
+Write these as automated tests (unit/integration with two seeded test users and two businesses, created by the tests and cleaned up afterward, plus Playwright where a browser is needed):
 1. Signed-out visitor opening any `/app/...` page is sent to `/sign-in`.
 2. User A, signed in, cannot read or change Business B's rows through the Supabase client with A's session — for every table with `business_id`.
 3. User A cannot open Business B's pages by changing the URL (gets "not found" or the picker, never B's data).
