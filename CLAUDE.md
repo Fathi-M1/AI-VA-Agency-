@@ -6,6 +6,7 @@ Read this file, `docs/BLUEPRINT.md`, and `MISTAKES.md` at the start of every ses
 - `docs/BLUEPRINT.md` is the approved product design. Every feature must match it.
 - If a request conflicts with the blueprint, or the blueprint is silent on something that matters, STOP and ask. Never guess.
 - Use the blueprint's Glossary terms everywhere (UI, code, agent prompts). Never use the retired names.
+- Never add a feature, workaround, or temporary measure I haven't approved. Before building anything not in the approved plan, tell me: what it is, what I will see, why it's needed, and when it will be removed. Wait for my yes.
 
 ## How every task is built (Superpowers workflow)
 1. **Brainstorm** with the Superpowers brainstorming skill, using the blueprint section and the task prompt as the approved design. Ask only about what they leave open.
