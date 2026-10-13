@@ -1,0 +1,164 @@
+{
+  "vertical": "spa",
+  "display_name": "Spa & massage",
+  "card_description": "Massages, foot spa, and body treatments",
+  "staff_role": "Therapist",
+  "staff_role_plural": "Therapists",
+  "name_placeholder": "e.g. Serene Touch Spa",
+  "staff_name_placeholder": "e.g. Liza",
+  "research_level": "starter",
+  "icon": "Flower2",
+  "booking_example": "therapist preference and health notes",
+  "sample_request": "Swedish massage (90 min) · Female therapist · Sunday evening",
+  "requires_consent": true,
+  "default_hours": [
+    {
+      "weekday": 0,
+      "start": "11:00",
+      "end": "23:00"
+    },
+    {
+      "weekday": 1,
+      "start": "11:00",
+      "end": "23:00"
+    },
+    {
+      "weekday": 2,
+      "start": "11:00",
+      "end": "23:00"
+    },
+    {
+      "weekday": 3,
+      "start": "11:00",
+      "end": "23:00"
+    },
+    {
+      "weekday": 4,
+      "start": "11:00",
+      "end": "23:00"
+    },
+    {
+      "weekday": 5,
+      "start": "11:00",
+      "end": "23:00"
+    },
+    {
+      "weekday": 6,
+      "start": "11:00",
+      "end": "23:00"
+    }
+  ],
+  "services": [
+    {
+      "name": "Swedish massage (60 min)",
+      "pricing_type": "fixed",
+      "duration_minutes": 60,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    },
+    {
+      "name": "Swedish massage (90 min)",
+      "pricing_type": "fixed",
+      "duration_minutes": 90,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    },
+    {
+      "name": "Shiatsu massage (60 min)",
+      "pricing_type": "fixed",
+      "duration_minutes": 60,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    },
+    {
+      "name": "Foot spa",
+      "pricing_type": "fixed",
+      "duration_minutes": 45,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    },
+    {
+      "name": "Body scrub",
+      "pricing_type": "fixed",
+      "duration_minutes": 60,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    }
+  ],
+  "booking_questions": [
+    {
+      "id": "service",
+      "ask": "Which service would you like to book?",
+      "type": "choice",
+      "options": [
+        "$SERVICES"
+      ],
+      "applies_to": "all",
+      "ask_if": null,
+      "required": true
+    },
+    {
+      "id": "therapist_preference",
+      "ask": "Do you prefer a female or male therapist?",
+      "type": "choice",
+      "options": [
+        "No preference",
+        "Female",
+        "Male"
+      ],
+      "applies_to": "all",
+      "ask_if": null,
+      "required": true,
+      "summary_skip": [
+        "No preference"
+      ],
+      "summary_template": "{value} therapist"
+    },
+    {
+      "id": "health_note",
+      "ask": "Are you pregnant or do you have a medical condition we should know about?",
+      "type": "yes_no",
+      "options": null,
+      "applies_to": "all",
+      "ask_if": null,
+      "required": true
+    }
+  ],
+  "faqs": [
+    {
+      "q": "What are your hours?",
+      "a_template": "{hours_summary}"
+    },
+    {
+      "q": "How can I pay?",
+      "a_template": "We accept {payment_methods}."
+    },
+    {
+      "q": "Can I choose who serves me?",
+      "a_template": "Yes. Our therapists are {staff_names}."
+    },
+    {
+      "q": "Can I choose a female or male therapist?",
+      "a_template": "Yes. Choose your preference when you book."
+    }
+  ],
+  "escalation_keywords": [
+    "chest pain",
+    "fainting",
+    "can't breathe",
+    "severe pain"
+  ],
+  "emergency_instruction": "If this is an emergency, please go to the nearest hospital emergency room or call 911.",
+  "setup_tips": {
+    "step1": "Pick the type closest to your business. You can change everything later.",
+    "step2": "We added services most spas offer. Turn off what you don't do, set the times, and add the prices you know.",
+    "step3": "Add each therapist and the days they work.",
+    "step4": "Your AI team never handles emergencies by itself. It shows this message right away and alerts you."
+  },
+  "_help": "A starter spa pack. It asks for consent because customers may share health information."
+}

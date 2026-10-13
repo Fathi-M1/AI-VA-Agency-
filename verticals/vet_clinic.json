@@ -1,0 +1,177 @@
+{
+  "vertical": "vet_clinic",
+  "display_name": "Veterinary clinic",
+  "card_description": "Check-ups, vaccines, and grooming for pets",
+  "staff_role": "Veterinarian",
+  "staff_role_plural": "Veterinarians",
+  "name_placeholder": "e.g. Happy Paws Vet",
+  "staff_name_placeholder": "e.g. Dr. Lim",
+  "research_level": "starter",
+  "icon": "PawPrint",
+  "booking_example": "the pet type, the pet's name, and the reason",
+  "sample_request": "Vaccination · Dog · Bantay · Tomorrow morning",
+  "default_hours": [
+    {
+      "weekday": 1,
+      "start": "09:00",
+      "end": "18:00"
+    },
+    {
+      "weekday": 2,
+      "start": "09:00",
+      "end": "18:00"
+    },
+    {
+      "weekday": 3,
+      "start": "09:00",
+      "end": "18:00"
+    },
+    {
+      "weekday": 4,
+      "start": "09:00",
+      "end": "18:00"
+    },
+    {
+      "weekday": 5,
+      "start": "09:00",
+      "end": "18:00"
+    },
+    {
+      "weekday": 6,
+      "start": "09:00",
+      "end": "18:00"
+    }
+  ],
+  "services": [
+    {
+      "name": "Check-up",
+      "pricing_type": "fixed",
+      "duration_minutes": 30,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    },
+    {
+      "name": "Vaccination",
+      "pricing_type": "fixed",
+      "duration_minutes": 20,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    },
+    {
+      "name": "Deworming",
+      "pricing_type": "fixed",
+      "duration_minutes": 15,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    },
+    {
+      "name": "Grooming",
+      "pricing_type": "fixed",
+      "duration_minutes": 90,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    },
+    {
+      "name": "Spay/neuter consultation",
+      "pricing_type": "fixed",
+      "duration_minutes": 30,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    }
+  ],
+  "booking_questions": [
+    {
+      "id": "service",
+      "ask": "Which service would you like to book?",
+      "type": "choice",
+      "options": [
+        "$SERVICES"
+      ],
+      "applies_to": "all",
+      "ask_if": null,
+      "required": true
+    },
+    {
+      "id": "pet_type",
+      "ask": "What kind of pet is it?",
+      "type": "choice",
+      "options": [
+        "Dog",
+        "Cat",
+        "Other"
+      ],
+      "applies_to": "all",
+      "ask_if": null,
+      "required": true,
+      "option_details": {
+        "Dog": {
+          "icon": "Dog"
+        },
+        "Cat": {
+          "icon": "Cat"
+        },
+        "Other": {
+          "icon": "PawPrint"
+        }
+      }
+    },
+    {
+      "id": "pet_name",
+      "ask": "What's your pet's name?",
+      "type": "text",
+      "options": null,
+      "applies_to": "all",
+      "ask_if": null,
+      "required": true,
+      "summary_template": "{value}"
+    },
+    {
+      "id": "reason",
+      "ask": "What's the reason for the visit?",
+      "type": "text",
+      "options": null,
+      "applies_to": "all",
+      "ask_if": null,
+      "required": true,
+      "multiline": true
+    }
+  ],
+  "faqs": [
+    {
+      "q": "What are your hours?",
+      "a_template": "{hours_summary}"
+    },
+    {
+      "q": "How can I pay?",
+      "a_template": "We accept {payment_methods}."
+    },
+    {
+      "q": "Can I choose who serves me?",
+      "a_template": "Yes. Our veterinarians are {staff_names}."
+    },
+    {
+      "q": "What should I bring?",
+      "a_template": "Please bring your pet's vaccination record if you have one."
+    }
+  ],
+  "escalation_keywords": [
+    "not breathing",
+    "poisoning",
+    "hit by a car",
+    "seizure",
+    "heavy bleeding"
+  ],
+  "emergency_instruction": "Please bring your pet to the nearest 24-hour animal hospital right away.",
+  "setup_tips": {
+    "step1": "Pick the type closest to your business. You can change everything later.",
+    "step2": "We added services most vet clinics offer. Turn off what you don't do and add the prices you know.",
+    "step3": "Add each veterinarian and the days they're in the clinic.",
+    "step4": "Your AI team never handles emergencies by itself. It shows this message right away and alerts you."
+  },
+  "_help": "A starter veterinary clinic pack. It asks for the pet type, the pet's name, and the reason for the visit."
+}

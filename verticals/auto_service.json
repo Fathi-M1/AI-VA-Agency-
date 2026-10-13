@@ -1,0 +1,153 @@
+{
+  "vertical": "auto_service",
+  "display_name": "Auto service & car care",
+  "card_description": "Oil changes, maintenance, and car wash",
+  "staff_role": "Mechanic team",
+  "staff_role_plural": "Mechanic teams",
+  "name_placeholder": "e.g. Quick Fix Auto Care",
+  "staff_name_placeholder": "e.g. Team A",
+  "research_level": "starter",
+  "icon": "Car",
+  "booking_example": "the car's make, model, and year",
+  "sample_request": "Change oil · Toyota Vios 2018 · Saturday morning",
+  "default_hours": [
+    {
+      "weekday": 1,
+      "start": "08:00",
+      "end": "17:00"
+    },
+    {
+      "weekday": 2,
+      "start": "08:00",
+      "end": "17:00"
+    },
+    {
+      "weekday": 3,
+      "start": "08:00",
+      "end": "17:00"
+    },
+    {
+      "weekday": 4,
+      "start": "08:00",
+      "end": "17:00"
+    },
+    {
+      "weekday": 5,
+      "start": "08:00",
+      "end": "17:00"
+    },
+    {
+      "weekday": 6,
+      "start": "08:00",
+      "end": "17:00"
+    }
+  ],
+  "services": [
+    {
+      "name": "Change oil",
+      "pricing_type": "fixed",
+      "duration_minutes": 60,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    },
+    {
+      "name": "Preventive maintenance service",
+      "pricing_type": "fixed",
+      "duration_minutes": 120,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    },
+    {
+      "name": "Car aircon cleaning",
+      "pricing_type": "fixed",
+      "duration_minutes": 120,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    },
+    {
+      "name": "Car wash",
+      "pricing_type": "fixed",
+      "duration_minutes": 45,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    },
+    {
+      "name": "Diagnostic check",
+      "pricing_type": "fixed",
+      "duration_minutes": 60,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    }
+  ],
+  "booking_questions": [
+    {
+      "id": "service",
+      "ask": "Which service would you like to book?",
+      "type": "choice",
+      "options": [
+        "$SERVICES"
+      ],
+      "applies_to": "all",
+      "ask_if": null,
+      "required": true
+    },
+    {
+      "id": "car_model",
+      "ask": "What's your car's make and model?",
+      "type": "text",
+      "options": null,
+      "applies_to": "all",
+      "ask_if": null,
+      "required": true,
+      "summary_template": "{value}"
+    },
+    {
+      "id": "car_year",
+      "ask": "What year is your car?",
+      "type": "text",
+      "options": null,
+      "applies_to": "all",
+      "ask_if": null,
+      "required": true,
+      "summary_template": "{value}"
+    }
+  ],
+  "faqs": [
+    {
+      "q": "What are your hours?",
+      "a_template": "{hours_summary}"
+    },
+    {
+      "q": "How can I pay?",
+      "a_template": "We accept {payment_methods}."
+    },
+    {
+      "q": "Can I choose who serves me?",
+      "a_template": "Yes. Our mechanic teams are {staff_names}."
+    },
+    {
+      "q": "How long will my car take?",
+      "a_template": "{service_durations}. The team will confirm when you drop it off."
+    }
+  ],
+  "escalation_keywords": [
+    "smoke",
+    "fuel leak",
+    "brakes not working",
+    "overheating",
+    "accident"
+  ],
+  "emergency_instruction": "If your car is smoking or leaking fuel, stop driving, move away from the car, and call 911 if there's a fire.",
+  "setup_tips": {
+    "step1": "Pick the type closest to your business. You can change everything later.",
+    "step2": "We added services most car shops offer. Turn off what you don't do and add the prices you know.",
+    "step3": "Add each mechanic team and the days they work.",
+    "step4": "Your AI team never handles emergencies by itself. It shows this message right away and alerts you."
+  },
+  "_help": "A starter auto service pack. It asks for the car's make, model, and year."
+}

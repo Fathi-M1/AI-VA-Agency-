@@ -1,0 +1,212 @@
+{
+  "vertical": "aircon",
+  "display_name": "Aircon cleaning",
+  "card_description": "Aircon cleaning and check-ups at your customer's place",
+  "staff_role": "Technician team",
+  "staff_role_plural": "Technician teams",
+  "name_placeholder": "e.g. CoolFix Aircon Services",
+  "staff_name_placeholder": "e.g. Team A",
+  "research_level": "researched",
+  "icon": "AirVent",
+  "booking_example": "how many units and the address",
+  "sample_request": "Split-type cleaning · 2 units · Friday morning",
+  "uses_service_areas": true,
+  "quantity_question": "unit_count",
+  "address_question": "address",
+  "extra_charges": [
+    {
+      "config_key": "addon_inverter_php",
+      "label": "Inverter unit",
+      "count_question": "inverter_count"
+    },
+    {
+      "config_key": "addon_over_1_5hp_php",
+      "label": "Unit over 1.5 HP",
+      "count_question": "over_1_5hp_count"
+    }
+  ],
+  "minimum_booking": true,
+  "default_hours": [
+    {
+      "weekday": 1,
+      "start": "08:00",
+      "end": "17:00"
+    },
+    {
+      "weekday": 2,
+      "start": "08:00",
+      "end": "17:00"
+    },
+    {
+      "weekday": 3,
+      "start": "08:00",
+      "end": "17:00"
+    },
+    {
+      "weekday": 4,
+      "start": "08:00",
+      "end": "17:00"
+    },
+    {
+      "weekday": 5,
+      "start": "08:00",
+      "end": "17:00"
+    },
+    {
+      "weekday": 6,
+      "start": "08:00",
+      "end": "17:00"
+    }
+  ],
+  "services": [
+    {
+      "name": "Window-type cleaning",
+      "pricing_type": "per_unit",
+      "duration_minutes": 60,
+      "variants": null,
+      "typical_range": "₱500–₱1,150 per unit",
+      "default_on": true
+    },
+    {
+      "name": "Split-type cleaning",
+      "pricing_type": "per_unit",
+      "duration_minutes": 90,
+      "variants": null,
+      "typical_range": "₱900–₱1,800 per unit",
+      "default_on": true
+    },
+    {
+      "name": "Tower / floor-mounted cleaning",
+      "pricing_type": "per_unit",
+      "duration_minutes": 120,
+      "variants": null,
+      "typical_range": "₱2,300 and up per unit",
+      "default_on": true
+    },
+    {
+      "name": "Repair check-up",
+      "pricing_type": "per_unit",
+      "duration_minutes": 60,
+      "variants": null,
+      "typical_range": null,
+      "default_on": false
+    }
+  ],
+  "booking_questions": [
+    {
+      "id": "service",
+      "ask": "Which service do you need?",
+      "type": "choice",
+      "options": [
+        "$SERVICES"
+      ],
+      "applies_to": "all",
+      "ask_if": null,
+      "required": true,
+      "help_prompt": "Not sure which type? Describe your aircon."
+    },
+    {
+      "id": "unit_count",
+      "ask": "How many units need this service?",
+      "type": "number",
+      "options": null,
+      "applies_to": "all",
+      "ask_if": null,
+      "required": true,
+      "summary_template": "{value} unit{s}",
+      "min": 1,
+      "max": 20
+    },
+    {
+      "id": "inverter",
+      "ask": "Are any of these units inverter type?",
+      "type": "yes_no",
+      "options": null,
+      "applies_to": "all",
+      "ask_if": null,
+      "required": true
+    },
+    {
+      "id": "inverter_count",
+      "ask": "How many of them are inverter type?",
+      "type": "number",
+      "options": null,
+      "applies_to": "all",
+      "ask_if": {
+        "question_id": "inverter",
+        "equals": "Yes"
+      },
+      "required": true,
+      "summary_template": "{value} inverter",
+      "min": 1,
+      "max": 20
+    },
+    {
+      "id": "over_1_5hp",
+      "ask": "Are any of these units bigger than 1.5 HP?",
+      "type": "yes_no",
+      "options": null,
+      "applies_to": "all",
+      "ask_if": null,
+      "required": true
+    },
+    {
+      "id": "over_1_5hp_count",
+      "ask": "How many of them are bigger than 1.5 HP?",
+      "type": "number",
+      "options": null,
+      "applies_to": "all",
+      "ask_if": {
+        "question_id": "over_1_5hp",
+        "equals": "Yes"
+      },
+      "required": true,
+      "summary_template": "{value} over 1.5 HP",
+      "min": 1,
+      "max": 20
+    },
+    {
+      "id": "address",
+      "ask": "What's the full address where the units are?",
+      "type": "text",
+      "options": null,
+      "applies_to": "all",
+      "ask_if": null,
+      "required": true
+    }
+  ],
+  "faqs": [
+    {
+      "q": "Do you serve my area?",
+      "a_template": "We serve {service_areas}."
+    },
+    {
+      "q": "How long does it take?",
+      "a_template": "About {per_unit_durations}. We plan the visit based on how many units you have."
+    },
+    {
+      "q": "How much per unit?",
+      "a_template": "{per_unit_prices}{addon_line}{minimum_line}"
+    },
+    {
+      "q": "How can I pay?",
+      "a_template": "We accept {payment_methods}."
+    }
+  ],
+  "escalation_keywords": [
+    "sparks",
+    "burning smell",
+    "smoke",
+    "water leaking on outlet",
+    "electric shock",
+    "fire"
+  ],
+  "emergency_instruction": "If you see sparks or smell burning, turn off the circuit breaker and stay away from the unit. If there is a fire, call 911.",
+  "setup_tips": {
+    "step1": "Pick the type closest to your business. You can change everything later.",
+    "step2": "Add your price per unit. You can also add extra charges for inverter units or units over 1.5 HP, and a minimum booking amount.",
+    "step3": "Add each team you send out and their working days, then list the areas you serve.",
+    "step4": "Your AI team never handles emergencies by itself. It shows this message right away and alerts you."
+  },
+  "_help": "An aircon cleaning pack. Every service is priced and timed per unit, so the estimate multiplies by the number of units, adds the owner's extra charges for inverter units and units over 1.5 HP, and applies the minimum booking amount. There is no team-member question: the business assigns a team when it confirms."
+}

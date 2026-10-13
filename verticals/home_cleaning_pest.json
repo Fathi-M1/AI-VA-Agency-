@@ -1,0 +1,162 @@
+{
+  "vertical": "home_cleaning_pest",
+  "display_name": "Home cleaning & pest control",
+  "card_description": "Cleaning and pest control at your customer's place",
+  "staff_role": "Team",
+  "staff_role_plural": "Teams",
+  "name_placeholder": "e.g. Sparkle Home Services",
+  "staff_name_placeholder": "e.g. Team A",
+  "research_level": "starter",
+  "icon": "SprayCan",
+  "booking_example": "the property type, size, and address",
+  "sample_request": "Deep cleaning · Condo · 2 bedrooms · Saturday morning",
+  "uses_service_areas": true,
+  "address_question": "address",
+  "default_hours": [
+    {
+      "weekday": 1,
+      "start": "08:00",
+      "end": "17:00"
+    },
+    {
+      "weekday": 2,
+      "start": "08:00",
+      "end": "17:00"
+    },
+    {
+      "weekday": 3,
+      "start": "08:00",
+      "end": "17:00"
+    },
+    {
+      "weekday": 4,
+      "start": "08:00",
+      "end": "17:00"
+    },
+    {
+      "weekday": 5,
+      "start": "08:00",
+      "end": "17:00"
+    },
+    {
+      "weekday": 6,
+      "start": "08:00",
+      "end": "17:00"
+    }
+  ],
+  "services": [
+    {
+      "name": "General cleaning",
+      "pricing_type": "fixed",
+      "duration_minutes": 180,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    },
+    {
+      "name": "Deep cleaning",
+      "pricing_type": "fixed",
+      "duration_minutes": 300,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    },
+    {
+      "name": "General pest control",
+      "pricing_type": "fixed",
+      "duration_minutes": 90,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    },
+    {
+      "name": "Termite inspection",
+      "pricing_type": "fixed",
+      "duration_minutes": 60,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    }
+  ],
+  "booking_questions": [
+    {
+      "id": "service",
+      "ask": "Which service would you like to book?",
+      "type": "choice",
+      "options": [
+        "$SERVICES"
+      ],
+      "applies_to": "all",
+      "ask_if": null,
+      "required": true
+    },
+    {
+      "id": "property_type",
+      "ask": "What kind of property is it?",
+      "type": "choice",
+      "options": [
+        "Condo",
+        "House",
+        "Office"
+      ],
+      "applies_to": "all",
+      "ask_if": null,
+      "required": true
+    },
+    {
+      "id": "property_size",
+      "ask": "How big is the place?",
+      "type": "choice",
+      "options": [
+        "Studio",
+        "1 bedroom",
+        "2 bedrooms",
+        "3+ bedrooms",
+        "Office/commercial"
+      ],
+      "applies_to": "all",
+      "ask_if": null,
+      "required": true
+    },
+    {
+      "id": "address",
+      "ask": "What's the full address?",
+      "type": "text",
+      "options": null,
+      "applies_to": "all",
+      "ask_if": null,
+      "required": true
+    }
+  ],
+  "faqs": [
+    {
+      "q": "What are your hours?",
+      "a_template": "{hours_summary}"
+    },
+    {
+      "q": "How can I pay?",
+      "a_template": "We accept {payment_methods}."
+    },
+    {
+      "q": "Can I choose who serves me?",
+      "a_template": "Yes. Our teams are {staff_names}."
+    },
+    {
+      "q": "Is pest control safe for kids and pets?",
+      "a_template": "The team will tell you how to prepare and how long to stay out."
+    }
+  ],
+  "escalation_keywords": [
+    "chemical exposure",
+    "swallowed pesticide",
+    "can't breathe"
+  ],
+  "emergency_instruction": "If someone swallowed a chemical or can't breathe, call 911 or go to the nearest hospital right away.",
+  "setup_tips": {
+    "step1": "Pick the type closest to your business. You can change everything later.",
+    "step2": "We added services most home service businesses offer. Turn off what you don't do and add the prices you know.",
+    "step3": "Add each team you send out and their working days, then list the areas you serve.",
+    "step4": "Your AI team never handles emergencies by itself. It shows this message right away and alerts you."
+  },
+  "_help": "A starter home cleaning and pest control pack. It asks where the job is and checks it against the areas the business serves."
+}

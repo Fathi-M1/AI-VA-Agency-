@@ -1,0 +1,149 @@
+{
+  "vertical": "barbershop",
+  "display_name": "Barbershop",
+  "card_description": "Haircuts, shaves, and beard trims",
+  "staff_role": "Barber",
+  "staff_role_plural": "Barbers",
+  "name_placeholder": "e.g. Kanto Barbershop",
+  "staff_name_placeholder": "e.g. Marco",
+  "research_level": "starter",
+  "icon": "ScissorsLineDashed",
+  "booking_example": "the service and preferred barber",
+  "sample_request": "Haircut + shave · Saturday afternoon",
+  "asks_walk_ins": true,
+  "default_hours": [
+    {
+      "weekday": 0,
+      "start": "10:00",
+      "end": "20:00"
+    },
+    {
+      "weekday": 1,
+      "start": "10:00",
+      "end": "20:00"
+    },
+    {
+      "weekday": 2,
+      "start": "10:00",
+      "end": "20:00"
+    },
+    {
+      "weekday": 3,
+      "start": "10:00",
+      "end": "20:00"
+    },
+    {
+      "weekday": 4,
+      "start": "10:00",
+      "end": "20:00"
+    },
+    {
+      "weekday": 5,
+      "start": "10:00",
+      "end": "20:00"
+    },
+    {
+      "weekday": 6,
+      "start": "10:00",
+      "end": "20:00"
+    }
+  ],
+  "services": [
+    {
+      "name": "Haircut",
+      "pricing_type": "fixed",
+      "duration_minutes": 30,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    },
+    {
+      "name": "Haircut + shave",
+      "pricing_type": "fixed",
+      "duration_minutes": 45,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    },
+    {
+      "name": "Beard trim",
+      "pricing_type": "fixed",
+      "duration_minutes": 20,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    },
+    {
+      "name": "Kids haircut",
+      "pricing_type": "fixed",
+      "duration_minutes": 30,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    },
+    {
+      "name": "Hair color",
+      "pricing_type": "fixed",
+      "duration_minutes": 60,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    }
+  ],
+  "booking_questions": [
+    {
+      "id": "service",
+      "ask": "Which service would you like to book?",
+      "type": "choice",
+      "options": [
+        "$SERVICES"
+      ],
+      "applies_to": "all",
+      "ask_if": null,
+      "required": true
+    },
+    {
+      "id": "barber",
+      "ask": "Do you have a preferred barber?",
+      "type": "choice",
+      "options": [
+        "Anyone available",
+        "$STAFF"
+      ],
+      "applies_to": "all",
+      "ask_if": null,
+      "required": true
+    }
+  ],
+  "faqs": [
+    {
+      "q": "What are your hours?",
+      "a_template": "{hours_summary}"
+    },
+    {
+      "q": "How can I pay?",
+      "a_template": "We accept {payment_methods}."
+    },
+    {
+      "q": "Do I need to book or can I walk in?",
+      "a_template": "{walk_in_answer}"
+    },
+    {
+      "q": "Can I choose who serves me?",
+      "a_template": "Yes. Our barbers are {staff_names}."
+    }
+  ],
+  "escalation_keywords": [
+    "cut",
+    "bleeding",
+    "allergic reaction"
+  ],
+  "emergency_instruction": "If this is an emergency, please go to the nearest hospital emergency room or call 911.",
+  "setup_tips": {
+    "step1": "Pick the type closest to your business. You can change everything later.",
+    "step2": "We added services most barbershops offer. Turn off what you don't do and add the prices you know. If you leave a price blank, your AI team will say you'll confirm it.",
+    "step3": "Add each barber and the days they work.",
+    "step4": "Your AI team never handles emergencies by itself. It shows this message right away and alerts you."
+  },
+  "_help": "A starter barbershop pack. The barber question is skipped when there is only one barber."
+}

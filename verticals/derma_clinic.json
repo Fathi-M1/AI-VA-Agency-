@@ -1,0 +1,173 @@
+{
+  "vertical": "derma_clinic",
+  "display_name": "Skin & aesthetic clinic",
+  "card_description": "Facials, acne care, and skin treatments",
+  "staff_role": "Doctor",
+  "staff_role_plural": "Doctors",
+  "name_placeholder": "e.g. Glow Skin Clinic",
+  "staff_name_placeholder": "e.g. Dr. Reyes",
+  "research_level": "starter",
+  "icon": "Droplets",
+  "booking_example": "the skin concern and whether it's a first visit",
+  "sample_request": "Facial · New patient · Thursday afternoon",
+  "requires_consent": true,
+  "default_hours": [
+    {
+      "weekday": 1,
+      "start": "10:00",
+      "end": "19:00"
+    },
+    {
+      "weekday": 2,
+      "start": "10:00",
+      "end": "19:00"
+    },
+    {
+      "weekday": 3,
+      "start": "10:00",
+      "end": "19:00"
+    },
+    {
+      "weekday": 4,
+      "start": "10:00",
+      "end": "19:00"
+    },
+    {
+      "weekday": 5,
+      "start": "10:00",
+      "end": "19:00"
+    },
+    {
+      "weekday": 6,
+      "start": "10:00",
+      "end": "19:00"
+    }
+  ],
+  "services": [
+    {
+      "name": "Consultation",
+      "pricing_type": "fixed",
+      "duration_minutes": 30,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    },
+    {
+      "name": "Facial",
+      "pricing_type": "fixed",
+      "duration_minutes": 60,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    },
+    {
+      "name": "Acne treatment",
+      "pricing_type": "fixed",
+      "duration_minutes": 45,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    },
+    {
+      "name": "Chemical peel",
+      "pricing_type": "fixed",
+      "duration_minutes": 45,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    },
+    {
+      "name": "Laser hair removal (per area)",
+      "pricing_type": "fixed",
+      "duration_minutes": 30,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    }
+  ],
+  "booking_questions": [
+    {
+      "id": "service",
+      "ask": "Which service would you like to book?",
+      "type": "choice",
+      "options": [
+        "$SERVICES"
+      ],
+      "applies_to": "all",
+      "ask_if": null,
+      "required": true
+    },
+    {
+      "id": "patient_type",
+      "ask": "Is this your first visit with us, or have you been here before?",
+      "type": "choice",
+      "options": [
+        "New patient",
+        "Returning patient"
+      ],
+      "applies_to": "all",
+      "ask_if": null,
+      "required": true,
+      "option_details": {
+        "New patient": {
+          "hint": "First time here"
+        },
+        "Returning patient": {
+          "hint": "I've been here before"
+        }
+      }
+    },
+    {
+      "id": "concern",
+      "ask": "What skin concern would you like help with?",
+      "type": "text",
+      "options": null,
+      "applies_to": "all",
+      "ask_if": null,
+      "required": true,
+      "multiline": true
+    },
+    {
+      "id": "health_note",
+      "ask": "Are you pregnant or allergic to any medicine?",
+      "type": "yes_no",
+      "options": null,
+      "applies_to": "all",
+      "ask_if": null,
+      "required": true
+    }
+  ],
+  "faqs": [
+    {
+      "q": "What are your hours?",
+      "a_template": "{hours_summary}"
+    },
+    {
+      "q": "How can I pay?",
+      "a_template": "We accept {payment_methods}."
+    },
+    {
+      "q": "Can I choose who serves me?",
+      "a_template": "Yes. Our doctors are {staff_names}."
+    },
+    {
+      "q": "Do I need a consultation first?",
+      "a_template": "For some treatments, yes. The clinic will advise you."
+    }
+  ],
+  "escalation_keywords": [
+    "severe reaction",
+    "swelling",
+    "blistering",
+    "burn",
+    "can't breathe"
+  ],
+  "emergency_instruction": "If this is an emergency, please go to the nearest hospital emergency room or call 911.",
+  "setup_tips": {
+    "step1": "Pick the type closest to your business. You can change everything later.",
+    "step2": "We added services most skin clinics offer. Turn off what you don't do and add the prices you know. If you leave a price blank, your AI team will say the clinic will confirm it.",
+    "step3": "Add each doctor and the days they're in the clinic.",
+    "step4": "Your AI team never handles emergencies by itself. It shows this message right away and alerts you."
+  },
+  "_help": "A starter skin clinic pack. It asks for consent because customers share health information."
+}

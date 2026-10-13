@@ -1,26 +1,283 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-instrument-serif), Georgia, serif;
+  --font-heading: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  /* Type scale (~1.25), mapped onto Tailwind's standard size names so class
+     merging still recognises them. Every text element uses one of these. */
+  --text-xs: 0.78125rem;   --text-xs--line-height: 1.5;    /* 12.5 meta, badges */
+  --text-sm: 0.875rem;     --text-sm--line-height: 1.5;    /* 14 secondary */
+  --text-base: 0.9375rem;  --text-base--line-height: 1.55; /* 15 body */
+  --text-lg: 1.0625rem;    --text-lg--line-height: 1.45;   /* 17 card titles */
+  --text-xl: 1.1875rem;    --text-xl--line-height: 1.5;    /* 19 hero sentence */
+  --text-2xl: 1.625rem;    --text-2xl--line-height: 1.2;   /* 26 supporting numbers */
+  --text-7xl: clamp(4.5rem, 11vw, 7.5rem); --text-7xl--line-height: 0.9; /* the one loud number */
+  /* eyebrow labels use text-[0.71875rem] (11.5) */
+
+  --color-subtle: var(--subtle);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+  --animate-gradient: gradient 8s linear infinite;
+  --animate-shimmer-slide: shimmer-slide var(--speed) ease-in-out infinite alternate;
+  --animate-spin-around: spin-around calc(var(--speed) * 2) infinite linear;
+  --animate-marquee: marquee var(--duration) infinite linear;
+  --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+  @keyframes gradient {
+  to {
+    background-position: var(--bg-size, 300%) 0;
+    }
+  }
+  @keyframes shimmer-slide {
+  to {
+    transform: translate(calc(100cqw - 100%), 0);
+    }
+  }
+  @keyframes spin-around {
+  0% {
+    transform: translateZ(0) rotate(0);
+    }
+  15%, 35% {
+    transform: translateZ(0) rotate(90deg);
+    }
+  65%, 85% {
+    transform: translateZ(0) rotate(270deg);
+    }
+  100% {
+    transform: translateZ(0) rotate(360deg);
+    }
+  }
+  @keyframes marquee {
+  from {
+    transform: translateX(0);
+    }
+  to {
+    transform: translateX(calc(-100% - var(--gap)));
+    }
+  }
+  @keyframes marquee-vertical {
+  from {
+    transform: translateY(0);
+    }
+  to {
+    transform: translateY(calc(-100% - var(--gap)));
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+:root {
+  /* Quiet premium operator tool: warm paper neutrals, one green accent.
+     The accent marks THE action, live status and the escalation count, nothing else. */
+  --background: oklch(0.967 0.007 85);        /* paper  #f6f4ef */
+  --foreground: oklch(0.215 0.006 85);        /* ink    #1b1a17 */
+  --card: oklch(0.994 0.004 85);              /* card   #fffdf9 */
+  --card-foreground: oklch(0.215 0.006 85);
+  --popover: oklch(0.994 0.004 85);
+  --popover-foreground: oklch(0.215 0.006 85);
+  --primary: oklch(0.405 0.07 155);           /* accent #1f5138 */
+  --primary-foreground: oklch(0.99 0.004 85);
+  --secondary: oklch(0.94 0.009 85);          /* hover wash #efece4 */
+  --secondary-foreground: oklch(0.215 0.006 85);
+  --muted: oklch(0.94 0.009 85);
+  --muted-foreground: oklch(0.5 0.012 80);    /* soft text, ~5.4:1 on paper */
+  --subtle: oklch(0.555 0.012 80);            /* quietest text still passing 4.5:1 */
+  --accent: oklch(0.94 0.009 85);
+  --accent-foreground: oklch(0.215 0.006 85);
+  --destructive: oklch(0.52 0.16 30);
+  --warning: oklch(0.72 0.15 70);             /* amber: escalations only (Origin comp-421 hue) */
+  --warning-foreground: oklch(0.5 0.12 62);   /* amber for small text (~5:1 on paper) */
+  /* Visit types (Calendar): low-chroma hues, shown as soft tints. Green is not
+     used here: it stays the accent, which marks AI bookings. */
+  --service-1: oklch(0.6 0.07 250);
+  --service-2: oklch(0.64 0.1 70);
+  --service-3: oklch(0.58 0.08 305);
+  --service-4: oklch(0.58 0.13 25);
+  --service-5: oklch(0.62 0.07 200);
+  --border: oklch(0.912 0.011 85);            /* line   #e6e2d9 */
+  --input: oklch(0.868 0.015 85);             /* line-strong #d9d4c8 */
+  --ring: oklch(0.405 0.07 155);
+  --chart-1: oklch(0.405 0.07 155);
+  --chart-2: oklch(0.5 0.012 80);
+  --chart-3: oklch(0.7 0.012 80);
+  --chart-4: oklch(0.85 0.012 80);
+  --chart-5: oklch(0.912 0.011 85);
+  --radius: 0.5625rem;
+  --sidebar: oklch(0.967 0.007 85);
+  --sidebar-foreground: oklch(0.5 0.012 80);
+  --sidebar-primary: oklch(0.405 0.07 155);
+  --sidebar-primary-foreground: oklch(0.99 0.004 85);
+  --sidebar-accent: oklch(0.94 0.009 85);
+  --sidebar-accent-foreground: oklch(0.215 0.006 85);
+  --sidebar-border: oklch(0.912 0.011 85);
+  --sidebar-ring: oklch(0.405 0.07 155);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  button:not(:disabled), [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  html {
+    @apply font-sans;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    font-size: var(--text-base);
+    line-height: 1.55;
+  }
+}
+/* Sidebar hover-expand (SidebarShell adds .sidebar-hover to the shadcn SidebarProvider).
+   shadcn animates the container's width (and each menu button's width/padding), which
+   forces layout every frame. Here the container is always full width and slides with
+   transform instead: the panel moves left by (width - icon width) and its contents move
+   right by the same amount, so the collapsed state shows exactly the icon rail. Only
+   transform and opacity animate (compositor-only). The layout gap stays at icon width,
+   so the page never shifts, and z-50 keeps the panel above page layers (e.g. z-10 day
+   picker buttons). Unlayered so it wins over the component's utility classes. */
+@media (min-width: 768px) {
+  .sidebar-hover {
+    --sidebar-slide: calc(var(--sidebar-width) - var(--sidebar-width-icon));
+    --sidebar-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .sidebar-hover [data-slot="sidebar-gap"] {
+    width: var(--sidebar-width-icon);
+    transition: none;
+  }
+  .sidebar-hover [data-slot="sidebar-container"] {
+    width: var(--sidebar-width);
+    z-index: 50;
+    overflow: hidden;
+    transform: translateX(calc(var(--sidebar-slide) * -1));
+    transition: transform 180ms var(--sidebar-ease);
+    will-change: transform;
+  }
+  .sidebar-hover [data-slot="sidebar-inner"] {
+    transform: translateX(var(--sidebar-slide));
+    transition: transform 180ms var(--sidebar-ease);
+    will-change: transform;
+  }
+  .sidebar-hover [data-state="expanded"] [data-slot="sidebar-container"],
+  .sidebar-hover [data-state="expanded"] [data-slot="sidebar-inner"] {
+    transform: none;
+  }
+  /* Edge shadow while expanded: moves with the panel, fades by opacity. */
+  .sidebar-hover [data-slot="sidebar"]::after {
+    content: "";
+    position: fixed;
+    inset-block: 0;
+    left: var(--sidebar-width);
+    z-index: 49;
+    width: 28px;
+    pointer-events: none;
+    background: linear-gradient(to right, rgb(27 26 23 / 0.09), transparent);
+    opacity: 0;
+    transform: translateX(calc(var(--sidebar-slide) * -1));
+    transition: transform 180ms var(--sidebar-ease), opacity 180ms ease;
+  }
+  .sidebar-hover [data-slot="sidebar"][data-state="expanded"]::after {
+    opacity: 1;
+    transform: none;
+  }
+  /* Menu buttons: no width/height/padding tweening; labels fade in instead. */
+  .sidebar-hover [data-sidebar="menu-button"] {
+    transition-property: color, background-color;
+    transition-duration: 150ms;
+  }
+  .sidebar-hover [data-sidebar="menu-button"] > span:last-child {
+    transition: opacity 150ms ease;
+  }
+  .sidebar-hover [data-state="collapsed"] [data-sidebar="menu-button"] > span:last-child {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-hover [data-slot="sidebar-container"],
+  .sidebar-hover [data-slot="sidebar-inner"],
+  .sidebar-hover [data-slot="sidebar"]::after,
+  .sidebar-hover [data-sidebar="menu-button"],
+  .sidebar-hover [data-sidebar="menu-button"] > span:last-child {
+    transition: none !important;
+  }
 }

@@ -1,0 +1,170 @@
+{
+  "vertical": "nail_salon",
+  "display_name": "Nail salon",
+  "card_description": "Manicures, pedicures, and nail art",
+  "staff_role": "Nail technician",
+  "staff_role_plural": "Nail technicians",
+  "name_placeholder": "e.g. Polished Nail Lounge",
+  "staff_name_placeholder": "e.g. Ana",
+  "research_level": "starter",
+  "icon": "Hand",
+  "booking_example": "regular polish or gel and preferred technician",
+  "sample_request": "Gel polish · Friday evening",
+  "asks_walk_ins": true,
+  "default_hours": [
+    {
+      "weekday": 0,
+      "start": "10:00",
+      "end": "20:00"
+    },
+    {
+      "weekday": 1,
+      "start": "10:00",
+      "end": "20:00"
+    },
+    {
+      "weekday": 2,
+      "start": "10:00",
+      "end": "20:00"
+    },
+    {
+      "weekday": 3,
+      "start": "10:00",
+      "end": "20:00"
+    },
+    {
+      "weekday": 4,
+      "start": "10:00",
+      "end": "20:00"
+    },
+    {
+      "weekday": 5,
+      "start": "10:00",
+      "end": "20:00"
+    },
+    {
+      "weekday": 6,
+      "start": "10:00",
+      "end": "20:00"
+    }
+  ],
+  "services": [
+    {
+      "name": "Manicure",
+      "pricing_type": "fixed",
+      "duration_minutes": 45,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    },
+    {
+      "name": "Pedicure",
+      "pricing_type": "fixed",
+      "duration_minutes": 60,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    },
+    {
+      "name": "Manicure + pedicure",
+      "pricing_type": "fixed",
+      "duration_minutes": 90,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    },
+    {
+      "name": "Gel polish",
+      "pricing_type": "fixed",
+      "duration_minutes": 60,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    },
+    {
+      "name": "Nail extensions",
+      "pricing_type": "fixed",
+      "duration_minutes": 120,
+      "variants": null,
+      "typical_range": null,
+      "default_on": true
+    }
+  ],
+  "booking_questions": [
+    {
+      "id": "service",
+      "ask": "Which service would you like to book?",
+      "type": "choice",
+      "options": [
+        "$SERVICES"
+      ],
+      "applies_to": "all",
+      "ask_if": null,
+      "required": true
+    },
+    {
+      "id": "polish",
+      "ask": "Regular polish or gel?",
+      "type": "choice",
+      "options": [
+        "Regular",
+        "Gel",
+        "Not sure"
+      ],
+      "applies_to": "all",
+      "ask_if": null,
+      "required": true,
+      "summary_skip": [
+        "Not sure"
+      ]
+    },
+    {
+      "id": "technician",
+      "ask": "Do you have a preferred nail technician?",
+      "type": "choice",
+      "options": [
+        "Anyone available",
+        "$STAFF"
+      ],
+      "applies_to": "all",
+      "ask_if": null,
+      "required": true
+    }
+  ],
+  "faqs": [
+    {
+      "q": "What are your hours?",
+      "a_template": "{hours_summary}"
+    },
+    {
+      "q": "How can I pay?",
+      "a_template": "We accept {payment_methods}."
+    },
+    {
+      "q": "Do you accept walk-ins?",
+      "a_template": "{walk_in_answer}"
+    },
+    {
+      "q": "Can I choose who serves me?",
+      "a_template": "Yes. Our nail technicians are {staff_names}."
+    },
+    {
+      "q": "How long does gel polish last?",
+      "a_template": "Usually about 2 to 3 weeks. Your technician can tell you more."
+    }
+  ],
+  "escalation_keywords": [
+    "infection",
+    "swelling",
+    "allergic reaction",
+    "bleeding"
+  ],
+  "emergency_instruction": "If this is an emergency, please go to the nearest hospital emergency room or call 911.",
+  "setup_tips": {
+    "step1": "Pick the type closest to your business. You can change everything later.",
+    "step2": "We added services most nail salons offer. Turn off what you don't do and add the prices you know.",
+    "step3": "Add each nail technician and the days they work.",
+    "step4": "Your AI team never handles emergencies by itself. It shows this message right away and alerts you."
+  },
+  "_help": "A starter nail salon pack. The technician question is skipped when there is only one technician."
+}
