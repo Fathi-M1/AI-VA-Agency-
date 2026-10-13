@@ -3,6 +3,9 @@ import { handleMessage } from "@/server/agent/orchestrator"
 import { getCurrentBusinessId, listBusinesses } from "@/server/tenant"
 
 export async function POST(request: Request) {
+  // EMERGENCY HOTFIX: off in production until Phase 0 (it uses the service-role key
+  // and outside services for any caller).
+  if (process.env.NODE_ENV === "production") return new Response("Not found", { status: 404 })
   const body = (await request.json().catch(() => null)) as {
     sessionId?: unknown
     message?: unknown

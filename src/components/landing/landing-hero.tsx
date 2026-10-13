@@ -78,7 +78,7 @@ export function LandingHero() {
           <div className="relative before:absolute before:-inset-x-4 before:top-0 before:bottom-7 before:skew-x-6 before:rounded-[calc(var(--radius)+1rem)] before:border before:border-primary/20 before:bg-primary/5">
             <div className="relative -translate-y-4 skew-x-6 overflow-hidden rounded-(--radius) border border-foreground/10 bg-background shadow-2xl ring-1 shadow-primary/20 ring-foreground/5">
               <Image
-                src="/landing/app-conversations-v2.webp"
+                src="/landing/app-conversations-v3.webp"
                 alt="The owner app: every conversation your AI team handled, with who it was and what happened"
                 width={2420}
                 height={1480}

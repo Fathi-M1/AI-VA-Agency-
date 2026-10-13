@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import { notFound } from "next/navigation"
 import { CheckIcon, PlusIcon } from "lucide-react"
 
 import { GlassCard } from "@/components/workspace/surface"
@@ -11,6 +12,8 @@ export const metadata: Metadata = { title: "Switch business (demo)" }
 
 // Demo only (no logins yet): pick which business this app shows. Not access control.
 export default async function SwitchPage() {
+  // EMERGENCY HOTFIX: the demo business switcher is off in production (Phase 0 removes it).
+  if (process.env.NODE_ENV === "production") notFound()
   const [businesses, current] = await Promise.all([listBusinesses(), getCurrentBusinessId()])
   return (
     <div className="mx-auto flex w-full max-w-[480px] flex-col gap-4 px-4 pt-5 pb-10 md:pt-10">

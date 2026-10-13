@@ -20,6 +20,9 @@ export type SetupEvent =
   | { kind: "error"; text: string }
 
 export async function POST(request: Request) {
+  // EMERGENCY HOTFIX: off in production until Phase 0 (it uses the service-role key
+  // and outside services for any caller).
+  if (process.env.NODE_ENV === "production") return new Response("Not found", { status: 404 })
   const body = (await request.json().catch(() => null)) as { sessionId?: unknown; message?: unknown } | null
   const sessionId = typeof body?.sessionId === "string" ? body.sessionId.slice(0, 100) : ""
   const message = typeof body?.message === "string" ? body.message.trim().slice(0, 4000) : ""
