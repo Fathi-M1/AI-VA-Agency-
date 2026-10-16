@@ -19,29 +19,45 @@ renamed). The site is behind the lock, so only you can see that.
 
 ## Before you start (once)
 
-1. **Docker Desktop**, installed and running (the whale icon in the taskbar says "running").
-   Only the backup in step 2 needs it: `supabase db dump` runs `pg_dump` inside Docker.
-   Get it from docker.com/products/docker-desktop.
+1. **PostgreSQL command-line tools** (for the backup in step 2; no Docker needed).
+   Go to enterprisedb.com/downloads/postgres-postgresql-downloads, download the Windows
+   installer for PostgreSQL **18** (17 also works), run it, and on the *Select Components*
+   screen tick **only "Command Line Tools"** (untick the server, pgAdmin and Stack Builder).
+   Then, in Git Bash, check it works (use `17` instead of `18` if you installed 17):
+
+```bash
+export PATH="/c/Program Files/PostgreSQL/18/bin:$PATH"
+```
+
+```bash
+pg_dump --version
+```
+
+   ✅ Success: `pg_dump (PostgreSQL) 18.x` (or 17.x).
+   The `export PATH` line only lasts for this Git Bash window; run it again if you open a new one.
 2. **Your database password.** Supabase dashboard → Project Settings → Database. If you
    don't know it, click *Reset database password* and save the new one in your password
    manager. The app doesn't use this password (it uses API keys), so resetting it breaks nothing.
-3. **Git Bash**, open in the `web` folder, on the branch with the migrations:
+   Tip: a password of only letters and numbers avoids problems in step 2.
+3. **Git Bash**, open in the `web` folder:
 
 ```bash
-git switch feat/data-model
+cd /c/Users/fatxi/Downloads/ai-va-agency-bundle/ai-va-agency/web
 ```
 
 ```bash
-git status
+ls supabase/migrations supabase/checks
 ```
 
-   ✅ Success: `On branch feat/data-model` and `nothing to commit, working tree clean`.
+   ✅ Success: ten files in `supabase/migrations` (`20261016000100_baseline.sql` …
+   `20261016001000_public_functions.sql`) and two in `supabase/checks`. Don't switch git
+   branches while Claude is working in this folder; the files are the same on its branch.
 
 ---
 
 ## Step 1 — Log in and link the project (changes nothing in the database)
 
-The backup command needs to know which project to read from, so linking comes first.
+Linking lets the check queries and `db push` reach your project.
 Linking only saves the project ID in `supabase/.temp/` (that folder is git-ignored).
 
 ```bash
@@ -67,40 +83,56 @@ item 2) and run `link` again.
 
 ## Step 2 — Back up the database
 
-Three files: roles, structure, data. They hold customer data, so they live **outside**
-the repo and never go to GitHub.
+Two files: everything in the app's tables (structure + data, restorable) and a readable
+copy of the data. They hold customer data, so they live **outside** the repo and never go
+to GitHub.
+
+First get the connection string: Supabase dashboard → **Connect** (top of the project
+page) → **Session pooler** → copy the URI. It looks like
+`postgresql://postgres.aoyadctzaqgnicxeigvs:[YOUR-PASSWORD]@aws-0-….pooler.supabase.com:5432/postgres`.
+Replace `[YOUR-PASSWORD]` (brackets included) with your database password.
+
+Load it into the terminal without it showing on screen or in your history. Run this,
+paste the URI, press Enter (nothing appears while you paste; that's normal):
+
+```bash
+read -s DB_URL
+```
 
 ```bash
 mkdir -p ~/Documents/ai-va-backups/2026-10-16
 ```
 
 ```bash
-npx supabase db dump --linked --role-only -f ~/Documents/ai-va-backups/2026-10-16/roles.sql
+pg_dump "$DB_URL" --schema=public --format=custom --file ~/Documents/ai-va-backups/2026-10-16/public.dump
 ```
 
 ```bash
-npx supabase db dump --linked -f ~/Documents/ai-va-backups/2026-10-16/schema.sql
-```
-
-```bash
-npx supabase db dump --linked --data-only --use-copy -f ~/Documents/ai-va-backups/2026-10-16/data.sql
+pg_dump "$DB_URL" --schema=public --data-only --file ~/Documents/ai-va-backups/2026-10-16/data.sql
 ```
 
 ```bash
 ls -l ~/Documents/ai-va-backups/2026-10-16
 ```
 
-✅ Success: three files, none of them 0 bytes. `schema.sql` is the biggest. Then:
+✅ Success: two files, neither 0 bytes. Then both of these print a number above 0:
+
+```bash
+pg_restore --list ~/Documents/ai-va-backups/2026-10-16/public.dump | grep -c "TABLE DATA public"
+```
 
 ```bash
 grep -c "COPY public" ~/Documents/ai-va-backups/2026-10-16/data.sql
 ```
 
-✅ Success: a number above 0 (one per table with data).
-
-❌ `Cannot connect to the Docker daemon` → start Docker Desktop, wait until it says
-running, then repeat the command.
-❌ Anything else, or you can't get Docker running → **stop here**. Don't push without a backup.
+❌ `password authentication failed` → the password in the URI is wrong, or it has
+characters like `@ : / # ?` that break the URI. Reset it to letters and numbers only
+(Before you start, item 2), run `npx supabase link` again with the new password, and
+redo this step from `read -s DB_URL`.
+❌ `server version: 17.x; pg_dump version: 16.x` (or similar) → your tools are older than
+the database; install PostgreSQL 18 command-line tools.
+❌ `pg_dump: command not found` → run the `export PATH=…` line from Before you start.
+❌ Anything else → **stop here**. Don't push without a backup.
 
 ---
 
