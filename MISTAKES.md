@@ -222,3 +222,15 @@ prevention. Read this before building. Never repeat a logged mistake.
   (renaming a variable) proved the scanner now catches `env("…")` names.
 - **Prevention:** any edit containing a backslash goes through the Edit tool or a script
   file, never an inline heredoc. After scripted edits, `grep -c $'\x08'` the file.
+
+## #20 — A docs commit swept in half-finished route moves
+
+- **Symptom:** the "runbook without Docker" commit also contained 44 staged renames from
+  an unfinished route move (a commit that wouldn't build).
+- **Root cause:** `git mv` stages immediately; `git add <one file> && git commit` still
+  commits everything already staged.
+- **Fix:** `git reset --soft HEAD~1` (not pushed yet), unstaged everything, recommitted the
+  runbook alone.
+- **Prevention:** before any commit, `git diff --cached --stat` and check the file list;
+  for a quick side commit in the middle of other work, use `git commit <path>` (commits
+  only that path) instead of `git add` + `git commit`.
