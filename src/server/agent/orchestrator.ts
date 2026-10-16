@@ -27,6 +27,7 @@ import {
   type MobileCustomer,
 } from "../db/store"
 import { getPack, isVertical } from "../verticals"
+import type { MessageRole } from "../db/values"
 import { normalizeMobile } from "@/lib/format"
 import { bookingInstruction, BOOKING_TOOLS } from "./booking"
 import { HANDOFF_LINES, handoffTarget, type AgentName, type Specialist } from "./handoff"
@@ -334,7 +335,7 @@ async function persistReplies(s: Session, events: ChatEvent[]) {
     if (e.kind === "message" || e.kind === "handoff") {
       await saveMessage(s.businessId, s.conversationId!, { role: "agent", agent: e.from, content: e.text })
     } else if (e.kind === "emergency") {
-      await saveMessage(s.businessId, s.conversationId!, { role: "agent", agent: null, content: e.text })
+      await saveMessage(s.businessId, s.conversationId!, { role: "system", agent: null, content: e.text })
     }
   }
 }
@@ -371,7 +372,7 @@ export async function logToConversation(
   businessId: string,
   sessionId: string,
   channel: Channel,
-  lines: { role: "user" | "agent"; agent: AgentName | null; content: string }[]
+  lines: { role: MessageRole; agent: AgentName | null; content: string }[]
 ) {
   const conversationId = await ensureConversation(businessId, sessionId, channel)
   for (const l of lines) await saveMessage(businessId, conversationId, l)
@@ -387,8 +388,8 @@ export async function safetyCheck(businessId: string, sessionId: string, channel
   if (!matched) return null
   const s = session(businessId, sessionId)
   const conversationId = await logToConversation(businessId, sessionId, channel, [
-    { role: "user", agent: null, content: text },
-    { role: "agent", agent: null, content: emergencyLine },
+    { role: "customer", agent: null, content: text },
+    { role: "system", agent: null, content: emergencyLine },
   ])
   await insertNeedsYouItem(businessId, {
     customerId: s.customer?.id ?? s.mobileCustomer?.id ?? null,
@@ -441,7 +442,7 @@ export async function handleMessage(
     s.channel = "voice"
   }
   if (!opts.clientMessageId || !s.savedIds.has(opts.clientMessageId)) {
-    await saveMessage(businessId, s.conversationId, { role: "user", agent: null, content: message })
+    await saveMessage(businessId, s.conversationId, { role: "customer", agent: null, content: message })
     if (opts.clientMessageId) s.savedIds.add(opts.clientMessageId)
   }
 

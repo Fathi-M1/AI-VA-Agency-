@@ -1,6 +1,6 @@
 "use server"
 
-// Saves Settings into the business's config row (businesses.config jsonb). Every field
+// Saves Settings into the business (businesses + business_profile, via business-config.ts). Every field
 // is validated here; services are not edited from Settings (they're linked to calendar
 // event types and will be managed by the Setup agent).
 // NOTE: there is no login yet, so this is as open as the rest of the app. Add auth

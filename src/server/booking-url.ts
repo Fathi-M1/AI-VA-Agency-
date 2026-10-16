@@ -15,7 +15,7 @@ export async function bookingUrl(slug: string) {
   return `${await siteOrigin()}/book/${slug}`
 }
 
-/** The customer's ticket page for a booking request. */
-export async function ticketUrl(slug: string, code: string) {
-  return `${await siteOrigin()}/book/${slug}/r/${code}`
+/** The customer's ticket page for a booking request (private token, never the code). */
+export async function ticketUrl(slug: string, token: string) {
+  return `${await siteOrigin()}/book/${slug}/t/${token}`
 }

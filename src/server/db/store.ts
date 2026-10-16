@@ -3,6 +3,7 @@
 import type { BusinessKnowledge } from "../agent/knowledge/types"
 import { customerTermOf, getBusinessRow } from "./business-config"
 import { db } from "./client"
+import { bookingStatusFromCalcom, needsYouTypeFromReason, type MessageRole, type NeedsYouType } from "./values"
 
 function fail(what: string, error: { message: string } | null): never {
   throw new Error(`DB ${what} failed: ${error?.message ?? "no row"}`)
@@ -63,7 +64,7 @@ export async function saveMessage(
   businessId: string,
   conversationId: string,
   msg: {
-    role: "user" | "agent"
+    role: MessageRole
     agent: "receptionist" | "booking" | "sales" | "support" | null
     content: string
   }
@@ -148,7 +149,7 @@ export async function insertBooking(
     slot_start: b.slotStart,
     slot_end: b.slotEnd,
     calcom_booking_id: b.calcomBookingId,
-    status: b.status,
+    status: bookingStatusFromCalcom(b.status),
   })
   if (error) fail("insert booking", error)
 }
@@ -157,7 +158,7 @@ export async function insertBooking(
 
 export async function insertNeedsYouItem(
   businessId: string,
-  e: { customerId: string | null; conversationId: string; reason: string }
+  e: { customerId: string | null; conversationId: string; reason: string; type?: NeedsYouType }
 ): Promise<string> {
   const { data, error } = await db()
     .from("needs_you_items")
@@ -166,6 +167,7 @@ export async function insertNeedsYouItem(
       customer_id: e.customerId,
       conversation_id: e.conversationId,
       reason: e.reason,
+      type: e.type ?? needsYouTypeFromReason(e.reason),
       status: "open",
     })
     .select("id")

@@ -10,8 +10,8 @@ function fail(what: string, error: { message: string } | null): never {
   throw new Error(`DB ${what} failed: ${error?.message ?? "no data"}`)
 }
 
-/** Confirmed appointments: our own confirmed requests, and Cal.com bookings (Cruz). */
-export const CONFIRMED = ["confirmed", "accepted"]
+/** Confirmed appointments (one booking system for everyone). */
+export const CONFIRMED = ["confirmed"]
 
 /** The business and the moments Today is measured from (cached per request). */
 export const todayBase = cache(async (businessId: string) => {
@@ -89,6 +89,8 @@ export type BookingRequest = {
   conversationId: string | null
   /** set by the booking form (migration 005); null for chat requests */
   referenceCode: string | null
+  /** private ticket token (the ticket link) */
+  ticketToken: string | null
   preferredDay: string | null
   preferredTimeOfDay: "morning" | "afternoon" | "evening" | null
   source: "form" | "chat"
@@ -135,6 +137,7 @@ export const needsYou = cache(async (businessId: string) => {
       staffId: r.staff_id,
       conversationId: r.conversation_id,
       referenceCode: r.reference_code ?? null,
+      ticketToken: r.ticket_token ?? null,
       preferredDay: r.preferred_day ?? null,
       preferredTimeOfDay: r.preferred_time_of_day ?? null,
       source: r.source === "form" ? "form" : "chat",

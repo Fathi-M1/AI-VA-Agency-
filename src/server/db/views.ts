@@ -5,6 +5,7 @@ import type { TrendPoint, WeekSummary } from "@/lib/dashboard-data"
 
 import { getBusinessRow, type BusinessConfig } from "./business-config"
 import { db } from "./client"
+import { BOOKED_STATUSES, isBooked, type MessageRole } from "./values"
 
 /* ---------------------------------------------------------------- shared */
 
@@ -69,7 +70,7 @@ function currentWeek(timeZone: string) {
 
 /* ---------------------------------------------------------------- conversations */
 
-export type TranscriptLine = { who: string; role: "user" | "agent"; at: string; text: string }
+export type TranscriptLine = { who: string; role: MessageRole; at: string; text: string }
 
 export type ConversationView = {
   id: string
@@ -85,7 +86,7 @@ export type ConversationView = {
   messageCount: number
   transcript: TranscriptLine[]
   /** raw role + timestamp per message, oldest first (for timing metrics) */
-  rawMessages: { role: "user" | "agent"; created_at: string }[]
+  rawMessages: { role: MessageRole; created_at: string }[]
 }
 
 type ConversationRow = {
@@ -95,14 +96,14 @@ type ConversationRow = {
   status: string
   started_at: string
   customers: { name: string | null; email: string | null } | null
-  messages: { role: "user" | "agent"; agent: AgentTag | null; content: string; created_at: string }[]
+  messages: { role: MessageRole; agent: AgentTag | null; content: string; created_at: string }[]
   bookings: { id: string; status: string }[]
   needs_you_items: { id: string }[]
 }
 
-/** Booking requests that are still open or were declined aren't bookings. */
-const NOT_BOOKED = ["requested", "declined"]
-const isBooked = (b: { status: string }) => !NOT_BOOKED.includes(b.status)
+/** Only confirmed (or completed / no-show) bookings count as booked; open or declined
+ *  booking requests don't (server/db/values.ts). */
+const booked = (b: { status: string }) => isBooked(b.status)
 
 function toConversationView(timeZone: string, c: ConversationRow): ConversationView {
   const msgs = [...c.messages].sort((a, b) => a.created_at.localeCompare(b.created_at))
@@ -117,12 +118,12 @@ function toConversationView(timeZone: string, c: ConversationRow): ConversationV
     startedAt: c.started_at,
     channel: capitalize(c.channel),
     agents,
-    outcome: c.bookings.some(isBooked) ? "Booked" : c.needs_you_items.length ? "Needs you" : "Open",
+    outcome: c.bookings.some(booked) ? "Booked" : c.needs_you_items.length ? "Needs you" : "Open",
     status: c.status,
     messageCount: msgs.length,
     rawMessages: msgs.map((m) => ({ role: m.role, created_at: m.created_at })),
     transcript: msgs.map((m) => ({
-      who: m.role === "user" ? (name ?? "Patient") : m.agent ? AGENT_LABEL[m.agent] : "Safety net",
+      who: m.role === "customer" ? (name ?? "Customer") : m.role === "owner" ? "You" : m.agent ? AGENT_LABEL[m.agent] : "Safety net",
       role: m.role,
       at: fmt(timeZone, m.created_at, { hour: "numeric", minute: "2-digit" }),
       text: m.content,
@@ -173,7 +174,7 @@ type CustomerRow = {
     id: string
     channel: string
     started_at: string
-    messages: { role: "user" | "agent"; agent: AgentTag | null; content: string; created_at: string }[]
+    messages: { role: MessageRole; agent: AgentTag | null; content: string; created_at: string }[]
   }[]
 }
 
@@ -213,7 +214,7 @@ export async function listCustomers(businessId: string): Promise<CustomerView[]>
         : null,
       nextVisit: upcoming ? `${whenLabel(timeZone, upcoming.slot_start)} · ${upcoming.service}` : null,
       openNeedsYou: c.needs_you_items.some((e) => e.status === "open"),
-      bookedByAi: c.bookings.some(isBooked), // only the Booking agent writes bookings
+      bookedByAi: c.bookings.some(booked), // only the Booking agent writes bookings
       bookings: bookings.map((b) => ({
         id: b.id,
         service: b.service,
@@ -229,7 +230,7 @@ export async function listCustomers(businessId: string): Promise<CustomerView[]>
           channel: capitalize(cv.channel),
           agents: [...new Set(msgs.map((m) => m.agent).filter((a): a is AgentTag => !!a))].map((a) => AGENT_LABEL[a]),
           messageCount: msgs.length,
-          firstMessage: msgs.find((m) => m.role === "user")?.content ?? null,
+          firstMessage: msgs.find((m) => m.role === "customer")?.content ?? null,
         }
       }),
     }
@@ -343,7 +344,7 @@ export async function getDashboard(businessId: string): Promise<DashboardView> {
       .from("bookings")
       .select("id, created_at, conversation_id")
       .eq("business_id", businessId)
-      .not("status", "in", `(${NOT_BOOKED.join(",")})`)
+      .in("status", [...BOOKED_STATUSES])
       .gte("created_at", trendStart)
       .lt("created_at", week.end),
   ])
@@ -358,7 +359,7 @@ export async function getDashboard(businessId: string): Promise<DashboardView> {
   const replyTimes: number[] = []
   for (const c of weekConvs) {
     const raw = c.rawMessages
-    const firstUser = raw.find((m) => m.role === "user")
+    const firstUser = raw.find((m) => m.role === "customer")
     const firstReply = firstUser && raw.find((m) => m.role === "agent" && m.created_at >= firstUser.created_at)
     if (firstUser && firstReply) {
       replyTimes.push((new Date(firstReply.created_at).getTime() - new Date(firstUser.created_at).getTime()) / 1000)
@@ -598,7 +599,7 @@ export async function getAgentsView(businessId: string): Promise<AgentView[]> {
       .from("bookings")
       .select("id")
       .eq("business_id", businessId)
-      .not("status", "in", `(${NOT_BOOKED.join(",")})`)
+      .in("status", [...BOOKED_STATUSES])
       .gte("created_at", week.start)
       .lt("created_at", week.end),
   ])

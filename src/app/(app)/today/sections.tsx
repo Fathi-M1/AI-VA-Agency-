@@ -124,7 +124,7 @@ export async function NeedsYouSection({ businessId }: { businessId: string }) {
           needs.requests.map(async (r) => ({
             ...r,
             received: minutesAgo(base.nowMs, r.createdAt),
-            ticketUrl: r.referenceCode && profile.booking_slug ? await ticketUrl(profile.booking_slug, r.referenceCode) : null,
+            ticketUrl: r.source === "form" && r.ticketToken && profile.booking_slug ? await ticketUrl(profile.booking_slug, r.ticketToken) : null,
           }))
         )}
         items={needs.items.map((i) => ({ ...i, received: minutesAgo(base.nowMs, i.createdAt) }))}

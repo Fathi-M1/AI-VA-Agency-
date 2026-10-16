@@ -79,7 +79,7 @@ export async function confirmRequest(input: {
   const dateLabel = new Intl.DateTimeFormat("en-US", { timeZone: tz, weekday: "short", month: "short", day: "numeric" }).format(start)
   const timeLabel = time12(input.time)
   // Form requests have a ticket page the customer can check; include its link.
-  const ticket = booking.reference_code && business.booking_slug ? await ticketUrl(business.booking_slug, booking.reference_code) : null
+  const ticket = booking.source === "form" && booking.ticket_token && business.booking_slug ? await ticketUrl(business.booking_slug, booking.ticket_token) : null
   return {
     ok: true,
     dateLabel,
@@ -108,6 +108,6 @@ export async function declineRequest(input: { bookingId: string; reason: string;
 /** "Mark as done" on a needs-you item. */
 export async function resolveItem(id: string) {
   const businessId = await getCurrentBusinessId()
-  const { error } = await db().from("needs_you_items").update({ status: "resolved" }).eq("business_id", businessId).eq("id", id)
+  const { error } = await db().from("needs_you_items").update({ status: "done" }).eq("business_id", businessId).eq("id", id)
   return { ok: !error }
 }

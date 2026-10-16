@@ -5,10 +5,10 @@ import { getTicket } from "@/server/db/tickets"
 const stamp = (iso: string) => new Date(iso).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "")
 const esc = (s: string) => s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n")
 
-export async function GET(_request: Request, { params }: RouteContext<"/book/[slug]/r/[code]/ics">) {
-  const { slug, code } = await params
+export async function GET(_request: Request, { params }: RouteContext<"/book/[slug]/t/[token]/ics">) {
+  const { slug, token } = await params
   const business = await getBusinessBySlug(slug)
-  const ticket = business ? await getTicket(business, code) : null
+  const ticket = business ? await getTicket(business, token) : null
   if (!business || !ticket?.confirmed) return new Response("Not found", { status: 404 })
 
   const lines = [

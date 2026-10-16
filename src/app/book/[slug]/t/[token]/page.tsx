@@ -29,10 +29,10 @@ function contactHref(v: string) {
 
 // Ticket & live status (B8): one ticket card, centered (max 560px), the business's
 // storefront header above it. Shows the first name only; never the mobile number.
-export default async function TicketPage({ params }: PageProps<"/book/[slug]/r/[code]">) {
-  const { slug, code } = await params
+export default async function TicketPage({ params }: PageProps<"/book/[slug]/t/[token]">) {
+  const { slug, token } = await params
   const business = await getBusinessBySlug(slug)
-  const ticket = business ? await getTicket(business, code) : null
+  const ticket = business ? await getTicket(business, token) : null
   const brand = business?.brand_color ?? DEFAULT_BRAND
 
   if (!business || !ticket) {
@@ -121,7 +121,7 @@ export default async function TicketPage({ params }: PageProps<"/book/[slug]/r/[
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
           {ticket.status === "confirmed" ? (
-            <a href={`/book/${slug}/r/${ticket.code}/ics`} download={`${ticket.code}.ics`} className={brandCls}>
+            <a href={`/book/${slug}/t/${ticket.token}/ics`} download={`${ticket.code}.ics`} className={brandCls}>
               <CalendarPlusIcon className="size-5" aria-hidden="true" /> Add to calendar
             </a>
           ) : null}

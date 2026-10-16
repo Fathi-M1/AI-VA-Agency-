@@ -17,7 +17,6 @@ import { normalizeMobile } from "@/lib/format"
 import { linkVisitCustomer, logToConversation, safetyCheck } from "@/server/agent/orchestrator"
 import { loadStorefront } from "@/server/booking-page"
 import { db } from "@/server/db/client"
-import { upsertCustomerByMobile } from "@/server/db/store"
 
 export type SubmitInput = {
   sessionId: string
@@ -32,20 +31,13 @@ export type SubmitInput = {
 }
 
 export type SubmitResult =
-  | { ok: true; code: string }
+  | { ok: true; token: string; code: string }
   | { ok: false; emergency: string }
   | { ok: false; errors: Record<string, string> }
   | { ok: false; error: string }
 
 const TOD_LABEL = { morning: "Morning", afternoon: "Afternoon", evening: "Evening" } as const
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-/** "Bella Hair Studio" → "BH"; "Juan's" → "JU". */
-function initials(name: string) {
-  const words = name.replace(/[^A-Za-z\s]/g, "").split(/\s+/).filter(Boolean)
-  const two = words.length >= 2 ? words[0][0] + words[1][0] : (words[0] ?? "BK").slice(0, 2)
-  return two.toUpperCase().padEnd(2, "K")
-}
 
 export async function submitRequest(slug: string, input: SubmitInput): Promise<SubmitResult> {
   const loaded = await loadStorefront(slug)
@@ -95,49 +87,39 @@ export async function submitRequest(slug: string, input: SubmitInput): Promise<S
   const summary = shortDetails(spec, fill.answers, staffName)
 
   try {
-    const customer = await upsertCustomerByMobile(business.id, {
-      mobile: mobile!,
-      name,
-      consentAt: pack.requires_consent ? new Date().toISOString() : null,
-    })
-    if (email) {
-      // Optional email: saved unless another customer of this business already uses it.
-      await db().from("customers").update({ email }).eq("business_id", business.id).eq("id", customer.id).is("email", null)
-    }
     const conversationId = await logToConversation(business.id, sessionId, "web", [
       { role: "agent", agent: "booking", content: `Booking request sent from the form: ${summary} · ${day.long} · ${TOD_LABEL[tod]}.` },
     ])
-    await linkVisitCustomer(business.id, sessionId, customer)
-
-    const row = {
-      business_id: business.id,
-      customer_id: customer.id,
-      conversation_id: conversationId,
-      service: fill.answers.service,
-      staff_id: staffId,
-      details: {
-        answers: Object.fromEntries(activeQuestions(spec, fill.answers).filter((q) => fill.answers[q.id]).map((q) => [q.id, fill.answers[q.id]])),
-        summary,
-        estimate,
-        notes: [],
+    // The same narrow function the public storefront uses: customer by mobile, booking
+    // request, reference code and private ticket token, in one transaction.
+    const { data, error } = await db().rpc("create_booking_request", {
+      p_link: store.slug,
+      req: {
+        name,
+        mobile,
+        email,
+        consent: !!input.consent,
+        service: fill.answers.service,
+        staff_id: staffId,
+        conversation_id: conversationId,
+        details: {
+          answers: Object.fromEntries(activeQuestions(spec, fill.answers).filter((q) => fill.answers[q.id]).map((q) => [q.id, fill.answers[q.id]])),
+          summary,
+          estimate,
+          notes: [],
+        },
+        preferred_day: day.value,
+        preferred_time_of_day: tod,
+        requested_time_text: `${day.long} · ${TOD_LABEL[tod]}`,
       },
-      requested_time_text: `${day.long} · ${TOD_LABEL[tod]}`,
-      preferred_day: day.value,
-      preferred_time_of_day: tod,
-      customer_mobile: mobile,
-      status: "requested",
-      source: "form",
+    })
+    if (error || !data) {
+      console.error("[book/submit] request failed:", error?.message ?? "no data")
+      return { ok: false, error: "We couldn't send your request. Check your connection and try again." }
     }
-    for (let attempt = 0; attempt < 6; attempt++) {
-      const code = `${initials(business.name)}-${String(Math.floor(Math.random() * 10000)).padStart(4, "0")}`
-      const { error } = await db().from("bookings").insert({ ...row, reference_code: code })
-      if (!error) return { ok: true, code }
-      if (error.code !== "23505") {
-        console.error("[book/submit] insert failed:", error.message)
-        return { ok: false, error: "We couldn't send your request. Check your connection and try again." }
-      }
-    }
-    return { ok: false, error: "We couldn't send your request. Please try again." }
+    const made = data as { ticket_token: string; reference_code: string; customer_id: string }
+    await linkVisitCustomer(business.id, sessionId, { id: made.customer_id, name, mobile })
+    return { ok: true, token: made.ticket_token, code: made.reference_code }
   } catch (err) {
     console.error("[book/submit]", err instanceof Error ? err.message : "unknown error")
     return { ok: false, error: "We couldn't send your request. Check your connection and try again." }
