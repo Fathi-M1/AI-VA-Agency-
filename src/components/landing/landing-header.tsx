@@ -4,7 +4,7 @@
 // registry/bases/radix/mist/blocks/hero-section/one/header.tsx). License: MIT (tailark/blocks,
 // LICENCE.md). Structure kept: fixed nav that blurs on scroll, logo left, centred links,
 // actions right, mobile menu toggle. Adapted: our wordmark, links to the page sections,
-// "Open demo dashboard" + "Register your business" actions, shadcn Button.
+// "Sign in" + "Register your business" actions, shadcn Button.
 import * as React from "react"
 import Link from "next/link"
 import { Menu, X } from "lucide-react"
@@ -81,7 +81,7 @@ export function LandingHeader() {
               </div>
               <div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit">
                 <Button asChild variant="ghost" size="sm">
-                  <Link href="/dashboard">Open demo dashboard</Link>
+                  <Link href="/today">Sign in</Link>
                 </Button>
                 <Button asChild size="sm">
                   <Link href="/setup">Register your business</Link>

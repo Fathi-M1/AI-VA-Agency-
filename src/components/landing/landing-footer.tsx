@@ -10,7 +10,7 @@ const links = [
   { title: "How it works", href: "/#how" },
   { title: "Safety", href: "/#safety" },
   { title: "Register", href: "/setup" },
-  { title: "Demo dashboard", href: "/dashboard" },
+  { title: "Sign in", href: "/today" },
 ]
 
 export function LandingFooter() {

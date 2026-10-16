@@ -88,10 +88,10 @@ export function ProblemStats() {
 
 const TEAM = [
   { icon: PhoneIncomingIcon, name: "Receptionist", copy: "Answers every conversation first, finds out what the person needs, and routes it." },
-  { icon: CalendarCheckIcon, name: "Booking", copy: "Finds real open times in your calendar and books them while the customer is still there." },
-  { icon: BriefcaseIcon, name: "Sales", copy: "Answers new customers from your details, captures the lead, and hands them to Booking." },
+  { icon: CalendarCheckIcon, name: "Booking", copy: "Asks the right questions, works out an estimate, and sends you a booking request to confirm." },
+  { icon: BriefcaseIcon, name: "Sales", copy: "Answers new customers' questions about your services, prices and hours, using only your details." },
   { icon: LifeBuoyIcon, name: "Support", copy: "Answers existing customers from your details and their own record; logs the rest for you." },
-  { icon: SlidersHorizontalIcon, name: "Setup", copy: "Your own agent. Interviews you, links your services to your calendar, and switches the team on." },
+  { icon: SlidersHorizontalIcon, name: "Your assistant", copy: "Answers your questions while you set up. It can explain anything, but it can't change your answers." },
 ]
 
 function Tile({ children }: { children: React.ReactNode }) {
@@ -132,17 +132,17 @@ export function TeamSection() {
 
 const STEPS = [
   { n: "1", title: "Register your business", copy: "Tell us your name and what kind of business you run. No forms to fight with." },
-  { n: "2", title: "Chat with your Setup agent", copy: "It asks about your services, hours and safety rules, and links each service to your calendar." },
-  { n: "3", title: "Your AI team goes live", copy: "Customers get answers and real bookings; you get a dashboard of everything that happened." },
+  { n: "2", title: "Add your services, team and hours", copy: "A few short screens, already filled in for your type of business. Prices are optional." },
+  { n: "3", title: "Share your booking link", copy: "Customers ask and book from your link; you confirm each booking request on your Today screen." },
 ]
 
 export function HowItWorks() {
   return (
     <section id="how" aria-labelledby="how-h" className="scroll-mt-20 bg-background py-24">
       <div className="mx-auto w-full max-w-[1760px] px-6 sm:px-10 lg:px-14 xl:px-20">
-        <h2 id="how-h" className="text-4xl font-semibold tracking-tight">Set up in about 15 minutes</h2>
+        <h2 id="how-h" className="text-4xl font-semibold tracking-tight">How it works</h2>
         <p className="mt-4 mb-12 max-w-2xl text-lg text-balance text-muted-foreground">
-          Adding a business means a conversation, not new software.
+          Adding a business means filling in a few screens, not new software.
         </p>
         <div className="grid gap-6 md:grid-cols-3">
           {STEPS.map((s) => (
@@ -164,9 +164,9 @@ export function HowItWorks() {
 
 const SAFETY = [
   { icon: SirenIcon, title: "Emergencies come first", copy: "Your emergency words stop the AI before it answers, and your exact emergency instruction is read." },
-  { icon: CalendarCheckIcon, title: "Only real times", copy: "Bookings use your live calendar. The AI can't offer a time it didn't find there." },
+  { icon: CalendarCheckIcon, title: "Only real times", copy: "Customers can only pick days your team works, and you confirm the exact time before anything is booked." },
   { icon: ShieldCheckIcon, title: "No invented answers", copy: "Prices, policies and advice come from you, or a team member follows up." },
-  { icon: UserRoundCheckIcon, title: "You stay in charge", copy: "Refunds, disputes and anything risky become escalations on your dashboard." },
+  { icon: UserRoundCheckIcon, title: "You stay in charge", copy: "Refunds, complaints and anything risky show up under \"Needs you\" for you to handle." },
 ]
 
 export function SafetySection() {
@@ -206,7 +206,7 @@ export function FinalCta() {
               <Link href="/setup">Register your business</Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="h-11 rounded-full border-primary-foreground/40 bg-transparent px-6 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">
-              <Link href="/dashboard">Open the demo dashboard</Link>
+              <Link href="/today">Sign in</Link>
             </Button>
           </div>
         </div>

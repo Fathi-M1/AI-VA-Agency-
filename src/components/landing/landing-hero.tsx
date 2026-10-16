@@ -47,8 +47,8 @@ export function LandingHero() {
             Never miss another customer.
           </h1>
           <p className="mt-7 mb-9 max-w-lg text-lg text-pretty text-foreground/75 sm:text-xl">
-            A team of AI agents answers every conversation, books real appointments into your calendar, and hands you
-            anything that needs a human. Set up in about 15 minutes.
+            A team of AI agents answers your customers, turns their requests into booking requests you confirm in a
+            tap, and hands you anything that needs a human.
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <Link href="/setup">
@@ -62,7 +62,7 @@ export function LandingHero() {
               </ShimmerButton>
             </Link>
             <Button asChild size="lg" variant="outline" className="h-11 rounded-full border-foreground/15 bg-background px-6">
-              <Link href="/playground">Talk to a demo business</Link>
+              <Link href="/today">Sign in</Link>
             </Button>
           </div>
           <p className="mt-6 text-sm text-foreground/65">Dental clinics, home services, salons, law firms, auto repair: same platform.</p>
