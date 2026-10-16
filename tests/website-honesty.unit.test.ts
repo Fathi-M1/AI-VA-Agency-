@@ -1,14 +1,20 @@
 // The public website only describes what the product does today (blueprint: Surfaces;
 // Phase 0 section 10). These claims are not true today and must not appear.
 import assert from "node:assert/strict"
-import { readdirSync, readFileSync } from "node:fs"
+import { readdirSync, readFileSync, statSync } from "node:fs"
 import { join } from "node:path"
 import { test } from "node:test"
 
-const dir = "src/components/landing"
-const copy = readdirSync(dir)
-  .filter((f) => f.endsWith(".tsx"))
-  .map((f) => readFileSync(join(dir, f), "utf8"))
+function tsx(dir: string): string[] {
+  return readdirSync(dir).flatMap((f) => {
+    const p = join(dir, f)
+    return statSync(p).isDirectory() ? tsx(p) : f.endsWith(".tsx") ? [p] : []
+  })
+}
+
+// The landing sections, the marketing pages (incl. the search-result description) and the root layout.
+const copy = [...tsx("src/components/landing"), ...tsx("src/app/(marketing)"), "src/app/layout.tsx"]
+  .map((f) => readFileSync(f, "utf8"))
   .join("\n")
   // ignore code comments (source credits mention component names)
   .replace(/\/\/.*$/gm, "")

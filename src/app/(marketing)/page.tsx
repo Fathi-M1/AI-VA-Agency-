@@ -15,7 +15,7 @@ import {
 export const metadata: Metadata = {
   title: "AI VA Agency · An AI front desk for any small business",
   description:
-    "A team of AI agents that answers every conversation, books real appointments into your calendar, and hands you anything that needs a human.",
+    "A team of AI agents that answers your customers, turns their requests into booking requests you confirm in a tap, and hands you anything that needs a human.",
 }
 
 // The public landing page for the platform (the owner app lives under /dashboard).
