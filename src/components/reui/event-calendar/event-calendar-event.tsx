@@ -451,6 +451,7 @@ function EventCalendarEvent<TData = unknown>({
       data-selected={isSelected || undefined}
       data-dragging={isDragging || undefined}
       data-preview={preview || undefined}
+            // eslint-disable-next-line react-hooks/purity -- vendored ReUI calendar: only styles past events; a stale value until the next render is harmless
       data-past={occurrence.end.getTime() < Date.now() || undefined}
       title={preview || tooltipOn ? undefined : label}
       aria-label={

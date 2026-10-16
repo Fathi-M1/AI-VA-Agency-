@@ -1,0 +1,32 @@
+# Checks every change before it can reach production (Phase 0 section 11):
+# type-check, lint and unit tests on every push to staging and every pull request to main.
+# The security suite joins this workflow once it runs without live credentials.
+name: CI
+
+on:
+  push:
+    branches: [staging]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Generate route types
+        run: npx next typegen
+      - name: Type-check
+        run: npx tsc --noEmit
+      - name: Lint
+        run: npm run lint
+      - name: Unit tests
+        run: npm run test:unit

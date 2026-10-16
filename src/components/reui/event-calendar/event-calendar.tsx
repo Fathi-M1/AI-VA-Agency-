@@ -937,6 +937,7 @@ function useEventCalendarState<TData = unknown>(
   const [store] = useState(() => createEventCalendarStore<TData>(options))
   const changed = store.setOptions(options)
   const changedRef = useRef(false)
+  // eslint-disable-next-line react-hooks/refs -- vendored ReUI calendar: the library's store marks option changes during render on purpose
   if (changed) changedRef.current = true
   useLayoutEffect(() => {
     if (changedRef.current) {
@@ -985,6 +986,7 @@ function useEventCalendarSelector<TData = unknown, TSelected = unknown>(
   const isEqual = options?.isEqual ?? Object.is
   const lastRef = useRef<{ value: TSelected } | null>(null)
   const selectorRef = useRef(selector)
+  // eslint-disable-next-line react-hooks/refs -- vendored ReUI calendar: latest-selector ref pattern used by the library's store
   selectorRef.current = selector
 
   const getSnapshot = () => {

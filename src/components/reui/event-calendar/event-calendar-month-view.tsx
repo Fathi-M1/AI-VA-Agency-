@@ -1124,6 +1124,7 @@ function EventCalendarMoreIndicator({
     (state) => state.drag !== null
   )
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- vendored ReUI calendar: closes the popover when a drag starts (library behaviour kept as-is)
     if (isDragging) setOpen(false)
   }, [isDragging])
 
