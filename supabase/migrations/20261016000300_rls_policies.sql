@@ -50,6 +50,8 @@ declare
   t text;
 begin
   foreach t in array array['contacts', 'conversations', 'messages', 'bookings', 'escalations'] loop
+    -- skip tables already renamed by a later migration (safe re-run)
+    continue when to_regclass('public.' || t) is null;
     execute format('drop policy if exists "%1$s: members read" on public.%1$I', t);
     execute format('create policy "%1$s: members read" on public.%1$I for select to authenticated using ((select public.is_member(business_id)))', t);
     execute format('drop policy if exists "%1$s: members insert" on public.%1$I', t);
@@ -67,6 +69,7 @@ declare
   t text;
 begin
   foreach t in array array['services', 'staff', 'staff_hours'] loop
+    continue when to_regclass('public.' || t) is null;
     execute format('drop policy if exists "%1$s: members read" on public.%1$I', t);
     execute format('create policy "%1$s: members read" on public.%1$I for select to authenticated using ((select public.is_member(business_id)))', t);
     execute format('drop policy if exists "%1$s: owners insert" on public.%1$I', t);
