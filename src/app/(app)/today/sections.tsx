@@ -9,6 +9,7 @@ import { plural, WEEKDAY_SHORT } from "@/lib/format"
 import { anyRequestConfirmed, dateIn, handledSince, needsYou, timeIn, todayBase, todaysAppointments, weekCounts } from "@/server/db/today"
 import { activeStaff } from "@/server/db/business-profile"
 import { bookingUrl, ticketUrl } from "@/server/booking-url"
+import { hasAnyConversation } from "@/server/metrics"
 import { TZDate } from "@date-fns/tz"
 
 import { NeedsYouList, type DateOption } from "./needs-you-list"
@@ -167,7 +168,7 @@ export async function AppointmentsSection({ businessId }: { businessId: string }
 /* ---------------------------------------------------------------- handled */
 
 export async function HandledSection({ businessId }: { businessId: string }) {
-  const [{ tz, nowMs }, handled] = await Promise.all([todayBase(businessId), handledSince(businessId)])
+  const [{ tz, nowMs }, handled, anyEver] = await Promise.all([todayBase(businessId), handledSince(businessId), hasAnyConversation(businessId)])
   const todayKey = dateIn(tz, new Date(nowMs).toISOString())
   return (
     <GlassCard className="p-5" aria-labelledby="handled-h">
@@ -196,7 +197,8 @@ export async function HandledSection({ businessId }: { businessId: string }) {
         </>
       ) : (
         <p className="mt-3 flex items-center gap-2 text-base text-muted-foreground">
-          <InboxIcon className="size-5 shrink-0" aria-hidden="true" /> No conversations yet. Share your booking link to get started.
+          <InboxIcon className="size-5 shrink-0" aria-hidden="true" />
+          {anyEver ? "Nothing new since your last visit." : "No conversations yet. Share your booking link to get started."}
         </p>
       )}
     </GlassCard>

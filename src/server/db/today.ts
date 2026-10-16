@@ -4,6 +4,7 @@ import { cache } from "react"
 import { TZDate } from "@date-fns/tz"
 
 import { getBusinessProfile, type BusinessProfile } from "./business-profile"
+import { getMetrics, weekRange } from "../metrics"
 import { db } from "./client"
 
 function fail(what: string, error: { message: string } | null): never {
@@ -21,9 +22,6 @@ export const todayBase = cache(async (businessId: string) => {
   const now = new TZDate(nowMs, tz)
   const dayStart = new TZDate(now.getFullYear(), now.getMonth(), now.getDate(), tz)
   const dayEnd = new TZDate(now.getFullYear(), now.getMonth(), now.getDate() + 1, tz)
-  const dow = (now.getDay() + 6) % 7 // Monday = 0
-  const weekStart = new TZDate(now.getFullYear(), now.getMonth(), now.getDate() - dow, tz)
-  const weekEnd = new TZDate(now.getFullYear(), now.getMonth(), now.getDate() - dow + 7, tz)
   const iso = (d: Date) => new Date(d.getTime()).toISOString()
   // "Since your last visit"; first visit: since setup.
   const since = profile.last_seen_at ?? profile.setup_completed_at ?? iso(dayStart)
@@ -34,7 +32,7 @@ export const todayBase = cache(async (businessId: string) => {
     hour: now.getHours(),
     dateLabel: new Intl.DateTimeFormat("en-US", { timeZone: tz, weekday: "long", month: "short", day: "numeric" }).format(now),
     day: { start: iso(dayStart), end: iso(dayEnd) },
-    week: { start: iso(weekStart), end: iso(weekEnd) },
+    week: weekRange(nowMs, tz), // the one week definition (server/metrics-core.ts)
     since,
     firstVisit: !profile.last_seen_at,
   }
@@ -182,12 +180,11 @@ function outcomeOf(c: ConvRow) {
 }
 
 export const handledSince = cache(async (businessId: string) => {
-  const { since } = await todayBase(businessId)
-  const { data, error, count } = await db()
+  const { since, nowMs } = await todayBase(businessId)
+  const { data, error } = await db()
     .from("conversations")
     .select(
-      "id, started_at, customers(name, email), messages(role, agent), bookings(status, requested_time_text), needs_you_items(reason)",
-      { count: "exact" }
+      "id, started_at, customers(name, email), messages(role, agent), bookings(status, requested_time_text), needs_you_items(reason)"
     )
     .eq("business_id", businessId)
     .gte("started_at", since)
@@ -195,8 +192,10 @@ export const handledSince = cache(async (businessId: string) => {
     .limit(5)
   if (error) fail("list handled conversations", error)
   const rows = (data ?? []) as unknown as ConvRow[]
+  // The count comes from the one metrics module; the list shows the latest five.
+  const total = (await getMetrics(businessId, since, new Date(nowMs).toISOString())).conversations
   return {
-    total: count ?? rows.length,
+    total,
     recent: rows.map(
       (c): Handled => ({
         id: c.id,
@@ -211,27 +210,10 @@ export const handledSince = cache(async (businessId: string) => {
 /* ---------------------------------------------------------------- this week */
 
 export const weekCounts = cache(async (businessId: string) => {
+  // The same numbers as the Dashboard: one definition in server/metrics.ts.
   const { week } = await todayBase(businessId)
-  const head = { count: "exact" as const, head: true }
-  const [convs, reqs, confirmed] = await Promise.all([
-    db().from("conversations").select("id", head).eq("business_id", businessId).gte("started_at", week.start).lt("started_at", week.end),
-    db()
-      .from("bookings")
-      .select("id", head)
-      .eq("business_id", businessId)
-      .not("requested_time_text", "is", null)
-      .gte("created_at", week.start)
-      .lt("created_at", week.end),
-    db()
-      .from("bookings")
-      .select("id", head)
-      .eq("business_id", businessId)
-      .in("status", CONFIRMED)
-      .gte("slot_start", week.start)
-      .lt("slot_start", week.end),
-  ])
-  for (const r of [convs, reqs, confirmed]) if (r.error) fail("count this week", r.error)
-  return { conversations: convs.count ?? 0, requests: reqs.count ?? 0, confirmed: confirmed.count ?? 0 }
+  const m = await getMetrics(businessId, week.start, week.end)
+  return { conversations: m.conversations, requests: m.requests, confirmed: m.confirmed }
 })
 
 /** Has any booking request ever been confirmed? (checklist item 3) */

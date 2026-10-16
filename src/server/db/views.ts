@@ -5,6 +5,7 @@ import type { TrendPoint, WeekSummary } from "@/lib/dashboard-data"
 
 import { getBusinessRow, type BusinessConfig } from "./business-config"
 import { db } from "./client"
+import { getMetrics, weekRange } from "../metrics"
 import { BOOKED_STATUSES, isBooked, type MessageRole } from "./values"
 
 /* ---------------------------------------------------------------- shared */
@@ -36,36 +37,16 @@ export const whenLabel = (timeZone: string, iso: string) =>
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 
-/** Monday 00:00 → next Monday 00:00 in the business timezone, as UTC instants. */
+/** Monday 00:00 → next Monday 00:00 in the business timezone (the one week definition,
+ *  server/metrics-core.ts), plus a label like "Oct 12 – Oct 18, 2026". */
 function currentWeek(timeZone: string) {
-  const now = new Date()
-  // Wall-clock parts of "now" in the business timezone.
-  const parts = Object.fromEntries(
-    new Intl.DateTimeFormat("en-US", {
-      timeZone,
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      weekday: "short",
-    })
-      .formatToParts(now)
-      .map((p) => [p.type, p.value])
-  )
-  const dow = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].indexOf(parts.weekday)
-  const localMidnight = Date.UTC(+parts.year, +parts.month - 1, +parts.day) - dow * 864e5
-  // Offset of the timezone at that moment (business tz minus UTC).
-  const probe = new Date(localMidnight)
-  const asLocal = new Date(probe.toLocaleString("en-US", { timeZone }))
-  const asUtc = new Date(probe.toLocaleString("en-US", { timeZone: "UTC" }))
-  const offset = asLocal.getTime() - asUtc.getTime()
-  const start = new Date(localMidnight - offset)
-  const end = new Date(start.getTime() + 7 * 864e5)
-  const label = `${fmt(timeZone, start.toISOString(), { month: "short", day: "numeric" })} – ${fmt(
+  const { start, end } = weekRange(Date.now(), timeZone)
+  const label = `${fmt(timeZone, start, { month: "short", day: "numeric" })} – ${fmt(
     timeZone,
-    new Date(end.getTime() - 1).toISOString(),
+    new Date(Date.parse(end) - 1).toISOString(),
     { month: "short", day: "numeric", year: "numeric" }
   )}`
-  return { start: start.toISOString(), end: end.toISOString(), label }
+  return { start, end, label }
 }
 
 /* ---------------------------------------------------------------- conversations */
@@ -392,6 +373,8 @@ export async function getDashboard(businessId: string): Promise<DashboardView> {
   ).length
 
   const open = needsYouItems.filter((e) => e.status === "open")
+  // Counts come from the one metrics module (same numbers as Today).
+  const m = await getMetrics(businessId, week.start, week.end)
   return {
     week: {
       weekLabel: week.label,
@@ -400,9 +383,9 @@ export async function getDashboard(businessId: string): Promise<DashboardView> {
       recovered: weekBookings.length * avgJobValue,
       recoveredDelta: (weekBookings.length - lastWeekBookings) * avgJobValue,
       avgJobValue,
-      booked: weekBookings.length,
+      booked: m.confirmed,
       afterHoursBooked: weekBookings.filter((b) => b.conversation_id && afterHoursIds.has(b.conversation_id)).length,
-      conversations: weekConvs.length,
+      conversations: m.conversations,
       afterHours: afterHoursIds.size,
       firstReplySeconds,
       needsYou: open.map((e) => ({
@@ -412,7 +395,7 @@ export async function getDashboard(businessId: string): Promise<DashboardView> {
         why: e.email ?? "No email on file",
         due: e.when,
       })),
-      autoResolved: needsYouItems.filter((e) => e.status !== "open" && inWeek(e.createdAt)).length,
+      autoResolved: m.needsYouDone,
     },
     trend,
     recent: conversations.slice(0, 6),
@@ -592,18 +575,11 @@ export async function getAgentsView(businessId: string): Promise<AgentView[]> {
     const iso = new Date(s).toISOString()
     return iso >= week.start && iso < week.end
   }
-  const [conversations, needsYouItems, bookingsRes] = await Promise.all([
+  const [conversations, needsYouItems, metrics] = await Promise.all([
     listConversations(businessId),
     listNeedsYouItems(businessId),
-    db()
-      .from("bookings")
-      .select("id")
-      .eq("business_id", businessId)
-      .in("status", [...BOOKED_STATUSES])
-      .gte("created_at", week.start)
-      .lt("created_at", week.end),
+    getMetrics(businessId, week.start, week.end), // same numbers as Dashboard and Today
   ])
-  if (bookingsRes.error || !bookingsRes.data) fail("count bookings", bookingsRes.error)
   const weekConvs = conversations.filter((c) => inWeek(c.startedAt))
 
   return (["receptionist", "booking", "sales", "support", "admin"] as const).map((id) => {
@@ -613,7 +589,7 @@ export async function getAgentsView(businessId: string): Promise<AgentView[]> {
     const stats = [
       { label: "Conversations this week", one: "Conversation this week", value: weekConvs.filter((c) => c.agents.includes(facts.name)).length },
     ]
-    if (id === "booking") stats.push({ label: "Bookings this week", one: "Booking this week", value: bookingsRes.data.length })
+    if (id === "booking") stats.push({ label: "Bookings this week", one: "Booking this week", value: metrics.confirmed })
     if (id === "support") {
       stats.push({ label: "Needs-you items this week", one: "Needs-you item this week", value: needsYouItems.filter((e) => inWeek(e.createdAt)).length })
     }

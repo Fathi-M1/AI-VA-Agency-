@@ -65,35 +65,37 @@ export default async function TodayPage() {
         </div>
       </HeroPanel>
 
-      {/* Phone: the getting-started checklist comes first */}
-      <div className="mt-5 md:hidden">
-        <Section>
-          <ChecklistSection businessId={businessId} />
-        </Section>
-      </div>
-
-      {/* Row 2 */}
-      <div className="mt-5 grid grid-cols-1 gap-6 md:mt-6 md:grid-cols-12">
-        <div className="flex min-w-0 flex-col gap-6 md:col-span-7 lg:col-span-8">
-          <Section rows={2}>
-            <NeedsYouSection businessId={businessId} />
-          </Section>
-          <Section>
-            <AppointmentsSection businessId={businessId} />
-          </Section>
+      {/* Row 2. Each section renders once: on phones the two columns dissolve ("contents")
+          into one list and the checklist moves first; from tablet up they are columns. */}
+      <div className="mt-5 flex flex-col gap-6 md:mt-6 md:grid md:grid-cols-12">
+        <div className="contents md:col-span-7 md:flex md:min-w-0 md:flex-col md:gap-6 lg:col-span-8">
+          <div className="order-2 md:order-none">
+            <Section rows={2}>
+              <NeedsYouSection businessId={businessId} />
+            </Section>
+          </div>
+          <div className="order-3 md:order-none">
+            <Section>
+              <AppointmentsSection businessId={businessId} />
+            </Section>
+          </div>
         </div>
-        <div className="flex min-w-0 flex-col gap-6 md:col-span-5 lg:col-span-4">
-          <div className="hidden md:block">
+        <div className="contents md:col-span-5 md:flex md:min-w-0 md:flex-col md:gap-6 lg:col-span-4">
+          <div className="order-1 empty:hidden md:order-none">
             <Section>
               <ChecklistSection businessId={businessId} />
             </Section>
           </div>
-          <Section>
-            <WeekSection businessId={businessId} />
-          </Section>
-          <Section>
-            <HandledSection businessId={businessId} />
-          </Section>
+          <div className="order-4 md:order-none">
+            <Section>
+              <WeekSection businessId={businessId} />
+            </Section>
+          </div>
+          <div className="order-5 md:order-none">
+            <Section>
+              <HandledSection businessId={businessId} />
+            </Section>
+          </div>
         </div>
       </div>
 
