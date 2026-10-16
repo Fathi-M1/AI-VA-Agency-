@@ -200,3 +200,14 @@ prevention. Read this before building. Never repeat a logged mistake.
 - **Fix:** replaced the flag with `[\s\S]`; `tsc` clean; follow-up commit ebe820e.
 - **Prevention:** chain every check before a commit with `&&`, never `;`. Don't use
   regex flags newer than the tsconfig target (`s`, named groups in old targets).
+
+## #18 — The honesty test missed the page description
+
+- **Symptom:** after Release 1 went live, the landing page's meta description (the text
+  search results show) still said the agents "book real appointments into your calendar".
+- **Root cause:** the website-honesty test only read `src/components/landing/`; the
+  page metadata lives in `src/app/(marketing)/page.tsx`.
+- **Fix:** the test now scans the landing components, every file under
+  `src/app/(marketing)/` and the root layout; description reworded to match the hero.
+- **Prevention:** a copy test scans every file that renders public text (pages,
+  layouts, metadata), not just the component folder; check the live HTML after a release.
