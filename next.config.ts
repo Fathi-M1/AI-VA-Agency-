@@ -23,6 +23,13 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
+  // Old owner links keep working after the Phase 0 renames (customers, Needs you).
+  async redirects() {
+    return [
+      { source: "/contacts", destination: "/customers", permanent: true },
+      { source: "/escalations", destination: "/needs-you", permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;
