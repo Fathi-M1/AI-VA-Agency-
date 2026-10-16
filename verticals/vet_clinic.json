@@ -159,7 +159,7 @@
       "a_template": "Please bring your pet's vaccination record if you have one."
     }
   ],
-  "escalation_keywords": [
+  "emergency_keywords": [
     "not breathing",
     "poisoning",
     "hit by a car",

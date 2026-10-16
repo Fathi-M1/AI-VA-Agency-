@@ -186,7 +186,7 @@
       "a_template": "We accept {hmos|We don't accept HMO cards at the moment.}. Please bring your HMO card and one valid ID. If your HMO isn't listed, the clinic will confirm before your visit."
     }
   ],
-  "escalation_keywords": [
+  "emergency_keywords": [
     "chest pain",
     "difficulty breathing",
     "severe bleeding",

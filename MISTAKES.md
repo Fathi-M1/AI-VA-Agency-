@@ -191,6 +191,16 @@ prevention. Read this before building. Never repeat a logged mistake.
 - **Prevention:** never put backslash escapes in inline heredoc edits; write the edit
   script to a file first (as #7 says) and run `tsc` right after.
 
+## #17 — A commit ran even though the type-check failed
+
+- **Symptom:** commit 2c3ea5e went in while `tsc` reported TS1501 (a regex `/s` flag
+  needs ES2018; this project targets ES2017).
+- **Root cause:** the command was `tsc && echo OK; git commit` — the `;` let the
+  commit run whatever `tsc` returned.
+- **Fix:** replaced the flag with `[\s\S]`; `tsc` clean; follow-up commit ebe820e.
+- **Prevention:** chain every check before a commit with `&&`, never `;`. Don't use
+  regex flags newer than the tsconfig target (`s`, named groups in old targets).
+
 ## #18 — The honesty test missed the page description
 
 - **Symptom:** after Release 1 went live, the landing page's meta description (the text
@@ -201,3 +211,26 @@ prevention. Read this before building. Never repeat a logged mistake.
   `src/app/(marketing)/` and the root layout; description reworded to match the hero.
 - **Prevention:** a copy test scans every file that renders public text (pages,
   layouts, metadata), not just the component folder; check the live HTML after a release.
+
+## #19 — Repeat of #16: a heredoc edit wrote a hidden control character
+
+- **Symptom:** the env-example scanner's new regex silently never matched; `cat -A`
+  showed `^H` (backspace) where `\b` should be.
+- **Root cause:** a Python edit with `\b` inside an inline heredoc; the escape reached
+  the file as a real backspace character. Same cause as #16.
+- **Fix:** replaced the character with a literal `\b` via a script file; a mutation check
+  (renaming a variable) proved the scanner now catches `env("…")` names.
+- **Prevention:** any edit containing a backslash goes through the Edit tool or a script
+  file, never an inline heredoc. After scripted edits, `grep -c $'\x08'` the file.
+
+## #20 — A docs commit swept in half-finished route moves
+
+- **Symptom:** the "runbook without Docker" commit also contained 44 staged renames from
+  an unfinished route move (a commit that wouldn't build).
+- **Root cause:** `git mv` stages immediately; `git add <one file> && git commit` still
+  commits everything already staged.
+- **Fix:** `git reset --soft HEAD~1` (not pushed yet), unstaged everything, recommitted the
+  runbook alone.
+- **Prevention:** before any commit, `git diff --cached --stat` and check the file list;
+  for a quick side commit in the middle of other work, use `git commit <path>` (commits
+  only that path) instead of `git add` + `git commit`.

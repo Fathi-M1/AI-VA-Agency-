@@ -3,6 +3,7 @@
 // shows, and what Settings (and later the Setup agent) edits. New businesses = new rows.
 import type { Weekday } from "../agent/knowledge/types"
 import { db } from "./client"
+import { configFromProfile, profileFromConfig, type ProfileRow } from "./profile-mapping"
 
 export type BusinessConfig = {
   business_type?: string
@@ -57,16 +58,41 @@ export function normalizeConfig(c: Partial<BusinessConfig> | null): BusinessConf
   }
 }
 
+// A business's knowledge lives in businesses (timezone, onboarding state) and its
+// business_profile row (migration 20261016000700); profile-mapping.ts turns them into the
+// BusinessConfig shape the rest of the app uses, and back.
+export const BUSINESS_WITH_PROFILE = "id, name, timezone, onboarding_state, business_profile(*)"
+
+type ProfileEmbed = ProfileRow | ProfileRow[] | null
+const one = (p: ProfileEmbed) => (Array.isArray(p) ? (p[0] ?? null) : p)
+
+/** The app's config for a businesses row selected with BUSINESS_WITH_PROFILE. */
+export function configOfRow(row: { timezone: string | null; onboarding_state: Record<string, unknown> | null; business_profile: ProfileEmbed }) {
+  return normalizeConfig(configFromProfile(row, one(row.business_profile)))
+}
+
 export async function getBusinessRow(businessId: string): Promise<BusinessRow> {
-  const { data, error } = await db().from("businesses").select("id, name, config").eq("id", businessId).single()
+  const { data, error } = await db().from("businesses").select(BUSINESS_WITH_PROFILE).eq("id", businessId).single()
   if (error || !data) fail("load business", error)
-  return { id: data.id, name: data.name, config: normalizeConfig(data.config) }
+  return { id: data.id, name: data.name, config: configOfRow(data) }
+}
+
+/** Saves a business's config into businesses + business_profile. */
+export async function saveBusinessConfig(businessId: string, config: BusinessConfig) {
+  const { profile, timezone, onboarding_state } = profileFromConfig(config)
+  const { error } = await db().from("businesses").update({ timezone, onboarding_state }).eq("id", businessId)
+  if (error) fail("save business", error)
+  const { error: e2 } = await db()
+    .from("business_profile")
+    .upsert({ business_id: businessId, ...profile, updated_at: new Date().toISOString() }, { onConflict: "business_id" })
+  if (e2) fail("save business profile", e2)
 }
 
 /** Replaces the name and config of one business (callers merge their changes first). */
 export async function saveBusinessRow(businessId: string, name: string, config: BusinessConfig) {
-  const { error } = await db().from("businesses").update({ name, config }).eq("id", businessId)
+  const { error } = await db().from("businesses").update({ name }).eq("id", businessId)
   if (error) fail("save business", error)
+  await saveBusinessConfig(businessId, config)
 }
 
 /** Neutral defaults for fields a business hasn't set yet. */
@@ -74,7 +100,9 @@ export const customerTermOf = (c: BusinessConfig) => c.customer_term ?? { singul
 
 /** Creates a new business (a new tenant: new rows, no new code). Returns its id. */
 export async function createBusinessRow(name: string, config: BusinessConfig): Promise<string> {
-  const { data, error } = await db().from("businesses").insert({ name, config }).select("id").single()
+  const { timezone } = profileFromConfig(config)
+  const { data, error } = await db().from("businesses").insert({ name, timezone }).select("id").single()
   if (error || !data) fail("create business", error)
+  await saveBusinessConfig(data.id, config)
   return data.id
 }

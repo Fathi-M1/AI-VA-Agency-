@@ -5,7 +5,7 @@
 // emerald / amber / red as comp-420 / comp-421 / comp-422
 // (https://coss.com/origin/r/comp-421.json, https://coss.com/origin/r/comp-422.json).
 // Here: accent (green) for live/booked/handled, warning (comp-421's amber) for
-// escalate-now, danger (comp-422's red) for safe redirects, ink, hollow for
+// needs-you-now, danger (comp-422's red) for safe redirects, ink, hollow for
 // captured/callback, quiet for answered. Label via children, the
 // Dashboard's type/spacing. Structure unchanged.
 import { Badge } from "@/components/ui/badge";

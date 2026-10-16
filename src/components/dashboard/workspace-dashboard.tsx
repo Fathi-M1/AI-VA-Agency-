@@ -3,7 +3,6 @@
 // week's real count, and revenue shows $0 until an average job value is set.
 // Parts: NumberFlow hero figure (MIT), Origin UI comp-91 download button (MIT),
 // Lucide icons (ISC).
-import Link from "next/link"
 import {
   BotIcon,
   BriefcaseIcon,
@@ -23,6 +22,7 @@ import DownloadReportButton from "@/components/comp-91"
 import { HeroFigure } from "@/components/dashboard/hero-figure"
 import { CardTitle, GlassCard, GlassChip, GlassTile, HeroPanel, LivePulse, PillButton } from "@/components/workspace/surface"
 import { usd, type WeekSummary } from "@/lib/dashboard-data"
+import { AppLink } from "@/components/app-link"
 
 export function DashboardHero({
   greeting,
@@ -80,9 +80,9 @@ export function DashboardHero({
               ) : (
                 <>
                   Shows $0 until you set your average job value.{" "}
-                  <Link href="/settings" className="font-medium text-primary-foreground underline underline-offset-4">
+                  <AppLink to="/settings" className="font-medium text-primary-foreground underline underline-offset-4">
                     Set it
-                  </Link>
+                  </AppLink>
                 </>
               )}
             </p>
@@ -130,7 +130,7 @@ export function NeedsYouCard({ week }: { week: WeekSummary }) {
         subtitle={`${week.autoResolved} resolved automatically this week`}
         action={
           n ? (
-            <PillButton href="/escalations" variant="primary">
+            <PillButton to="/needs-you" variant="primary">
               Review <ChevronRightIcon aria-hidden="true" />
             </PillButton>
           ) : null
@@ -141,14 +141,14 @@ export function NeedsYouCard({ week }: { week: WeekSummary }) {
           <GlassTile>
             <CircleCheckIcon />
           </GlassTile>
-          <p className="text-sm text-muted-foreground">You&apos;re all caught up. Escalations show up here the moment the AI needs you.</p>
+          <p className="text-sm text-muted-foreground">You&apos;re all caught up. Items show up here the moment the AI needs you.</p>
         </div>
       ) : (
         <ul className="mt-6 mb-6 flex flex-col gap-2">
           {week.needsYou.map((item) => (
             <li key={item.id}>
-              <Link
-                href="/escalations"
+              <AppLink
+                to="/needs-you"
                 className="group flex items-center gap-4 rounded-xl border border-transparent p-3 transition hover:border-[color-mix(in_oklch,var(--warning)_35%,transparent)] hover:bg-[color-mix(in_oklch,var(--warning)_7%,var(--background))]"
               >
                 <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_oklch,var(--warning)_18%,var(--background))] text-[oklch(0.45_0.12_60)] ring-1 ring-[color-mix(in_oklch,var(--warning)_35%,transparent)]">
@@ -162,13 +162,13 @@ export function NeedsYouCard({ week }: { week: WeekSummary }) {
                 </span>
                 <span className="hidden text-xs whitespace-nowrap text-subtle sm:block">{item.due}</span>
                 <ChevronRightIcon className="size-4 text-subtle transition group-hover:translate-x-0.5" aria-hidden="true" />
-              </Link>
+              </AppLink>
             </li>
           ))}
         </ul>
       )}
       <p className="mt-auto border-t border-border/70 pt-4 text-xs text-subtle">
-        Escalations are requests your AI team isn&apos;t allowed to handle alone, such as refunds, disputes and anything
+        These are requests your AI team isn&apos;t allowed to handle alone, such as refunds, disputes and anything
         outside your rules.
       </p>
     </GlassCard>
@@ -191,9 +191,9 @@ export function TeamCard({ agents }: { agents: { id: keyof typeof AGENT_ICON; na
         title="Your AI team"
         subtitle="What each agent did this week"
         action={
-          <Link href="/agents" className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
+          <AppLink to="/agents" className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
             Agents
-          </Link>
+          </AppLink>
         }
       />
       <ul className="mt-6 flex flex-col gap-3">

@@ -215,7 +215,7 @@
       "a_template": "{walk_in_answer}"
     }
   ],
-  "escalation_keywords": [
+  "emergency_keywords": [
     "allergic reaction",
     "burning scalp",
     "scalp burn",

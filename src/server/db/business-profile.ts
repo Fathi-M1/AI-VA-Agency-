@@ -1,7 +1,8 @@
 // A business with everything set up through /setup: its row (incl. the 004 columns),
 // services, team and team hours. Every read is scoped by business id (or booking link).
-import { getBusinessRow, normalizeConfig, type BusinessConfig } from "./business-config"
+import { configOfRow, getBusinessRow, saveBusinessConfig, type BusinessConfig } from "./business-config"
 import { db } from "./client"
+import { profileFromStorefront } from "./storefront-mapping"
 
 /** A business type id: the name of a pack file in web/verticals (e.g. "salon"). */
 export type Vertical = string
@@ -44,8 +45,7 @@ function fail(what: string, error: { message: string } | null): never {
   throw new Error(`DB ${what} failed: ${error?.message ?? "no row"}`)
 }
 
-// "*" so the app keeps working whichever migrations have run (missing columns read as null).
-const COLUMNS = "*"
+const COLUMNS = "*, business_profile(*)"
 
 const num = (v: unknown) => (v === null || v === undefined || v === "" ? null : Number(v))
 
@@ -75,7 +75,7 @@ async function withDetails(row: Record<string, unknown>): Promise<BusinessProfil
     brand_color: (row.brand_color as string | null) ?? null,
     business_address: (row.business_address as string | null) ?? null,
     public_contact: (row.public_contact as string | null) ?? null,
-    config: normalizeConfig(row.config as Partial<BusinessConfig>),
+    config: configOfRow(row as Parameters<typeof configOfRow>[0]),
     services: (services.data ?? []).map((s) => ({
       ...(s as ServiceRow),
       price_php: num(s.price_php),
@@ -102,35 +102,17 @@ async function withDetails(row: Record<string, unknown>): Promise<BusinessProfil
 
 export async function getBusinessProfile(businessId: string): Promise<BusinessProfile> {
   const { data, error } = await db().from("businesses").select(COLUMNS).eq("id", businessId).single()
-  if (error || !data) {
-    // Before migration 004 the new columns don't exist; fall back to the base row.
-    if (error?.message.includes("does not exist")) {
-      const row = await getBusinessRow(businessId)
-      return {
-        ...row,
-        vertical: null,
-        booking_slug: null,
-        owner_mobile: null,
-        setup_completed_at: null,
-        calendar_mode: "calcom",
-        last_seen_at: null,
-        brand_color: null,
-        business_address: null,
-        public_contact: null,
-        services: [],
-        staff: [],
-      }
-    }
-    fail("load business", error)
-  }
+  if (error || !data) fail("load business", error)
   return withDetails(data)
 }
 
-/** The business behind a public booking link, or null if the link isn't active. */
+/** The business behind a public booking link, or null if the link isn't active. Reads
+ *  through public_storefront (a narrow function an anonymous customer may call), so it
+ *  carries only what customers may see: no owner mobile, no internal settings. */
 export async function getBusinessBySlug(slug: string): Promise<BusinessProfile | null> {
-  const { data, error } = await db().from("businesses").select(COLUMNS).eq("booking_slug", slug).maybeSingle()
+  const { data, error } = await db().rpc("public_storefront", { p_link: slug })
   if (error) fail("load business by link", error)
-  return data ? withDetails(data) : null
+  return profileFromStorefront(data)
 }
 
 /** Active services / team, in display order. */
@@ -139,11 +121,6 @@ export const activeStaff = (b: BusinessProfile) => b.staff.filter((s) => s.activ
 
 /** Merges a patch into config (read-modify-write; callers pass only what changes). */
 export async function patchConfig(businessId: string, patch: Partial<BusinessConfig>) {
-  const { data, error } = await db().from("businesses").select("config").eq("id", businessId).single()
-  if (error || !data) fail("load config", error)
-  const { error: e2 } = await db()
-    .from("businesses")
-    .update({ config: { ...(data.config as object), ...patch } })
-    .eq("id", businessId)
-  if (e2) fail("save config", e2)
+  const { config } = await getBusinessRow(businessId)
+  await saveBusinessConfig(businessId, { ...config, ...patch })
 }

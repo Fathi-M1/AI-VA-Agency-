@@ -210,7 +210,7 @@
       "a_template": "{hours_summary}"
     }
   ],
-  "escalation_keywords": [
+  "emergency_keywords": [
     "severe pain",
     "swelling",
     "bleeding won't stop",

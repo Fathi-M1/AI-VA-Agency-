@@ -81,10 +81,10 @@ export function LandingHeader() {
               </div>
               <div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit">
                 <Button asChild variant="ghost" size="sm">
-                  <Link href="/today">Sign in</Link>
+                  <Link href="/sign-in">Sign in</Link>
                 </Button>
                 <Button asChild size="sm">
-                  <Link href="/setup">Register your business</Link>
+                  <Link href="/app/onboarding">Register your business</Link>
                 </Button>
               </div>
             </div>

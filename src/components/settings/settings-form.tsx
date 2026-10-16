@@ -11,7 +11,7 @@ import { useEffect, useState, useTransition } from "react"
 import { PlusIcon, Trash2Icon } from "lucide-react"
 import { toast } from "sonner"
 
-import { saveSettings, type SettingsInput } from "@/app/(app)/settings/actions"
+import { saveSettings, type SettingsInput } from "@/app/app/[businessId]/(shell)/settings/actions"
 import StatusDotBadge from "@/components/comp-420"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -72,11 +72,13 @@ const listBox = "rounded-xl border border-border bg-card"
 const lines = (s: string) => s.split("\n").map((x) => x.trim()).filter(Boolean)
 
 export function SettingsForm({
+  businessId,
   initialTab = "business",
   initial,
   services,
   calendarConnected,
 }: {
+  businessId: string
   initialTab?: SettingsTab
   initial: SettingsInput
   services: { name: string; durationMinutes: number; calcomEventTypeId: number }[]
@@ -106,7 +108,7 @@ export function SettingsForm({
   function save() {
     const input: SettingsInput = { ...v, emergencyKeywords: lines(keywordsText), restrictedAdvice: lines(adviceText) }
     startTransition(async () => {
-      const res = await saveSettings(input)
+      const res = await saveSettings(businessId, input)
       if (res.ok) {
         setDirty(false)
         toast.success("Saved.", { description: "Your AI team uses the new settings from the next conversation." })
@@ -316,7 +318,7 @@ export function SettingsForm({
                 />
               </Row>
               <FieldSeparator />
-              <Row label="On call" hint="Saved now; used once escalation alerts are added.">
+              <Row label="On call" hint="Saved now; used once on-call alerts are added.">
                 <div className={`grid grid-cols-2 gap-2 sm:grid-cols-[1fr_1fr_1.3fr] ${control}`}>
                   <Input aria-label="On call from" type="time" value={v.onCall.from} onChange={(e) => set("onCall", { ...v.onCall, from: e.target.value })} className={field} />
                   <Input aria-label="On call until" type="time" value={v.onCall.until} onChange={(e) => set("onCall", { ...v.onCall, until: e.target.value })} className={field} />
@@ -400,13 +402,13 @@ export function SettingsForm({
               <Field orientation="responsive">
                 <FieldContent>
                   <FieldTitle className="flex flex-wrap items-center gap-2">
-                    Human escalation desk
+                    Human backup desk
                     <Badge variant="outline" className="h-5 border-input px-2 text-xs font-normal text-muted-foreground">
                       Planned add-on
                     </Badge>
                   </FieldTitle>
                   <FieldDescription>
-                    A paid option: trained people cover nights and weekends for escalations when you&apos;re not on call.
+                    A paid option: trained people cover nights and weekends for anything that needs you when you&apos;re not on call.
                   </FieldDescription>
                 </FieldContent>
                 <div className={`rounded-xl border border-dashed border-input px-5 py-4 ${control}`}>

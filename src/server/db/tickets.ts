@@ -1,4 +1,4 @@
-// A booking request's public ticket (/book/[slug]/r/[code]). Anyone with the link can
+// A booking request's public ticket (/book/[slug]/t/[token]), found by its private token only. Anyone with the link can
 // open it, so it returns only what's safe to show: first name, never the mobile.
 import { time12 } from "@/lib/format"
 
@@ -6,7 +6,9 @@ import type { BusinessProfile } from "./business-profile"
 import { db } from "./client"
 
 export type Ticket = {
+  /** display only */
   code: string
+  token: string
   status: "requested" | "confirmed" | "declined" | string
   firstName: string
   service: string
@@ -19,17 +21,18 @@ export type Ticket = {
   estimate: { price: number | null; duration_minutes: number; notes: string[] } | null
 }
 
-export async function getTicket(business: BusinessProfile, code: string): Promise<Ticket | null> {
+export async function getTicket(business: BusinessProfile, token: string): Promise<Ticket | null> {
+  if (token.length < 32) return null // reference codes never open a ticket
   const { data, error } = await db()
     .from("bookings")
-    .select("reference_code, status, service, details, staff_id, requested_time_text, slot_start, slot_end, contacts(name)")
+    .select("reference_code, status, service, details, staff_id, requested_time_text, slot_start, slot_end, customers(name)")
     .eq("business_id", business.id)
-    .eq("reference_code", code.toUpperCase())
+    .eq("ticket_token", token)
     .maybeSingle()
   if (error || !data) return null
   const tz = business.config.timezone
   const d = (data.details ?? {}) as { summary?: string; answers?: Record<string, string>; estimate?: Ticket["estimate"] }
-  const name = (data.contacts as unknown as { name: string | null } | null)?.name ?? ""
+  const name = (data.customers as unknown as { name: string | null } | null)?.name ?? ""
   const staff = business.staff.find((m) => m.id === data.staff_id)?.name ?? null
   let confirmed: Ticket["confirmed"] = null
   if (data.status === "confirmed" && data.slot_start) {
@@ -43,6 +46,7 @@ export async function getTicket(business: BusinessProfile, code: string): Promis
   }
   return {
     code: data.reference_code!,
+    token,
     status: data.status,
     firstName: name.trim().split(/\s+/)[0] ?? "",
     service: data.service,

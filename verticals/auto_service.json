@@ -135,7 +135,7 @@
       "a_template": "{service_durations}. The team will confirm when you drop it off."
     }
   ],
-  "escalation_keywords": [
+  "emergency_keywords": [
     "smoke",
     "fuel leak",
     "brakes not working",

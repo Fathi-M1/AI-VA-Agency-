@@ -7,7 +7,6 @@
 // when it takes over, this week's counts and its recent conversations (Supabase).
 // Setup & Admin is shown as not built yet.
 import { useState } from "react"
-import Link from "next/link"
 import { ChevronRightIcon } from "lucide-react"
 
 import StatusDotBadge from "@/components/comp-420"
@@ -25,8 +24,9 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 import { avatarTint } from "@/lib/avatar"
 import { eyebrow, panel, quiet } from "@/lib/styles"
 import type { AgentView } from "@/server/db/views"
+import { AppLink } from "@/components/app-link"
 
-const outcomeTone = { Booked: "accent", Escalated: "warning", Open: "hollow" } as const
+const outcomeTone = { Booked: "accent", "Needs you": "warning", Open: "hollow" } as const
 
 export function AgentTeam({ agents }: { agents: AgentView[] }) {
   const [openId, setOpenId] = useState<AgentView["id"] | null>(null)
@@ -143,7 +143,7 @@ function AgentProfile({ a }: { a: AgentView }) {
                   {a.recent.map((c, i) => (
                     <div key={c.id}>
                       <Item asChild size="sm" className="px-2 hover:bg-secondary">
-                        <Link href={`/conversations?open=${c.id}`}>
+                        <AppLink to={`/conversations?open=${c.id}`}>
                           <ItemContent className="min-w-0 gap-0.5">
                             <ItemTitle className="text-sm font-medium">{c.customer}</ItemTitle>
                             <ItemDescription className="text-xs">{c.when}</ItemDescription>
@@ -154,7 +154,7 @@ function AgentProfile({ a }: { a: AgentView }) {
                             </StatusDotBadge>
                             <ChevronRightIcon aria-hidden="true" className="size-4 text-subtle" />
                           </ItemActions>
-                        </Link>
+                        </AppLink>
                       </Item>
                       {i < a.recent.length - 1 ? <ItemSeparator className="my-0" /> : null}
                     </div>

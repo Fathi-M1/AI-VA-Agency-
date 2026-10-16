@@ -3,14 +3,16 @@
 // shadcn/ui sidebar-07 "TeamSwitcher" (https://ui.shadcn.com/r/styles/radix-nova/sidebar-07.json),
 // License: MIT (shadcn-ui/ui). Structure kept: SidebarMenuButton trigger with logo tile +
 // name + subtitle, DropdownMenu listing the items, separator, "Add" row.
-// Adapted: lists real businesses (Supabase); choosing one switches the app via a Server
-// Action (cookie, dev-only until logins exist); "Add business" opens /setup; the
-// logo tile is the business's initial in ink; Lucide icons instead of IconPlaceholder.
+// Adapted: the account menu. Lists the businesses the signed-in user belongs to (links
+// to each one's Today; access is re-checked on every page), "Add business" opens
+// onboarding, and "Sign out" ends the session. The logo tile is the business's initial
+// in ink; Lucide icons instead of IconPlaceholder.
 import * as React from "react"
 import Link from "next/link"
-import { ChevronsUpDownIcon, PlusIcon } from "lucide-react"
+import { ChevronsUpDownIcon, LogOutIcon, PlusIcon } from "lucide-react"
 
-import { switchBusiness } from "@/app/(app)/business-actions"
+import { signOut } from "@/app/auth/actions"
+import { appPath } from "@/lib/app-path"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,7 +44,6 @@ export function TeamSwitcher({
   businesses: { id: string; name: string }[]
 }) {
   const { isMobile } = useSidebar()
-  const [pending, startTransition] = React.useTransition()
 
   return (
     <SidebarMenu>
@@ -52,7 +53,6 @@ export function TeamSwitcher({
             <SidebarMenuButton
               size="lg"
               className="gap-3 rounded-xl hover:bg-sidebar-accent active:bg-sidebar-accent data-[state=open]:bg-sidebar-accent"
-              aria-busy={pending}
             >
               <Initial name={current.name} glass className="size-[34px] text-xl group-data-[collapsible=icon]:size-8" />
               <div className="grid flex-1 text-left leading-tight">
@@ -65,27 +65,33 @@ export function TeamSwitcher({
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-64" align="start" side={isMobile ? "bottom" : "right"} sideOffset={4}>
-            <DropdownMenuLabel className="text-xs text-muted-foreground">Businesses (dev switcher)</DropdownMenuLabel>
+            <DropdownMenuLabel className="text-xs text-muted-foreground">Your businesses</DropdownMenuLabel>
             {businesses.map((b) => (
-              <DropdownMenuItem
-                key={b.id}
-                className="gap-2 p-2"
-                disabled={b.id === current.id}
-                onClick={() => startTransition(() => void switchBusiness(b.id))}
-              >
-                <Initial name={b.name} className="size-6 rounded-md text-sm" />
-                <span className="truncate">{b.name}</span>
+              <DropdownMenuItem key={b.id} asChild className="gap-2 p-2" disabled={b.id === current.id}>
+                <Link href={appPath(b.id, "/today")} aria-current={b.id === current.id ? "page" : undefined}>
+                  <Initial name={b.name} className="size-6 rounded-md text-sm" />
+                  <span className="truncate">{b.name}</span>
+                </Link>
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild className="gap-2 p-2">
-              <Link href="/setup">
+              <Link href="/app/onboarding">
                 <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
                   <PlusIcon className="size-4" />
                 </div>
                 <span className="font-medium text-muted-foreground">Add business</span>
               </Link>
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <form action={signOut}>
+              <DropdownMenuItem asChild className="w-full gap-2 p-2">
+                <button type="submit">
+                  <LogOutIcon className="size-4" aria-hidden="true" />
+                  Sign out
+                </button>
+              </DropdownMenuItem>
+            </form>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

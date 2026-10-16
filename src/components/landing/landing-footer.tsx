@@ -9,8 +9,8 @@ const links = [
   { title: "Your AI team", href: "/#team" },
   { title: "How it works", href: "/#how" },
   { title: "Safety", href: "/#safety" },
-  { title: "Register", href: "/setup" },
-  { title: "Sign in", href: "/today" },
+  { title: "Register", href: "/app/onboarding" },
+  { title: "Sign in", href: "/sign-in" },
 ]
 
 export function LandingFooter() {

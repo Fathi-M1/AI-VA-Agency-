@@ -18,10 +18,10 @@ export function receptionistInstruction(
   returning?: { name: string | null } | null
 ) {
   const { singular: one } = b.customerTerm
-  // Returning-contact recognition: set when the person's email matches a contact on file.
+  // Returning-customer recognition: set when the person's email matches a customer on file.
   const welcome = returning ? `Welcome back${returning.name ? `, ${returning.name}` : ""}` : ""
   const memory = returning
-    ? `\nThis person is a returning contact${returning.name ? ` named ${returning.name}` : ""}. Start your next reply with exactly "${welcome}", then carry on with the rules below.\n`
+    ? `\nThis person is a returning customer${returning.name ? ` named ${returning.name}` : ""}. Start your next reply with exactly "${welcome}", then carry on with the rules below.\n`
     : ""
   return `You are the receptionist for ${b.name} (${b.businessType}). The people it serves are called ${b.customerTerm.plural}. Your ONLY job is to greet, find out what the person wants, and route them to the right specialist. You never do the work yourself.
 ${memory}
