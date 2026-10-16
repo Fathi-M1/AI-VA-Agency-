@@ -23,11 +23,19 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
-  // Old owner links keep working after the Phase 0 renames (customers, Needs you).
+  // Old owner links keep working: owner pages moved under /app/[businessId]/… (Phase 0 §4)
+  // and two were renamed (§8). /app picks the business and keeps the page (?to=).
+  // Not permanent, so browsers don't cache them while the app is still taking shape.
   async redirects() {
+    const pages = ["today", "dashboard", "conversations", "customers", "needs-you", "calendar", "agents", "settings"];
     return [
-      { source: "/contacts", destination: "/customers", permanent: true },
-      { source: "/escalations", destination: "/needs-you", permanent: true },
+      ...pages.map((p) => ({ source: `/${p}`, destination: `/app?to=${p}`, permanent: false })),
+      { source: "/contacts", destination: "/app?to=customers", permanent: false },
+      { source: "/escalations", destination: "/app?to=needs-you", permanent: false },
+      { source: "/setup", destination: "/app/onboarding", permanent: false },
+      { source: "/setup/live", destination: "/app", permanent: false },
+      { source: "/switch", destination: "/app/businesses", permanent: false },
+      { source: "/playground", destination: "/console", permanent: false },
     ];
   },
 };

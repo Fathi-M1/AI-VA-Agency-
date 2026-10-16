@@ -19,13 +19,13 @@ import {
   CalendarDaysIcon,
   HomeIcon,
   LayoutDashboardIcon,
-  RepeatIcon,
   MessagesSquareIcon,
   SettingsIcon,
   TriangleAlertIcon,
   UsersIcon,
 } from "lucide-react"
 
+import { useAppPath } from "@/components/app-link"
 import { LivePulse } from "@/components/workspace/surface"
 import { LogoMark } from "@/components/brand/logo"
 import { TeamSwitcher } from "@/components/team-switcher"
@@ -42,14 +42,14 @@ import {
 } from "@/components/ui/sidebar"
 
 const NAV = [
-  { title: "Today", url: "/today", icon: HomeIcon },
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboardIcon },
-  { title: "Conversations", url: "/conversations", icon: MessagesSquareIcon },
-  { title: "Needs you", url: "/needs-you", icon: TriangleAlertIcon, countsNeedsYou: true },
-  { title: "Agents", url: "/agents", icon: BotIcon },
-  { title: "Calendar", url: "/calendar", icon: CalendarDaysIcon },
-  { title: "Customers", url: "/customers", icon: UsersIcon },
-  { title: "Settings", url: "/settings", icon: SettingsIcon },
+  { title: "Today", to: "/today", icon: HomeIcon },
+  { title: "Dashboard", to: "/dashboard", icon: LayoutDashboardIcon },
+  { title: "Conversations", to: "/conversations", icon: MessagesSquareIcon },
+  { title: "Needs you", to: "/needs-you", icon: TriangleAlertIcon, countsNeedsYou: true },
+  { title: "Agents", to: "/agents", icon: BotIcon },
+  { title: "Calendar", to: "/calendar", icon: CalendarDaysIcon },
+  { title: "Customers", to: "/customers", icon: UsersIcon },
+  { title: "Settings", to: "/settings", icon: SettingsIcon },
 ]
 
 export function AppSidebar({
@@ -62,10 +62,11 @@ export function AppSidebar({
   openNeedsYou?: number
   /** The business this account is for, from its Supabase row. */
   business: { id: string; name: string; ownerName: string | null }
-  /** Every business on the platform (dev switcher until logins exist). */
+  /** The businesses the signed-in user belongs to (account menu). */
   businesses: { id: string; name: string }[]
 }) {
   const pathname = usePathname()
+  const toApp = useAppPath()
 
   return (
     <Sidebar
@@ -83,7 +84,8 @@ export function AppSidebar({
         <SidebarGroup>
           <SidebarMenu className="gap-0.5">
             {NAV.map((item) => {
-              const active = pathname === item.url
+              const href = toApp(item.to)
+              const active = pathname === href
               return (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
@@ -91,7 +93,7 @@ export function AppSidebar({
                     isActive={active}
                     className="h-9 gap-3 rounded-xl px-3 text-sm text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-active:bg-sidebar-accent data-active:font-semibold data-active:text-sidebar-accent-foreground data-active:shadow-[inset_0_1px_0_rgb(255_255_255/0.18),inset_0_0_0_1px_rgb(255_255_255/0.12)] [&_svg]:text-sidebar-foreground data-active:[&_svg]:text-sidebar-accent-foreground"
                   >
-                    <Link href={item.url} aria-current={active ? "page" : undefined}>
+                    <Link href={href} aria-current={active ? "page" : undefined}>
                       <item.icon aria-hidden="true" />
                       <span>{item.title}</span>
                     </Link>
@@ -119,10 +121,6 @@ export function AppSidebar({
             4 of 5 agents live
           </span>
         </div>
-        <Link href="/switch" className="mt-1 flex min-h-9 items-center gap-1.5 text-sm text-sidebar-accent-foreground underline-offset-4 hover:underline">
-          <RepeatIcon className="size-4" aria-hidden="true" />
-          Switch business (demo)
-        </Link>
         <Link href="/" className="mt-1 flex items-center gap-1.5 text-xs text-sidebar-foreground hover:text-sidebar-accent-foreground">
           <LogoMark className="h-3.5 w-auto" onDark />
           AI VA Agency

@@ -5,13 +5,13 @@
 // and the outcome badge (Origin UI comp-420/421).
 // Real data only: the conversation row, its customer, and its messages from Supabase.
 // ("What the AI did" and "Play recording" were removed: no real source for either.)
-import Link from "next/link"
 
 import StatusDotBadge from "@/components/comp-420"
 import { RichText } from "@/components/rich-text"
 import { SheetDescription, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { eyebrow } from "@/lib/styles"
 import type { ConversationView, Outcome } from "@/server/db/views"
+import { AppLink } from "@/components/app-link"
 
 // Colour carries meaning here only: booked = green, needs you = amber, open = neutral.
 export const outcomeTone: Record<Outcome, "accent" | "warning" | "hollow"> = {
@@ -61,12 +61,12 @@ export function ConversationDetail({ c }: { c: ConversationView }) {
 
       {c.customerId ? (
         <SheetFooter className="flex-row items-center gap-4 border-t border-border px-7 py-5">
-          <Link
-            href={`/customers?open=${c.customerId}`}
+          <AppLink
+            to={`/customers?open=${c.customerId}`}
             className="text-sm text-muted-foreground underline underline-offset-3 hover:text-foreground"
           >
             Open customer
-          </Link>
+          </AppLink>
         </SheetFooter>
       ) : null}
     </>

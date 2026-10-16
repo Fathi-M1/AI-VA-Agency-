@@ -1,12 +1,11 @@
 // The Setup agent's entry point (owner-facing registration). Keys stay on the server.
 // The setup conversation itself is in memory; what it produces (the business row and any
-// calendar event types) is real. When a business is created, the app switches to it
-// (dev cookie, until logins exist).
-import { cookies } from "next/headers"
+// calendar event types) is real. Unlinked since onboarding moved to a form
+// (/app/onboarding) and off in production; it does not create an owner membership, so a
+// business it creates can't be opened after Phase 0 sign-in (see the Phase 0 report).
 
 import { runAgentTurn, userInput, type Step } from "@/server/agent/llm"
 import { executeSetupTool, setupInstruction, SETUP_TOOLS, type SetupState } from "@/server/agent/setup"
-import { BUSINESS_COOKIE } from "@/server/tenant"
 
 type SetupSession = SetupState & { history: Step[]; announced: boolean }
 
@@ -55,12 +54,6 @@ export async function POST(request: Request) {
 
   if (session.created && !session.announced) {
     session.announced = true
-    ;(await cookies()).set(BUSINESS_COOKIE, session.created.id, {
-      path: "/",
-      sameSite: "lax",
-      httpOnly: true,
-      maxAge: 60 * 60 * 24 * 365,
-    })
     events.push({ kind: "created", id: session.created.id, name: session.created.name })
   }
   return Response.json({ events })

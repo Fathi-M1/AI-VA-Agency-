@@ -159,13 +159,13 @@ export function RegisterChat() {
                 Your AI team is configured. Open your dashboard, or talk to your own front desk.
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
-                <Link href="/dashboard">
+                <Link href="/app">
                   <ShimmerButton background="oklch(0.405 0.07 155)" shimmerColor="oklch(0.92 0.03 85)" className="h-10 gap-2 px-5 text-sm font-medium">
                     Open your dashboard <ArrowRight className="size-4" aria-hidden="true" />
                   </ShimmerButton>
                 </Link>
                 <Button asChild variant="outline" className="h-10 rounded-full bg-background px-5">
-                  <Link href="/playground">Try your front desk</Link>
+                  <Link href="/console">Try your front desk</Link>
                 </Button>
               </div>
               <BorderBeam size={180} duration={8} colorFrom="oklch(0.72 0.09 150)" colorTo="oklch(0.405 0.07 155)" />

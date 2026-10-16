@@ -51,7 +51,7 @@ export function LandingHero() {
             tap, and hands you anything that needs a human.
           </p>
           <div className="flex flex-wrap items-center gap-3">
-            <Link href="/setup">
+            <Link href="/app/onboarding">
               <ShimmerButton
                 background={GREEN}
                 shimmerColor={BEIGE}
@@ -62,7 +62,7 @@ export function LandingHero() {
               </ShimmerButton>
             </Link>
             <Button asChild size="lg" variant="outline" className="h-11 rounded-full border-foreground/15 bg-background px-6">
-              <Link href="/today">Sign in</Link>
+              <Link href="/sign-in">Sign in</Link>
             </Button>
           </div>
           <p className="mt-6 text-sm text-foreground/65">Dental clinics, home services, salons, law firms, auto repair: same platform.</p>

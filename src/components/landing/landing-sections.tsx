@@ -203,10 +203,10 @@ export function FinalCta() {
           <h2 className="font-serif text-5xl leading-[1] text-balance">Give your business a front desk that never sleeps.</h2>
           <div className="flex flex-wrap justify-center gap-3">
             <Button asChild size="lg" className="h-11 rounded-full bg-background px-6 text-foreground hover:bg-background/90">
-              <Link href="/setup">Register your business</Link>
+              <Link href="/app/onboarding">Register your business</Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="h-11 rounded-full border-primary-foreground/40 bg-transparent px-6 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">
-              <Link href="/today">Sign in</Link>
+              <Link href="/sign-in">Sign in</Link>
             </Button>
           </div>
         </div>

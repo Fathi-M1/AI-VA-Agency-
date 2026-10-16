@@ -5,10 +5,9 @@
 // - GlassTile: frosted icon tile (on green or on beige)
 // - CardTitle: serif section heading + quiet subtitle + optional action
 // - LivePulse: the "online" pulse dot
-// - PillButton: round green-gradient action
+// - PillButton: round green-gradient action (a page inside the current business)
 import * as React from "react"
-import Link from "next/link"
-
+import { AppLink } from "@/components/app-link"
 import { cn } from "@/lib/utils"
 
 export function HeroPanel({ className, children }: { className?: string; children: React.ReactNode }) {
@@ -113,19 +112,20 @@ export function LivePulse({ className }: { className?: string }) {
 }
 
 export function PillButton({
-  href,
+  to,
   children,
   variant = "primary",
   className,
 }: {
-  href: string
+  /** Page inside the current business (the path after /app/[businessId]). */
+  to: string
   children: React.ReactNode
   variant?: "primary" | "glass" | "ghost"
   className?: string
 }) {
   return (
-    <Link
-      href={href}
+    <AppLink
+      to={to}
       className={cn(
         "inline-flex h-10 items-center gap-2 rounded-full px-5 text-sm font-medium transition [&_svg]:size-4",
         variant === "primary" &&
@@ -137,7 +137,7 @@ export function PillButton({
       )}
     >
       {children}
-    </Link>
+    </AppLink>
   )
 }
 

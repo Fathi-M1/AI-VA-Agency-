@@ -8,7 +8,6 @@
 // per row; an open section (heading + hairline divider, no card surface) with a
 // link to Agents.
 import * as React from "react"
-import Link from "next/link"
 import {
   BriefcaseIcon,
   CalendarCheckIcon,
@@ -28,6 +27,7 @@ import {
   ItemSeparator,
   ItemTitle,
 } from "@/components/ui/item"
+import { AppLink } from "@/components/app-link"
 import type { AgentView } from "@/server/db/views"
 
 /** One row per agent; `week` is a real line built from Supabase (see the Dashboard). */
@@ -49,12 +49,12 @@ export default function AgentsThisWeek({ agents }: { agents: AgentWeek[] }) {
           <h2 id="team-h" className="text-sm font-semibold">Your AI team this week</h2>
           <span className="text-xs text-subtle">What each agent did</span>
         </div>
-        <Link
-          href="/agents"
+        <AppLink
+          to="/agents"
           className="text-xs text-muted-foreground underline underline-offset-3 hover:text-foreground"
         >
           Agents
-        </Link>
+        </AppLink>
       </div>
       <Separator />
       <div>

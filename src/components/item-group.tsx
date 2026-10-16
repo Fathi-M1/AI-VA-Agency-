@@ -7,7 +7,6 @@
 // comp-420 status badge instead of the "+" button; an open section (heading +
 // hairline divider, no card surface) with a "View all" link; tighter item size.
 import * as React from "react"
-import Link from "next/link"
 import { UserRoundIcon } from "lucide-react"
 
 import StatusDotBadge from "@/components/comp-420"
@@ -23,6 +22,7 @@ import {
   ItemSeparator,
   ItemTitle,
 } from "@/components/ui/item"
+import { AppLink } from "@/components/app-link"
 import type { ConversationView, Outcome } from "@/server/db/views"
 
 // Same colours as the Conversations screen: booked = green, needs you = amber.
@@ -43,19 +43,19 @@ export default function RecentActivity({ items }: { items: ConversationView[] })
           <h2 id="activity-h" className="font-serif text-2xl leading-tight tracking-[-0.01em]">Recent activity</h2>
           <p className="mt-0.5 text-sm text-muted-foreground">{`The last ${items.length} conversations`}</p>
         </div>
-        <Link
-          href="/conversations"
+        <AppLink
+          to="/conversations"
           className="pt-1 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
         >
           View all
-        </Link>
+        </AppLink>
       </div>
       <div>
         <ItemGroup className="gap-0 has-data-[size=sm]:gap-0">
           {items.map((c, index) => (
             <React.Fragment key={c.id}>
               <Item asChild size="sm" className="-mx-2 rounded-xl px-2 py-2.5 hover:bg-[color-mix(in_oklch,var(--primary)_6%,var(--background))]">
-                <Link href={`/conversations?open=${c.id}`}>
+                <AppLink to={`/conversations?open=${c.id}`}>
                 <ItemMedia>
                   <Avatar className="size-9">
                     {c.customerId ? (
@@ -80,7 +80,7 @@ export default function RecentActivity({ items }: { items: ConversationView[] })
                     {c.outcome}
                   </StatusDotBadge>
                 </ItemActions>
-                </Link>
+                </AppLink>
               </Item>
               {index !== items.length - 1 && <ItemSeparator className="my-0" />}
             </React.Fragment>

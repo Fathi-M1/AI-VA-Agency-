@@ -6,7 +6,6 @@
 // Real data only: the customer row and its bookings + conversations from Supabase.
 // (The identity box, notes and Text/Call/Book buttons were removed: no real source.)
 import * as React from "react"
-import Link from "next/link"
 import { ChevronRightIcon } from "lucide-react"
 
 import StatusDotBadge from "@/components/comp-420"
@@ -25,6 +24,7 @@ import { SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { avatarTint, initials } from "@/lib/avatar"
 import type { CustomerView } from "@/server/db/views"
+import { AppLink } from "@/components/app-link"
 
 export type CustomerStatus = "Needs you" | "Booked by AI"
 export type CustomerRow = CustomerView & { statuses: CustomerStatus[]; order: number }
@@ -106,7 +106,7 @@ export function CustomerDetail({ c }: { c: CustomerRow }) {
                 {c.conversations.map((cv, i) => (
                   <React.Fragment key={cv.id}>
                     <Item asChild size="sm" className="px-2 hover:bg-secondary">
-                      <Link href={`/conversations?open=${cv.id}`}>
+                      <AppLink to={`/conversations?open=${cv.id}`}>
                         <ItemContent className="min-w-0 gap-0.5">
                           <ItemTitle className="text-sm font-medium">
                             {cv.firstMessage ? `“${cv.firstMessage}”` : "No messages"}
@@ -119,7 +119,7 @@ export function CustomerDetail({ c }: { c: CustomerRow }) {
                         <ItemActions>
                           <ChevronRightIcon aria-hidden="true" className="size-4 text-subtle" />
                         </ItemActions>
-                      </Link>
+                      </AppLink>
                     </Item>
                     {i !== c.conversations.length - 1 && <ItemSeparator className="my-0" />}
                   </React.Fragment>

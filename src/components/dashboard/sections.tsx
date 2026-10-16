@@ -1,4 +1,3 @@
-import Link from "next/link"
 import { ArrowRightIcon } from "lucide-react"
 
 import { HeroFigure } from "@/components/dashboard/hero-figure"
@@ -30,6 +29,7 @@ import {
 } from "@/components/ui/popover"
 import { usd, type WeekSummary } from "@/lib/dashboard-data"
 import { eyebrow, primaryBtn } from "@/lib/styles"
+import { AppLink } from "@/components/app-link"
 
 /* 1 · The one loud thing: what the AI team earned this week. */
 export function RecoveredHero({ week }: { week: WeekSummary }) {
@@ -75,12 +75,12 @@ function HowCalculated({ week }: { week: WeekSummary }) {
             bookings, it&apos;s {usd(week.afterHoursBooked * week.avgJobValue)}.
           </PopoverDescription>
         </PopoverHeader>
-        <Link
-          href="/settings?tab=business"
+        <AppLink
+          to="/settings?tab=business"
           className="mt-3 inline-block text-xs font-medium text-foreground underline underline-offset-3"
         >
           Change your average job value
-        </Link>
+        </AppLink>
       </PopoverContent>
     </Popover>
   )
@@ -164,7 +164,7 @@ export function NeedsYou({ week }: { week: WeekSummary }) {
               asChild
               className="rounded-none border-0 border-t border-border px-0 py-3.5 hover:bg-transparent [a]:hover:bg-transparent"
             >
-              <Link href="/needs-you">
+              <AppLink to="/needs-you">
                 <ItemContent className="min-w-0 gap-0.5">
                   <ItemTitle className="text-base font-medium group-hover/item:underline">
                     {item.who} · {item.action}
@@ -174,7 +174,7 @@ export function NeedsYou({ week }: { week: WeekSummary }) {
                 <ItemActions className="self-start pt-0.5 text-xs whitespace-nowrap text-subtle">
                   {item.due}
                 </ItemActions>
-              </Link>
+              </AppLink>
             </Item>
           ))}
         </ItemGroup>
@@ -182,10 +182,10 @@ export function NeedsYou({ week }: { week: WeekSummary }) {
 
       <CardFooter className="border-t-0 bg-transparent pt-0 pb-6">
         <Button asChild className={primaryBtn}>
-          <Link href="/needs-you">
+          <AppLink to="/needs-you">
             Review {n === 1 ? "it" : "these"}
             <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
-          </Link>
+          </AppLink>
         </Button>
       </CardFooter>
     </Card>

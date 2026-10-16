@@ -27,3 +27,17 @@ export function callbackStep(params: URLSearchParams): CallbackStep {
   if (error || !code) return { redirect: "/sign-in?error=failed" }
   return { exchange: code, next: safeNext(params.get("next")) }
 }
+
+const OWNER_PAGES = ["today", "dashboard", "conversations", "needs-you", "agents", "calendar", "customers", "settings"]
+
+/** A page inside a business that an old link (/today, /settings, …) may ask for, or null. */
+export function ownerPage(page: string | null | undefined): string | null {
+  return page && OWNER_PAGES.includes(page) ? page : null
+}
+
+/** Where /app sends a signed-in user (Phase 0 §5): onboarding, their one business, or the picker. */
+export function entryTarget(businesses: { id: string }[], page: string | null): string {
+  if (businesses.length === 0) return "/app/onboarding"
+  if (businesses.length === 1) return `/app/${businesses[0].id}/${page ?? "today"}`
+  return page ? `/app/businesses?to=${page}` : "/app/businesses"
+}

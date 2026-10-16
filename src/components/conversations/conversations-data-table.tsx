@@ -17,7 +17,6 @@
 // Sheet; the Dashboard's type and colours.
 // Data: real conversations from Supabase (server/db/views.ts), newest first.
 import * as React from "react"
-import Link from "next/link"
 import {
   columnFilteringFeature,
   columnVisibilityFeature,
@@ -72,6 +71,7 @@ import {
 } from "@/components/ui/table"
 import { panel } from "@/lib/styles"
 import type { ConversationView } from "@/server/db/views"
+import { AppLink } from "@/components/app-link"
 
 // New in v9: declare the features this table uses (tree-shaken otherwise).
 const features = tableFeatures({
@@ -213,7 +213,7 @@ const columns = columnHelper.columns([
             <DropdownMenuItem onClick={() => open?.(c.id)}>View conversation</DropdownMenuItem>
             {c.customerId ? (
               <DropdownMenuItem asChild>
-                <Link href={`/customers?open=${c.customerId}`}>Open customer</Link>
+                <AppLink to={`/customers?open=${c.customerId}`}>Open customer</AppLink>
               </DropdownMenuItem>
             ) : null}
             <DropdownMenuSeparator />

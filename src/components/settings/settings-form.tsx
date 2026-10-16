@@ -11,7 +11,7 @@ import { useEffect, useState, useTransition } from "react"
 import { PlusIcon, Trash2Icon } from "lucide-react"
 import { toast } from "sonner"
 
-import { saveSettings, type SettingsInput } from "@/app/(app)/settings/actions"
+import { saveSettings, type SettingsInput } from "@/app/app/[businessId]/(shell)/settings/actions"
 import StatusDotBadge from "@/components/comp-420"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -72,11 +72,13 @@ const listBox = "rounded-xl border border-border bg-card"
 const lines = (s: string) => s.split("\n").map((x) => x.trim()).filter(Boolean)
 
 export function SettingsForm({
+  businessId,
   initialTab = "business",
   initial,
   services,
   calendarConnected,
 }: {
+  businessId: string
   initialTab?: SettingsTab
   initial: SettingsInput
   services: { name: string; durationMinutes: number; calcomEventTypeId: number }[]
@@ -106,7 +108,7 @@ export function SettingsForm({
   function save() {
     const input: SettingsInput = { ...v, emergencyKeywords: lines(keywordsText), restrictedAdvice: lines(adviceText) }
     startTransition(async () => {
-      const res = await saveSettings(input)
+      const res = await saveSettings(businessId, input)
       if (res.ok) {
         setDirty(false)
         toast.success("Saved.", { description: "Your AI team uses the new settings from the next conversation." })
