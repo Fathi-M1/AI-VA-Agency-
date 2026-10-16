@@ -13,7 +13,9 @@ function files(dir: string): string[] {
 
 const used = new Set<string>()
 for (const f of [...files("src"), ...files("tests"), "next.config.ts"]) {
-  for (const m of readFileSync(f, "utf8").matchAll(/process\.env\.([A-Z][A-Z0-9_]*)/g)) used.add(m[1])
+  const src = readFileSync(f, "utf8")
+  for (const m of src.matchAll(/process\.env\.([A-Z][A-Z0-9_]*)/g)) used.add(m[1])
+  for (const m of src.matchAll(/\benv\("([A-Z][A-Z0-9_]*)"\)/g)) used.add(m[1]) // an env(...) helper reading a named variable
 }
 used.delete("NODE_ENV") // set by Next.js, not by us
 used.delete("NEXT_RUNTIME")

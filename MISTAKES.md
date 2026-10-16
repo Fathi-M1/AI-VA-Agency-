@@ -211,3 +211,14 @@ prevention. Read this before building. Never repeat a logged mistake.
   `src/app/(marketing)/` and the root layout; description reworded to match the hero.
 - **Prevention:** a copy test scans every file that renders public text (pages,
   layouts, metadata), not just the component folder; check the live HTML after a release.
+
+## #19 — Repeat of #16: a heredoc edit wrote a hidden control character
+
+- **Symptom:** the env-example scanner's new regex silently never matched; `cat -A`
+  showed `^H` (backspace) where `\b` should be.
+- **Root cause:** a Python edit with `\b` inside an inline heredoc; the escape reached
+  the file as a real backspace character. Same cause as #16.
+- **Fix:** replaced the character with a literal `\b` via a script file; a mutation check
+  (renaming a variable) proved the scanner now catches `env("…")` names.
+- **Prevention:** any edit containing a backslash goes through the Edit tool or a script
+  file, never an inline heredoc. After scripted edits, `grep -c $'\x08'` the file.
