@@ -193,7 +193,7 @@
       "a_template": "We accept {payment_methods}."
     }
   ],
-  "escalation_keywords": [
+  "emergency_keywords": [
     "sparks",
     "burning smell",
     "smoke",

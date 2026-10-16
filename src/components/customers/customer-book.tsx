@@ -1,17 +1,17 @@
 "use client"
 
-// Contacts: the same pulled table as Conversations.
+// Customers: the same pulled table as Conversations.
 // shadcn/ui "data-table-demo" (TanStack Table v9 + shadcn Table)
 //   https://ui.shadcn.com/docs/components/data-table · License: MIT (shadcn-ui/ui)
 //   TanStack Table: MIT (https://tanstack.com/table)
 // Kept from the example: feature declaration, columnHelper columns, useTable with
 // sorting / column filters / visibility / row selection / pagination, the select
 // column, sortable header button, per-row actions DropdownMenu, Previous/Next footer.
-// Adapted: contact columns (avatar + name + email, last contact, next visit, status),
+// Adapted: customer columns (avatar + name + email, last message, next visit, status),
 // the search box and "Everyone" Select in the site header, clicking a row opens the
 // person in a shadcn Sheet (https://ui.shadcn.com/docs/components/sheet, MIT).
-// Data: real contacts from Supabase (server/db/views.ts) with their bookings,
-// conversations and escalations; most recent contact first.
+// Data: real customers from Supabase (server/db/views.ts) with their bookings,
+// conversations and needs-you items; most recent first.
 // Status badges: Origin UI comp-420 (https://coss.com/origin, MIT), reused.
 // Avatar: shadcn Avatar (https://ui.shadcn.com/docs/components/avatar, MIT), reused.
 import * as React from "react"
@@ -45,7 +45,7 @@ import {
 } from "lucide-react"
 
 import StatusDotBadge from "@/components/comp-420"
-import { ContactDetail, statusTone, type ContactRow } from "@/components/contacts/contact-detail"
+import { CustomerDetail, statusTone, type CustomerRow } from "@/components/customers/customer-detail"
 import { SiteHeader } from "@/components/site-header"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -76,7 +76,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { avatarTint, initials } from "@/lib/avatar"
-import type { ContactView } from "@/server/db/views"
+import type { CustomerView } from "@/server/db/views"
 
 const features = tableFeatures({
   columnFilteringFeature,
@@ -97,7 +97,7 @@ const channelIcon: Record<string, LucideIcon> = {
   Sms: MessageSquareIcon,
 }
 
-const columnHelper = createColumnHelper<typeof features, ContactRow>()
+const columnHelper = createColumnHelper<typeof features, CustomerRow>()
 
 const columns = columnHelper.columns([
   columnHelper.display({
@@ -158,7 +158,7 @@ const columns = columnHelper.columns([
         className="-ml-2.5 h-8 px-2.5 text-xs font-normal text-muted-foreground"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Last contact
+        Last message
         <ArrowUpDown />
       </Button>
     ),
@@ -211,7 +211,7 @@ const columns = columnHelper.columns([
     (r) =>
       [
         r.nextVisit ? "upcoming" : "",
-        r.openEscalation ? "needs" : "",
+        r.openNeedsYou ? "needs" : "",
       ].join(" "),
     { id: "segment", filterFn: "includesString", enableHiding: true }
   ),
@@ -231,7 +231,7 @@ const columns = columnHelper.columns([
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => open?.(c.id)}>Open contact</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => open?.(c.id)}>Open customer</DropdownMenuItem>
             <DropdownMenuSeparator />
             {c.email ? (
               <DropdownMenuItem onClick={() => navigator.clipboard.writeText(c.email!)}>
@@ -251,25 +251,25 @@ const SEGMENTS = {
   needs: "Needs you",
 } as const
 
-export function ContactBook({
-  contacts,
+export function CustomerBook({
+  customers,
   initialOpen,
 }: {
-  contacts: ContactView[]
+  customers: CustomerView[]
   initialOpen?: string
 }) {
-  const total = contacts.length
-  const data = React.useMemo<ContactRow[]>(
+  const total = customers.length
+  const data = React.useMemo<CustomerRow[]>(
     () =>
-      contacts.map((c) => ({
+      customers.map((c) => ({
         ...c,
         order: new Date(c.lastContact?.at ?? c.firstSeenAt).getTime(),
         statuses: [
-          ...(c.openEscalation ? (["Open escalation"] as const) : []),
+          ...(c.openNeedsYou ? (["Needs you"] as const) : []),
           ...(c.bookedByAi ? (["Booked by AI"] as const) : []),
         ],
       })),
-    [contacts]
+    [customers]
   )
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
@@ -305,14 +305,14 @@ export function ContactBook({
         className="mb-8"
         title={
           <div className="flex items-baseline gap-3">
-            <h1 className="text-base font-semibold">Contacts</h1>
+            <h1 className="text-base font-semibold">Customers</h1>
             <span className="text-xs text-subtle">{total} people</span>
           </div>
         }
         actions={
           <div className="flex flex-wrap items-center justify-end gap-2 max-sm:w-full">
             <label className="relative max-sm:flex-1">
-              <span className="sr-only">Search contacts</span>
+              <span className="sr-only">Search customers</span>
               <SearchIcon
                 aria-hidden="true"
                 className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-subtle"
@@ -409,7 +409,7 @@ export function ContactBook({
 
       <div className="flex items-center justify-end gap-2 border-t border-border py-4">
         <div className="flex-1 text-xs text-muted-foreground">
-          {shown} of {total} {total === 1 ? "contact" : "contacts"}
+          {shown} of {total} {total === 1 ? "customer" : "customers"}
         </div>
         <Button
           variant="outline"
@@ -433,7 +433,7 @@ export function ContactBook({
 
       <Sheet open={open !== null} onOpenChange={(o) => !o && setOpenId(null)}>
         <SheetContent className="gap-0 overflow-y-auto bg-card p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-xl">
-          {open ? <ContactDetail key={open.id} c={open} /> : null}
+          {open ? <CustomerDetail key={open.id} c={open} /> : null}
         </SheetContent>
       </Sheet>
     </div>

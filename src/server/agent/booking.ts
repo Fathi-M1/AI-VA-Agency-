@@ -10,8 +10,8 @@ export const BOOKING_TOOLS: Tool[] = BOOKING_TOOL_DECLARATIONS
 export function bookingInstruction(
   b: BusinessKnowledge,
   handoff: { summary: string; name?: string },
-  /** Returning-contact memory: who they are and their past bookings, if known. */
-  contact?: {
+  /** Returning-customer memory: who they are and their past bookings, if known. */
+  customer?: {
     name: string | null
     email: string | null
     pastBookings: { service: string; slot_start: string; status: string }[]
@@ -27,11 +27,11 @@ export function bookingInstruction(
       hour: "numeric",
       minute: "2-digit",
     }).format(new Date(iso))
-  const past = contact?.pastBookings.length
-    ? contact.pastBookings.map((p) => `- ${p.service}, ${when(p.slot_start)} (${p.status})`).join("\n")
+  const past = customer?.pastBookings.length
+    ? customer.pastBookings.map((p) => `- ${p.service}, ${when(p.slot_start)} (${p.status})`).join("\n")
     : "- none on file"
-  const memory = contact
-    ? `\nKnown contact: ${contact.name ?? "name not on file"}${contact.email ? `, ${contact.email}` : ""}.\nTheir past bookings with ${b.name} (from our records; read-only, you cannot change them):\n${past}\nYou may use the name and email on file instead of asking again, but confirm them with the person first.\n`
+  const memory = customer
+    ? `\nKnown customer: ${customer.name ?? "name not on file"}${customer.email ? `, ${customer.email}` : ""}.\nTheir past bookings with ${b.name} (from our records; read-only, you cannot change them):\n${past}\nYou may use the name and email on file instead of asking again, but confirm them with the person first.\n`
     : ""
   const today = new Intl.DateTimeFormat("en-US", {
     timeZone: b.timeZone,

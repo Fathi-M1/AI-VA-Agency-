@@ -3,7 +3,7 @@
 // Row-detail panel content for the Conversations table (opens in a shadcn Sheet).
 // Built from pulled parts: shadcn Sheet (https://ui.shadcn.com/docs/components/sheet)
 // and the outcome badge (Origin UI comp-420/421).
-// Real data only: the conversation row, its contact, and its messages from Supabase.
+// Real data only: the conversation row, its customer, and its messages from Supabase.
 // ("What the AI did" and "Play recording" were removed: no real source for either.)
 import Link from "next/link"
 
@@ -13,10 +13,10 @@ import { SheetDescription, SheetFooter, SheetHeader, SheetTitle } from "@/compon
 import { eyebrow } from "@/lib/styles"
 import type { ConversationView, Outcome } from "@/server/db/views"
 
-// Colour carries meaning here only: booked = green, escalated = amber, open = neutral.
+// Colour carries meaning here only: booked = green, needs you = amber, open = neutral.
 export const outcomeTone: Record<Outcome, "accent" | "warning" | "hollow"> = {
   Booked: "accent",
-  Escalated: "warning",
+  "Needs you": "warning",
   Open: "hollow",
 }
 
@@ -59,13 +59,13 @@ export function ConversationDetail({ c }: { c: ConversationView }) {
         </section>
       </div>
 
-      {c.contactId ? (
+      {c.customerId ? (
         <SheetFooter className="flex-row items-center gap-4 border-t border-border px-7 py-5">
           <Link
-            href={`/contacts?open=${c.contactId}`}
+            href={`/customers?open=${c.customerId}`}
             className="text-sm text-muted-foreground underline underline-offset-3 hover:text-foreground"
           >
-            Open contact
+            Open customer
           </Link>
         </SheetFooter>
       ) : null}

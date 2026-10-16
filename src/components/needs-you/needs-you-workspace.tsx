@@ -1,13 +1,13 @@
 "use client"
 
-// Escalations: queue + detail in one two-pane frame.
+// Needs you: queue + detail in one two-pane frame.
 // Pulled parts (all MIT):
 // - Two-pane frame: shadcn Resizable, https://ui.shadcn.com/docs/components/resizable
 // - Toolbar: shadcn dashboard-01 site header + Tabs.
 // - Queue rows: shadcn Avatar (initials) + Origin UI comp-420 dot badge.
 // - Empty state: shadcn Empty, "empty-demo" example
 //   (https://ui.shadcn.com/r/styles/new-york-v4/empty-demo.json), Tabler → Lucide.
-// Real data only: rows from the escalations table with their contact and the
+// Real data only: rows from the needs_you_items table with their customer and the
 // conversation that led to them. Read-only: nothing here changes a row.
 // (The on-call badge, countdowns, promises, flags and resolve buttons were removed:
 // no real source for them yet.)
@@ -25,13 +25,13 @@ import { useIsMobile } from "@/hooks/use-mobile"
 import { avatarTint, initials } from "@/lib/avatar"
 import { eyebrow, raised } from "@/lib/styles"
 import { cn } from "@/lib/utils"
-import type { EscalationView } from "@/server/db/views"
+import type { NeedsYouView } from "@/server/db/views"
 
 // Colour carries meaning only: open = amber, anything else (handled) = green.
-const toneOf = (e: EscalationView) => (e.status === "open" ? "warning" : "accent")
+const toneOf = (e: NeedsYouView) => (e.status === "open" ? "warning" : "accent")
 const statusLabel = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 
-export function EscalationWorkspace({ items }: { items: EscalationView[] }) {
+export function NeedsYouWorkspace({ items }: { items: NeedsYouView[] }) {
   const isMobile = useIsMobile()
   const [view, setView] = React.useState<"open" | "resolved">("open")
   const open = items.filter((e) => e.status === "open")
@@ -45,7 +45,7 @@ export function EscalationWorkspace({ items }: { items: EscalationView[] }) {
       className="mb-6 flex-wrap"
       title={
         <div className="flex items-baseline gap-3">
-          <h1 className="text-base font-semibold">Escalations</h1>
+          <h1 className="text-base font-semibold">Needs you</h1>
           <span className="text-xs whitespace-nowrap text-subtle">
             {open.length ? `${open.length} need${open.length === 1 ? "s" : ""} you` : "All clear"}
           </span>
@@ -67,7 +67,7 @@ export function EscalationWorkspace({ items }: { items: EscalationView[] }) {
   )
 
   const queue = (
-    <section aria-label="Escalation queue" className="h-full">
+    <section aria-label="Needs you queue" className="h-full">
       <ul className="flex flex-col">
         {list.map((e) => {
           const active = selected?.id === e.id
@@ -105,8 +105,8 @@ export function EscalationWorkspace({ items }: { items: EscalationView[] }) {
   )
 
   const detail = selected ? (
-    <section aria-label="Selected escalation" className="px-6 py-6 sm:px-8">
-      <EscalationDetail e={selected} />
+    <section aria-label="Selected item" className="px-6 py-6 sm:px-8">
+      <NeedsYouDetail e={selected} />
     </section>
   ) : null
 
@@ -122,7 +122,7 @@ export function EscalationWorkspace({ items }: { items: EscalationView[] }) {
         <EmptyDescription className="text-sm">
           {view === "open"
             ? "Nothing is waiting for you. When the AI can't answer something, it shows up here."
-            : "Resolved escalations will show up here."}
+            : "Items you mark done will show up here."}
         </EmptyDescription>
       </EmptyHeader>
     </Empty>
@@ -153,7 +153,7 @@ export function EscalationWorkspace({ items }: { items: EscalationView[] }) {
   )
 }
 
-function EscalationDetail({ e }: { e: EscalationView }) {
+function NeedsYouDetail({ e }: { e: NeedsYouView }) {
   const c = e.conversation
   return (
     <div className="max-w-[760px]">
@@ -167,7 +167,7 @@ function EscalationDetail({ e }: { e: EscalationView }) {
 
       <div className={`${raised} mb-9 px-7 py-6`}>
         <dl className="grid grid-cols-[96px_1fr] gap-x-4 gap-y-2.5 text-sm">
-          <dt className="text-muted-foreground">Contact</dt>
+          <dt className="text-muted-foreground">Customer</dt>
           <dd className="font-medium">{e.who}</dd>
           <dt className="text-muted-foreground">Email</dt>
           <dd>{e.email ?? "Not on file"}</dd>
@@ -196,7 +196,7 @@ function EscalationDetail({ e }: { e: EscalationView }) {
             ))}
           </ol>
         ) : (
-          <p className="text-sm text-muted-foreground">No conversation is linked to this escalation.</p>
+          <p className="text-sm text-muted-foreground">No conversation is linked to this item.</p>
         )}
       </section>
     </div>

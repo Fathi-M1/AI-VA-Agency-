@@ -21,7 +21,7 @@ Prices are never written here. Owners add their own prices during setup.
    `sample_request`. Set `research_level` to `"starter"` until it has been checked
    with real businesses.
 3. **Edit services, questions and answers.** Change `services`, `booking_questions`,
-   `faqs`, `escalation_keywords`, `emergency_instruction` and `setup_tips`. Turn on
+   `faqs`, `emergency_keywords`, `emergency_instruction` and `setup_tips`. Turn on
    only the flags this kind of business needs.
 4. **Restart the server.** Stop `npm run dev` and start it again. The new type shows up
    in setup (before "Other service business", which always stays last).
@@ -54,7 +54,7 @@ No database change and no code change is needed.
 | `services` | Services suggested during setup: `name`, `pricing_type` (`fixed`, `by_hair_length`, `per_unit`), `duration_minutes` (per unit for `per_unit`), `variants` (times per hair length, or `null`), `typical_range` (a price hint when the owner leaves the price blank, or `null`), `default_on` (switched on at the start). |
 | `booking_questions` | Questions customers answer, in order (see below). If you leave out the `service` question, the app adds one first. |
 | `faqs` | Common questions and their answers. In `a_template`, words in `{braces}` are filled in from the owner's own setup answers. `{name|text}` means: if the owner left this empty, answer with `text` instead (for lists, `text` is also used for each item without a value). |
-| `escalation_keywords` | Words that mean an emergency. The customer sees the emergency message right away and the owner gets a "needs you" alert. |
+| `emergency_keywords` | Words that mean an emergency. The customer sees the emergency message right away and the owner gets a "needs you" alert. |
 | `emergency_instruction` | The emergency message the owner starts with (they can edit it in setup). |
 | `setup_tips` | The help text for each setup step (`step1` … `step4`). |
 | `_help` | A note for people reading the file. Not shown in the app. |

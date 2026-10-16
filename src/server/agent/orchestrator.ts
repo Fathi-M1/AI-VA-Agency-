@@ -5,26 +5,26 @@
 // agents in ./requests.ts take booking requests the owner confirms on Today).
 // Agents: Receptionist routes to Booking / Sales / Support; Sales and Support can hand
 // to Booking. Each agent only gets its own tools (capability guardrail).
-// Persisted (Supabase): conversation, every message (tagged by agent), contact,
-// bookings, escalations. In memory only: each agent's working model history.
+// Persisted (Supabase): conversation, every message (tagged by agent), customer,
+// bookings, needs-you items. In memory only: each agent's working model history.
 import { getBusinessProfile } from "../db/business-profile"
 import {
   createConversation,
-  findContactByEmail,
-  findContactByMobile,
+  findCustomerByEmail,
+  findCustomerByMobile,
   insertBookingRequest,
-  listContactRequests,
-  upsertContactByMobile,
+  listCustomerRequests,
+  upsertCustomerByMobile,
   insertBooking,
-  insertEscalation,
-  linkConversationContact,
-  listContactBookings,
+  insertNeedsYouItem,
+  linkConversationCustomer,
+  listCustomerBookings,
   loadBusiness,
   saveMessage,
   setConversationChannel,
-  upsertContact,
-  type Contact,
-  type MobileContact,
+  upsertCustomer,
+  type Customer,
+  type MobileCustomer,
 } from "../db/store"
 import { getPack, isVertical } from "../verticals"
 import { normalizeMobile } from "@/lib/format"
@@ -94,17 +94,17 @@ type Session = {
   histories: Record<AgentName, Step[]>
   handoffs: Partial<Record<Specialist, Handoff>>
   toolState: BookingToolState
-  contact: Contact | null
-  /** true when the contact already existed before this conversation */
+  customer: Customer | null
+  /** true when the customer already existed before this conversation */
   returning: boolean
-  /** a name heard before any email (contacts are matched by email) */
+  /** a name heard before any email (customers are matched by email) */
   pendingName?: string
   // requests mode only
   request: RequestDraft
-  /** consent given on the booking page (dental), stored when the contact is created */
+  /** consent given on the booking page (dental), stored when the customer is created */
   consentAt?: string | null
-  /** contact identified by a mobile number given in this conversation */
-  mobileContact?: MobileContact | null
+  /** customer identified by a mobile number given in this conversation */
+  mobileCustomer?: MobileCustomer | null
   /** client message ids already saved (a retry doesn't save the message twice) */
   savedIds: Set<string>
   /** booking page Ask panel: no booking agent; booking requests point to the form */
@@ -126,7 +126,7 @@ function session(businessId: string, id: string): Session {
       histories: { receptionist: [], booking: [], sales: [], support: [] },
       handoffs: {},
       toolState: { offered: new Map() },
-      contact: null,
+      customer: null,
       returning: false,
       request: emptyRequestDraft(),
       savedIds: new Set(),
@@ -139,22 +139,22 @@ function session(businessId: string, id: string): Session {
 const EMAIL = /[^\s@<>()"',;:]+@[^\s@<>()"',;:]+\.[a-z]{2,}/i
 const EMAIL_EXACT = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-/** Cross-channel memory: match or create the contact by email, link the conversation. */
-async function rememberContact(s: Session, c: { email: string; name?: string }) {
+/** Cross-channel memory: match or create the customer by email, link the conversation. */
+async function rememberCustomer(s: Session, c: { email: string; name?: string }) {
   const email = c.email.toLowerCase()
   const name = c.name ?? s.pendingName
-  if (s.contact?.email === email && (!name || s.contact.name === name)) return
-  if (!s.contact || s.contact.email !== email) {
-    const existing = await findContactByEmail(s.businessId, email)
-    if (existing && !s.contact) s.returning = true
+  if (s.customer?.email === email && (!name || s.customer.name === name)) return
+  if (!s.customer || s.customer.email !== email) {
+    const existing = await findCustomerByEmail(s.businessId, email)
+    if (existing && !s.customer) s.returning = true
     if (existing && (!name || existing.name === name)) {
-      s.contact = existing
-      await linkConversationContact(s.businessId, s.conversationId!, existing.id)
+      s.customer = existing
+      await linkConversationCustomer(s.businessId, s.conversationId!, existing.id)
       return
     }
   }
-  s.contact = await upsertContact(s.businessId, { email, name })
-  await linkConversationContact(s.businessId, s.conversationId!, s.contact.id)
+  s.customer = await upsertCustomer(s.businessId, { email, name })
+  await linkConversationCustomer(s.businessId, s.conversationId!, s.customer.id)
 }
 
 const result = (r: Record<string, unknown>): ToolOutcome => ({ kind: "result", result: r })
@@ -178,7 +178,7 @@ async function agentSpec(
 
   if (agent === "receptionist") {
     return {
-      instruction: receptionistInstruction(b, s.returning && s.contact ? { name: s.contact.name } : null),
+      instruction: receptionistInstruction(b, s.returning && s.customer ? { name: s.customer.name } : null),
       tools: RECEPTIONIST_TOOLS,
       execute: handoffOr(unknownTool),
     }
@@ -189,11 +189,11 @@ async function agentSpec(
   if (ctx) return requestsAgentSpec(agent, ctx, s, handoff.summary, handoffOr, unknownTool)
 
   if (agent === "booking") {
-    const memory = s.contact
+    const memory = s.customer
       ? {
-          name: s.contact.name,
-          email: s.contact.email,
-          pastBookings: await listContactBookings(s.businessId, s.contact.id),
+          name: s.customer.name,
+          email: s.customer.email,
+          pastBookings: await listCustomerBookings(s.businessId, s.customer.id),
         }
       : null
     return {
@@ -205,9 +205,9 @@ async function agentSpec(
             business: b,
             state: s.toolState,
             onBooked: async (bk) => {
-              await rememberContact(s, { email: bk.email, name: bk.name })
+              await rememberCustomer(s, { email: bk.email, name: bk.name })
               await insertBooking(s.businessId, {
-                contactId: s.contact!.id,
+                customerId: s.customer!.id,
                 conversationId: s.conversationId!,
                 service: bk.service,
                 slotStart: bk.start,
@@ -223,16 +223,16 @@ async function agentSpec(
 
   if (agent === "sales") {
     return {
-      instruction: salesInstruction(b, handoff, s.contact),
+      instruction: salesInstruction(b, handoff, s.customer),
       tools: SALES_TOOLS,
       execute: handoffOr(async (name, args) => {
-        if (name !== "capture_contact") return unknownTool()
+        if (name !== "capture_customer") return unknownTool()
         const email = String(args.email ?? "").trim()
         const contactName = String(args.name ?? "").trim()
         if (!EMAIL_EXACT.test(email)) return result({ ok: false, error: "invalid_email" })
         if (!contactName) return result({ ok: false, error: "missing_name" })
-        await rememberContact(s, { email, name: contactName })
-        return result({ ok: true, saved: { name: s.contact!.name, email: s.contact!.email } })
+        await rememberCustomer(s, { email, name: contactName })
+        return result({ ok: true, saved: { name: s.customer!.name, email: s.customer!.email } })
       }),
     }
   }
@@ -243,16 +243,16 @@ async function agentSpec(
     tools: SUPPORT_TOOLS,
     execute: handoffOr(async (name, args) => {
       if (name === "get_my_record") {
-        if (!s.contact) {
+        if (!s.customer) {
           return result({ ok: false, identified: false, message: "Ask for the email address they booked with." })
         }
-        const bookings = await listContactBookings(s.businessId, s.contact.id)
+        const bookings = await listCustomerBookings(s.businessId, s.customer.id)
         const now = Date.now()
         return result({
           ok: true,
           identified: true,
-          name: s.contact.name,
-          email: s.contact.email,
+          name: s.customer.name,
+          email: s.customer.email,
           bookings: bookings.map((bk) => ({
             service: bk.service,
             when: whenText(b, bk.slot_start),
@@ -261,15 +261,15 @@ async function agentSpec(
           })),
         })
       }
-      if (name === "create_escalation") {
+      if (name === "create_needs_you_item") {
         const reason = String(args.reason ?? "").trim()
         if (!reason) return result({ ok: false, error: "missing_reason" })
-        const id = await insertEscalation(s.businessId, {
-          contactId: s.contact?.id ?? null,
+        const id = await insertNeedsYouItem(s.businessId, {
+          customerId: s.customer?.id ?? null,
           conversationId: s.conversationId!,
           reason,
         })
-        return result({ ok: true, escalationId: id })
+        return result({ ok: true, needsYouItemId: id })
       }
       return unknownTool()
     }),
@@ -318,10 +318,10 @@ async function runActive(
     const summary = String(turn.payload.summary ?? message)
     const name = turn.payload.name ? String(turn.payload.name) : undefined
     if (name) {
-      if (s.contact?.email) await rememberContact(s, { email: s.contact.email, name })
+      if (s.customer?.email) await rememberCustomer(s, { email: s.customer.email, name })
       else s.pendingName = name
     }
-    s.handoffs[to] = { summary, name: name ?? s.contact?.name ?? undefined }
+    s.handoffs[to] = { summary, name: name ?? s.customer?.name ?? undefined }
     s.active = to
     events.push({ kind: "handoff", from: agent, to, text: HANDOFF_LINES[to], summary })
     s.histories[to].push(userInput(message))
@@ -351,7 +351,7 @@ async function businessContext(businessId: string) {
   const business = ctx ? ctx.knowledge : await loadBusiness(businessId)
   const keywords = ctx
     ? business.emergencyKeywords
-    : [...new Set([...business.emergencyKeywords, ...(isVertical(profile.vertical) ? getPack(profile.vertical).escalation_keywords : [])])]
+    : [...new Set([...business.emergencyKeywords, ...(isVertical(profile.vertical) ? getPack(profile.vertical).emergency_keywords : [])])]
   const emergencyLine = profile.config.emergency_instruction ?? business.emergencyLine
   return { profile, ctx, business, keywords, emergencyLine }
 }
@@ -390,19 +390,19 @@ export async function safetyCheck(businessId: string, sessionId: string, channel
     { role: "user", agent: null, content: text },
     { role: "agent", agent: null, content: emergencyLine },
   ])
-  await insertEscalation(businessId, {
-    contactId: s.contact?.id ?? s.mobileContact?.id ?? null,
+  await insertNeedsYouItem(businessId, {
+    customerId: s.customer?.id ?? s.mobileCustomer?.id ?? null,
     conversationId,
     reason: `Emergency words: ${matched}`,
   })
   return emergencyLine
 }
 
-/** Links a contact to the visit's conversation (after the booking form is sent). */
-export async function linkVisitContact(businessId: string, sessionId: string, contact: MobileContact) {
+/** Links a customer to the visit's conversation (after the booking form is sent). */
+export async function linkVisitCustomer(businessId: string, sessionId: string, customer: MobileCustomer) {
   const s = session(businessId, sessionId)
-  s.mobileContact = contact
-  if (s.conversationId) await linkConversationContact(businessId, s.conversationId, contact.id)
+  s.mobileCustomer = customer
+  if (s.conversationId) await linkConversationCustomer(businessId, s.conversationId, customer.id)
 }
 
 const MOBILE_IN_TEXT = /(\+639\d{9}|09\d{9})/
@@ -453,8 +453,8 @@ export async function handleMessage(
   if (matched) {
     events.push({ kind: "emergency", text: emergencyLine })
     await persistReplies(s, events)
-    await insertEscalation(businessId, {
-      contactId: s.contact?.id ?? s.mobileContact?.id ?? null,
+    await insertNeedsYouItem(businessId, {
+      customerId: s.customer?.id ?? s.mobileCustomer?.id ?? null,
       conversationId: s.conversationId,
       reason: `Emergency words: ${matched}`,
     })
@@ -464,17 +464,17 @@ export async function handleMessage(
   if (ctx) {
     // A mobile number in the message identifies a returning customer (match only).
     const mobile = normalizeMobile(message.match(MOBILE_IN_TEXT)?.[0] ?? "")
-    if (mobile && s.mobileContact?.mobile !== mobile) {
-      const found = await findContactByMobile(businessId, mobile)
+    if (mobile && s.mobileCustomer?.mobile !== mobile) {
+      const found = await findCustomerByMobile(businessId, mobile)
       if (found) {
-        s.mobileContact = found
-        await linkConversationContact(businessId, s.conversationId, found.id)
+        s.mobileCustomer = found
+        await linkConversationCustomer(businessId, s.conversationId, found.id)
       }
     }
   } else {
     // An email in the message identifies the person (match existing, else create).
     const email = message.match(EMAIL)?.[0]
-    if (email) await rememberContact(s, { email })
+    if (email) await rememberCustomer(s, { email })
   }
 
   // If the model call fails, roll the working histories back so a retry starts clean.
@@ -506,15 +506,15 @@ async function requestsAgentSpec(
   unknownTool: () => Promise<ToolOutcome>
 ) {
   const businessId = ctx.profile.id
-  const escalate = async (args: Record<string, unknown>) => {
+  const createNeedsYouItem = async (args: Record<string, unknown>) => {
     const reason = String(args.reason ?? "").trim()
     if (!reason) return result({ ok: false, error: "missing_reason" })
-    const id = await insertEscalation(businessId, {
-      contactId: s.mobileContact?.id ?? null,
+    const id = await insertNeedsYouItem(businessId, {
+      customerId: s.mobileCustomer?.id ?? null,
       conversationId: s.conversationId!,
       reason,
     })
-    return result({ ok: true, escalationId: id })
+    return result({ ok: true, needsYouItemId: id })
   }
 
   if (agent === "booking") {
@@ -524,15 +524,15 @@ async function requestsAgentSpec(
       execute: async (name: string, args: Record<string, unknown>) =>
         result(
           await executeRequestTool(name, args, ctx, s.request, {
-            onRequest: async ({ name: customer, mobile, preferredTime }) => {
-              const contact = await upsertContactByMobile(businessId, { mobile, name: customer, consentAt: s.consentAt })
-              s.mobileContact = contact
-              await linkConversationContact(businessId, s.conversationId!, contact.id)
+            onRequest: async ({ name: customerName, mobile, preferredTime }) => {
+              const customer = await upsertCustomerByMobile(businessId, { mobile, name: customerName, consentAt: s.consentAt })
+              s.mobileCustomer = customer
+              await linkConversationCustomer(businessId, s.conversationId!, customer.id)
               const staffQ = ctx.pack.booking_questions.find((q) => q.options?.includes("$STAFF"))
               const staffName = staffQ ? s.request.answers[staffQ.id] : undefined
               const staff = ctx.profile.staff.find((m) => m.active && m.name === staffName)
               await insertBookingRequest(businessId, {
-                contactId: contact.id,
+                customerId: customer.id,
                 conversationId: s.conversationId!,
                 service: s.request.answers.service,
                 staffId: staff?.id ?? null,
@@ -550,7 +550,7 @@ async function requestsAgentSpec(
     return {
       instruction: salesRequestsInstruction(ctx, summary),
       tools: SALES_REQUESTS_TOOLS,
-      execute: handoffOr(async (name, args) => (name === "create_escalation" ? escalate(args) : unknownTool())),
+      execute: handoffOr(async (name, args) => (name === "create_needs_you_item" ? createNeedsYouItem(args) : unknownTool())),
     }
   }
 
@@ -558,16 +558,16 @@ async function requestsAgentSpec(
     instruction: supportRequestsInstruction(ctx, summary),
     tools: SUPPORT_REQUESTS_TOOLS,
     execute: handoffOr(async (name, args) => {
-      if (name === "create_escalation") return escalate(args)
+      if (name === "create_needs_you_item") return createNeedsYouItem(args)
       if (name === "get_my_record") {
-        if (!s.mobileContact) {
+        if (!s.mobileCustomer) {
           return result({ ok: false, identified: false, message: "Ask for the mobile number they used." })
         }
-        const rows = await listContactRequests(businessId, s.mobileContact.id)
+        const rows = await listCustomerRequests(businessId, s.mobileCustomer.id)
         return result({
           ok: true,
           identified: true,
-          name: s.mobileContact.name,
+          name: s.mobileCustomer.name,
           items: rows.map((r) => ({
             service: r.service,
             status: r.status,

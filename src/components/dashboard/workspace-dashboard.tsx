@@ -130,7 +130,7 @@ export function NeedsYouCard({ week }: { week: WeekSummary }) {
         subtitle={`${week.autoResolved} resolved automatically this week`}
         action={
           n ? (
-            <PillButton href="/escalations" variant="primary">
+            <PillButton href="/needs-you" variant="primary">
               Review <ChevronRightIcon aria-hidden="true" />
             </PillButton>
           ) : null
@@ -141,14 +141,14 @@ export function NeedsYouCard({ week }: { week: WeekSummary }) {
           <GlassTile>
             <CircleCheckIcon />
           </GlassTile>
-          <p className="text-sm text-muted-foreground">You&apos;re all caught up. Escalations show up here the moment the AI needs you.</p>
+          <p className="text-sm text-muted-foreground">You&apos;re all caught up. Items show up here the moment the AI needs you.</p>
         </div>
       ) : (
         <ul className="mt-6 mb-6 flex flex-col gap-2">
           {week.needsYou.map((item) => (
             <li key={item.id}>
               <Link
-                href="/escalations"
+                href="/needs-you"
                 className="group flex items-center gap-4 rounded-xl border border-transparent p-3 transition hover:border-[color-mix(in_oklch,var(--warning)_35%,transparent)] hover:bg-[color-mix(in_oklch,var(--warning)_7%,var(--background))]"
               >
                 <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_oklch,var(--warning)_18%,var(--background))] text-[oklch(0.45_0.12_60)] ring-1 ring-[color-mix(in_oklch,var(--warning)_35%,transparent)]">
@@ -168,7 +168,7 @@ export function NeedsYouCard({ week }: { week: WeekSummary }) {
         </ul>
       )}
       <p className="mt-auto border-t border-border/70 pt-4 text-xs text-subtle">
-        Escalations are requests your AI team isn&apos;t allowed to handle alone, such as refunds, disputes and anything
+        These are requests your AI team isn&apos;t allowed to handle alone, such as refunds, disputes and anything
         outside your rules.
       </p>
     </GlassCard>

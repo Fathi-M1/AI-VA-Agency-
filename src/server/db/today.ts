@@ -54,7 +54,7 @@ export const todaysAppointments = cache(async (businessId: string): Promise<Appo
   const { day, profile } = await todayBase(businessId)
   const { data, error } = await db()
     .from("bookings")
-    .select("id, service, slot_start, staff_id, contacts(name, email)")
+    .select("id, service, slot_start, staff_id, customers(name, email)")
     .eq("business_id", businessId)
     .in("status", CONFIRMED)
     .gte("slot_start", day.start)
@@ -62,7 +62,7 @@ export const todaysAppointments = cache(async (businessId: string): Promise<Appo
     .order("slot_start")
   if (error) fail("list today's appointments", error)
   return (data ?? []).map((b) => {
-    const c = b.contacts as unknown as { name: string | null; email: string | null } | null
+    const c = b.customers as unknown as { name: string | null; email: string | null } | null
     return {
       id: b.id,
       start: b.slot_start as string,
@@ -106,13 +106,13 @@ export const needsYou = cache(async (businessId: string) => {
     db()
       .from("bookings")
       // "*" so this works whichever migrations have run (missing columns read as undefined).
-      .select("*, contacts(name)")
+      .select("*, customers(name)")
       .eq("business_id", businessId)
       .eq("status", "requested")
       .order("created_at", { ascending: false }),
     db()
-      .from("escalations")
-      .select("id, created_at, reason, conversation_id, contacts(name, email)")
+      .from("needs_you_items")
+      .select("id, created_at, reason, conversation_id, customers(name, email)")
       .eq("business_id", businessId)
       .eq("status", "open")
       .order("created_at", { ascending: false }),
@@ -121,7 +121,7 @@ export const needsYou = cache(async (businessId: string) => {
   if (escs.error) fail("list open items", escs.error)
   const requests: BookingRequest[] = (reqs.data ?? []).map((r) => {
     const d = (r.details ?? {}) as { summary?: string; estimate?: BookingRequest["estimate"] }
-    const c = r.contacts as unknown as { name: string | null } | null
+    const c = r.customers as unknown as { name: string | null } | null
     return {
       id: r.id,
       createdAt: r.created_at,
@@ -141,7 +141,7 @@ export const needsYou = cache(async (businessId: string) => {
     }
   })
   const items: OpenItem[] = (escs.data ?? []).map((e) => {
-    const c = e.contacts as unknown as { name: string | null; email: string | null } | null
+    const c = e.customers as unknown as { name: string | null; email: string | null } | null
     return {
       id: e.id,
       createdAt: e.created_at,
@@ -160,17 +160,17 @@ export type Handled = { id: string; customer: string; outcome: string; at: strin
 type ConvRow = {
   id: string
   started_at: string
-  contacts: { name: string | null; email: string | null } | null
+  customers: { name: string | null; email: string | null } | null
   messages: { role: string; agent: string | null }[]
   bookings: { status: string; requested_time_text: string | null }[]
-  escalations: { reason: string }[]
+  needs_you_items: { reason: string }[]
 }
 
 function outcomeOf(c: ConvRow) {
-  if (c.escalations.some((e) => e.reason.startsWith("Emergency words"))) return "Emergency message shown"
+  if (c.needs_you_items.some((e) => e.reason.startsWith("Emergency words"))) return "Emergency message shown"
   if (c.bookings.some((b) => b.requested_time_text !== null)) return "Sent a booking request"
   if (c.bookings.length) return "Booked an appointment"
-  if (c.escalations.length) return "Asked something the team needs to answer"
+  if (c.needs_you_items.length) return "Asked something the team needs to answer"
   const agents = new Set(c.messages.map((m) => m.agent).filter(Boolean))
   if (agents.has("sales")) return "Asked about prices and services"
   if (agents.has("support")) return "Asked a question"
@@ -183,7 +183,7 @@ export const handledSince = cache(async (businessId: string) => {
   const { data, error, count } = await db()
     .from("conversations")
     .select(
-      "id, started_at, contacts(name, email), messages(role, agent), bookings(status, requested_time_text), escalations(reason)",
+      "id, started_at, customers(name, email), messages(role, agent), bookings(status, requested_time_text), needs_you_items(reason)",
       { count: "exact" }
     )
     .eq("business_id", businessId)
@@ -197,7 +197,7 @@ export const handledSince = cache(async (businessId: string) => {
     recent: rows.map(
       (c): Handled => ({
         id: c.id,
-        customer: c.contacts?.name ?? c.contacts?.email ?? "New customer",
+        customer: c.customers?.name ?? c.customers?.email ?? "New customer",
         outcome: outcomeOf(c),
         at: c.started_at,
       })

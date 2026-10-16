@@ -44,14 +44,14 @@ export async function createConversation(businessId: string, channel: string): P
   return data.id
 }
 
-export async function linkConversationContact(
+export async function linkConversationCustomer(
   businessId: string,
   conversationId: string,
-  contactId: string
+  customerId: string
 ) {
   const { error } = await db()
     .from("conversations")
-    .update({ contact_id: contactId })
+    .update({ customer_id: customerId })
     .eq("business_id", businessId)
     .eq("id", conversationId)
   if (error) fail("link conversation", error)
@@ -78,34 +78,34 @@ export async function saveMessage(
   if (error) fail("save message", error)
 }
 
-/* ---------------------------------------------------------------- contacts */
+/* ---------------------------------------------------------------- customers */
 
-export type Contact = { id: string; name: string | null; email: string | null }
+export type Customer = { id: string; name: string | null; email: string | null }
 
-export async function findContactByEmail(businessId: string, email: string): Promise<Contact | null> {
+export async function findCustomerByEmail(businessId: string, email: string): Promise<Customer | null> {
   const { data, error } = await db()
-    .from("contacts")
+    .from("customers")
     .select("id, name, email")
     .eq("business_id", businessId)
     .eq("email", email.toLowerCase())
     .maybeSingle()
-  if (error) fail("find contact", error)
+  if (error) fail("find customer", error)
   return data
 }
 
-/** Insert or update the contact matched by email within this business (never duplicates). */
-export async function upsertContact(
+/** Insert or update the customer matched by email within this business (never duplicates). */
+export async function upsertCustomer(
   businessId: string,
   c: { email: string; name?: string }
-): Promise<Contact> {
+): Promise<Customer> {
   const row: Record<string, string> = { business_id: businessId, email: c.email.toLowerCase() }
   if (c.name) row.name = c.name // only overwrite the name when we actually have one
   const { data, error } = await db()
-    .from("contacts")
+    .from("customers")
     .upsert(row, { onConflict: "business_id,email" })
     .select("id, name, email")
     .single()
-  if (error || !data) fail("upsert contact", error)
+  if (error || !data) fail("upsert customer", error)
   return data
 }
 
@@ -113,15 +113,15 @@ export async function upsertContact(
 
 export type PastBooking = { service: string; slot_start: string; status: string }
 
-export async function listContactBookings(
+export async function listCustomerBookings(
   businessId: string,
-  contactId: string
+  customerId: string
 ): Promise<PastBooking[]> {
   const { data, error } = await db()
     .from("bookings")
     .select("service, slot_start, status")
     .eq("business_id", businessId)
-    .eq("contact_id", contactId)
+    .eq("customer_id", customerId)
     .order("slot_start", { ascending: false })
     .limit(10)
   if (error) fail("list bookings", error)
@@ -131,7 +131,7 @@ export async function listContactBookings(
 export async function insertBooking(
   businessId: string,
   b: {
-    contactId: string
+    customerId: string
     conversationId: string
     service: string
     slotStart: string
@@ -142,7 +142,7 @@ export async function insertBooking(
 ) {
   const { error } = await db().from("bookings").insert({
     business_id: businessId,
-    contact_id: b.contactId,
+    customer_id: b.customerId,
     conversation_id: b.conversationId,
     service: b.service,
     slot_start: b.slotStart,
@@ -153,24 +153,24 @@ export async function insertBooking(
   if (error) fail("insert booking", error)
 }
 
-/* ---------------------------------------------------------------- escalations */
+/* ---------------------------------------------------------------- needs-you items */
 
-export async function insertEscalation(
+export async function insertNeedsYouItem(
   businessId: string,
-  e: { contactId: string | null; conversationId: string; reason: string }
+  e: { customerId: string | null; conversationId: string; reason: string }
 ): Promise<string> {
   const { data, error } = await db()
-    .from("escalations")
+    .from("needs_you_items")
     .insert({
       business_id: businessId,
-      contact_id: e.contactId,
+      customer_id: e.customerId,
       conversation_id: e.conversationId,
       reason: e.reason,
       status: "open",
     })
     .select("id")
     .single()
-  if (error || !data) fail("insert escalation", error)
+  if (error || !data) fail("insert needs-you item", error)
   return data.id
 }
 
@@ -185,53 +185,53 @@ export async function setConversationChannel(businessId: string, conversationId:
 }
 
 /* ---------------------------------------------------------------- booking requests */
-// Businesses in "requests" mode (set up through /setup): contacts are matched by mobile
+// Businesses in "requests" mode (set up through /setup): customers are matched by mobile
 // (09XXXXXXXXX), and the Booking agent writes requests the owner confirms on Today.
 
-export type MobileContact = { id: string; name: string | null; mobile: string | null }
+export type MobileCustomer = { id: string; name: string | null; mobile: string | null }
 
-export async function findContactByMobile(businessId: string, mobile: string): Promise<MobileContact | null> {
+export async function findCustomerByMobile(businessId: string, mobile: string): Promise<MobileCustomer | null> {
   const { data, error } = await db()
-    .from("contacts")
+    .from("customers")
     .select("id, name, mobile")
     .eq("business_id", businessId)
     .eq("mobile", mobile)
     .maybeSingle()
-  if (error) fail("find contact by mobile", error)
+  if (error) fail("find customer by mobile", error)
   return data
 }
 
-/** Insert or update the contact with this mobile within the business (never duplicates).
- *  consent_at is only set when the contact is created. */
-export async function upsertContactByMobile(
+/** Insert or update the customer with this mobile within the business (never duplicates).
+ *  consent_at is only set when the customer is created. */
+export async function upsertCustomerByMobile(
   businessId: string,
   c: { mobile: string; name: string; consentAt?: string | null }
-): Promise<MobileContact> {
-  const existing = await findContactByMobile(businessId, c.mobile)
+): Promise<MobileCustomer> {
+  const existing = await findCustomerByMobile(businessId, c.mobile)
   if (existing) {
     const { data, error } = await db()
-      .from("contacts")
+      .from("customers")
       .update({ name: c.name })
       .eq("business_id", businessId)
       .eq("id", existing.id)
       .select("id, name, mobile")
       .single()
-    if (error || !data) fail("update contact", error)
+    if (error || !data) fail("update customer", error)
     return data
   }
   const { data, error } = await db()
-    .from("contacts")
+    .from("customers")
     .insert({ business_id: businessId, mobile: c.mobile, phone: c.mobile, name: c.name, consent_at: c.consentAt ?? null })
     .select("id, name, mobile")
     .single()
-  if (error || !data) fail("create contact", error)
+  if (error || !data) fail("create customer", error)
   return data
 }
 
 export async function insertBookingRequest(
   businessId: string,
   r: {
-    contactId: string
+    customerId: string
     conversationId: string
     service: string
     staffId: string | null
@@ -244,7 +244,7 @@ export async function insertBookingRequest(
     .from("bookings")
     .insert({
       business_id: businessId,
-      contact_id: r.contactId,
+      customer_id: r.customerId,
       conversation_id: r.conversationId,
       service: r.service,
       staff_id: r.staffId,
@@ -259,13 +259,13 @@ export async function insertBookingRequest(
   return data.id
 }
 
-/** A contact's own requests and bookings (Support, after they've given their mobile). */
-export async function listContactRequests(businessId: string, contactId: string) {
+/** A customer's own requests and bookings (Support, after they've given their mobile). */
+export async function listCustomerRequests(businessId: string, customerId: string) {
   const { data, error } = await db()
     .from("bookings")
     .select("service, status, slot_start, requested_time_text, created_at")
     .eq("business_id", businessId)
-    .eq("contact_id", contactId)
+    .eq("customer_id", customerId)
     .order("created_at", { ascending: false })
     .limit(10)
   if (error) fail("list requests", error)

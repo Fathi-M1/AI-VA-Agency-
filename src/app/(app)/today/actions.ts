@@ -27,7 +27,7 @@ export async function confirmRequest(input: {
 
   const { data: booking, error } = await db()
     .from("bookings")
-    .select("*, contacts(name)")
+    .select("*, customers(name)")
     .eq("business_id", businessId)
     .eq("id", input.bookingId)
     .maybeSingle()
@@ -75,7 +75,7 @@ export async function confirmRequest(input: {
     .eq("status", "requested")
   if (upErr) return { ok: false, error: "We couldn't save. Check your connection and tap Try again." }
 
-  const name = (booking.contacts as unknown as { name: string | null } | null)?.name ?? "there"
+  const name = (booking.customers as unknown as { name: string | null } | null)?.name ?? "there"
   const dateLabel = new Intl.DateTimeFormat("en-US", { timeZone: tz, weekday: "short", month: "short", day: "numeric" }).format(start)
   const timeLabel = time12(input.time)
   // Form requests have a ticket page the customer can check; include its link.
@@ -108,6 +108,6 @@ export async function declineRequest(input: { bookingId: string; reason: string;
 /** "Mark as done" on a needs-you item. */
 export async function resolveItem(id: string) {
   const businessId = await getCurrentBusinessId()
-  const { error } = await db().from("escalations").update({ status: "resolved" }).eq("business_id", businessId).eq("id", id)
+  const { error } = await db().from("needs_you_items").update({ status: "resolved" }).eq("business_id", businessId).eq("id", id)
   return { ok: !error }
 }

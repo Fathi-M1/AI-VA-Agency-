@@ -1,7 +1,7 @@
 "use server"
 
 // "Send request" on the booking page: deterministic, no model. Checks everything again,
-// runs the safety net on the customer's text answers, upserts the contact by mobile,
+// runs the safety net on the customer's text answers, upserts the customer by mobile,
 // and creates the booking request with a reference code, then returns the code for
 // the ticket page.
 import {
@@ -14,10 +14,10 @@ import {
   type TimeOfDay,
 } from "@/lib/booking-engine"
 import { normalizeMobile } from "@/lib/format"
-import { linkVisitContact, logToConversation, safetyCheck } from "@/server/agent/orchestrator"
+import { linkVisitCustomer, logToConversation, safetyCheck } from "@/server/agent/orchestrator"
 import { loadStorefront } from "@/server/booking-page"
 import { db } from "@/server/db/client"
-import { upsertContactByMobile } from "@/server/db/store"
+import { upsertCustomerByMobile } from "@/server/db/store"
 
 export type SubmitInput = {
   sessionId: string
@@ -95,23 +95,23 @@ export async function submitRequest(slug: string, input: SubmitInput): Promise<S
   const summary = shortDetails(spec, fill.answers, staffName)
 
   try {
-    const contact = await upsertContactByMobile(business.id, {
+    const customer = await upsertCustomerByMobile(business.id, {
       mobile: mobile!,
       name,
       consentAt: pack.requires_consent ? new Date().toISOString() : null,
     })
     if (email) {
-      // Optional email: saved unless another contact of this business already uses it.
-      await db().from("contacts").update({ email }).eq("business_id", business.id).eq("id", contact.id).is("email", null)
+      // Optional email: saved unless another customer of this business already uses it.
+      await db().from("customers").update({ email }).eq("business_id", business.id).eq("id", customer.id).is("email", null)
     }
     const conversationId = await logToConversation(business.id, sessionId, "web", [
       { role: "agent", agent: "booking", content: `Booking request sent from the form: ${summary} · ${day.long} · ${TOD_LABEL[tod]}.` },
     ])
-    await linkVisitContact(business.id, sessionId, contact)
+    await linkVisitCustomer(business.id, sessionId, customer)
 
     const row = {
       business_id: business.id,
-      contact_id: contact.id,
+      customer_id: customer.id,
       conversation_id: conversationId,
       service: fill.answers.service,
       staff_id: staffId,

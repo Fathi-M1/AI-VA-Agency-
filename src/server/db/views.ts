@@ -9,7 +9,7 @@ import { db } from "./client"
 /* ---------------------------------------------------------------- shared */
 
 export type AgentTag = "receptionist" | "booking" | "sales" | "support"
-export type Outcome = "Booked" | "Escalated" | "Open"
+export type Outcome = "Booked" | "Needs you" | "Open"
 
 const AGENT_LABEL: Record<AgentTag, string> = {
   receptionist: "Receptionist",
@@ -73,9 +73,9 @@ export type TranscriptLine = { who: string; role: "user" | "agent"; at: string; 
 
 export type ConversationView = {
   id: string
-  contactId: string | null
-  customer: string // contact name, or "Unknown contact"
-  customerNote: string // contact email, or "No email given"
+  customerId: string | null
+  customer: string // customer name, or "Unknown customer"
+  customerNote: string // customer email, or "No email given"
   when: string
   startedAt: string
   channel: string
@@ -90,14 +90,14 @@ export type ConversationView = {
 
 type ConversationRow = {
   id: string
-  contact_id: string | null
+  customer_id: string | null
   channel: string
   status: string
   started_at: string
-  contacts: { name: string | null; email: string | null } | null
+  customers: { name: string | null; email: string | null } | null
   messages: { role: "user" | "agent"; agent: AgentTag | null; content: string; created_at: string }[]
   bookings: { id: string; status: string }[]
-  escalations: { id: string }[]
+  needs_you_items: { id: string }[]
 }
 
 /** Booking requests that are still open or were declined aren't bookings. */
@@ -107,17 +107,17 @@ const isBooked = (b: { status: string }) => !NOT_BOOKED.includes(b.status)
 function toConversationView(timeZone: string, c: ConversationRow): ConversationView {
   const msgs = [...c.messages].sort((a, b) => a.created_at.localeCompare(b.created_at))
   const agents = [...new Set(msgs.map((m) => m.agent).filter((a): a is AgentTag => !!a))].map((a) => AGENT_LABEL[a])
-  const name = c.contacts?.name ?? null
+  const name = c.customers?.name ?? null
   return {
     id: c.id,
-    contactId: c.contact_id,
-    customer: name ?? c.contacts?.email ?? "Unknown contact",
-    customerNote: c.contacts?.email ?? "No email given",
+    customerId: c.customer_id,
+    customer: name ?? c.customers?.email ?? "Unknown customer",
+    customerNote: c.customers?.email ?? "No email given",
     when: whenLabel(timeZone, c.started_at),
     startedAt: c.started_at,
     channel: capitalize(c.channel),
     agents,
-    outcome: c.bookings.some(isBooked) ? "Booked" : c.escalations.length ? "Escalated" : "Open",
+    outcome: c.bookings.some(isBooked) ? "Booked" : c.needs_you_items.length ? "Needs you" : "Open",
     status: c.status,
     messageCount: msgs.length,
     rawMessages: msgs.map((m) => ({ role: m.role, created_at: m.created_at })),
@@ -131,7 +131,7 @@ function toConversationView(timeZone: string, c: ConversationRow): ConversationV
 }
 
 const CONVERSATION_SELECT =
-  "id, contact_id, channel, status, started_at, contacts(name, email), messages(role, agent, content, created_at), bookings(id, status), escalations(id)"
+  "id, customer_id, channel, status, started_at, customers(name, email), messages(role, agent, content, created_at), bookings(id, status), needs_you_items(id)"
 
 export async function listConversations(businessId: string): Promise<ConversationView[]> {
   const { timeZone } = await businessTimeZone(businessId)
@@ -144,9 +144,9 @@ export async function listConversations(businessId: string): Promise<Conversatio
   return (data as unknown as ConversationRow[]).map((c) => toConversationView(timeZone, c))
 }
 
-/* ---------------------------------------------------------------- contacts */
+/* ---------------------------------------------------------------- customers */
 
-export type ContactView = {
+export type CustomerView = {
   id: string
   name: string // name, or the email when no name is on file
   email: string | null
@@ -155,20 +155,20 @@ export type ContactView = {
   firstSeenAt: string
   lastContact: { channel: string; when: string; at: string } | null
   nextVisit: string | null
-  openEscalation: boolean
+  openNeedsYou: boolean
   bookedByAi: boolean
   bookings: { id: string; service: string; when: string; status: string; upcoming: boolean }[]
   conversations: { id: string; when: string; channel: string; agents: string[]; messageCount: number; firstMessage: string | null }[]
 }
 
-type ContactRow = {
+type CustomerRow = {
   id: string
   name: string | null
   email: string | null
   phone: string | null
   created_at: string
   bookings: { id: string; service: string; slot_start: string | null; status: string }[]
-  escalations: { status: string }[]
+  needs_you_items: { status: string }[]
   conversations: {
     id: string
     channel: string
@@ -177,17 +177,17 @@ type ContactRow = {
   }[]
 }
 
-export async function listContacts(businessId: string): Promise<ContactView[]> {
+export async function listCustomers(businessId: string): Promise<CustomerView[]> {
   const { timeZone } = await businessTimeZone(businessId)
   const { data, error } = await db()
-    .from("contacts")
+    .from("customers")
     .select(
-      "id, name, email, phone, created_at, bookings(id, service, slot_start, status), escalations(status), conversations(id, channel, started_at, messages(role, agent, content, created_at))"
+      "id, name, email, phone, created_at, bookings(id, service, slot_start, status), needs_you_items(status), conversations(id, channel, started_at, messages(role, agent, content, created_at))"
     )
     .eq("business_id", businessId)
-  if (error || !data) fail("list contacts", error)
+  if (error || !data) fail("list customers", error)
   const now = Date.now()
-  const views = (data as unknown as ContactRow[]).map((c): ContactView => {
+  const views = (data as unknown as CustomerRow[]).map((c): CustomerView => {
     const convs = [...c.conversations].sort((a, b) => b.started_at.localeCompare(a.started_at))
     const lastMsgAt = convs
       .flatMap((cv) => cv.messages.map((m) => m.created_at))
@@ -199,7 +199,7 @@ export async function listContacts(businessId: string): Promise<ContactView[]> {
       .sort((a, b) => a.slot_start.localeCompare(b.slot_start))[0]
     return {
       id: c.id,
-      name: c.name ?? c.email ?? "Unknown contact",
+      name: c.name ?? c.email ?? "Unknown customer",
       email: c.email,
       phone: c.phone,
       firstSeen: fmt(timeZone, c.created_at, { month: "short", day: "numeric", year: "numeric" }),
@@ -212,7 +212,7 @@ export async function listContacts(businessId: string): Promise<ContactView[]> {
           }
         : null,
       nextVisit: upcoming ? `${whenLabel(timeZone, upcoming.slot_start)} · ${upcoming.service}` : null,
-      openEscalation: c.escalations.some((e) => e.status === "open"),
+      openNeedsYou: c.needs_you_items.some((e) => e.status === "open"),
       bookedByAi: c.bookings.some(isBooked), // only the Booking agent writes bookings
       bookings: bookings.map((b) => ({
         id: b.id,
@@ -234,13 +234,13 @@ export async function listContacts(businessId: string): Promise<ContactView[]> {
       }),
     }
   })
-  // Most recent contact first.
+  // Most recently active first.
   return views.sort((a, b) => (b.lastContact?.at ?? b.firstSeenAt).localeCompare(a.lastContact?.at ?? a.firstSeenAt))
 }
 
-/* ---------------------------------------------------------------- escalations */
+/* ---------------------------------------------------------------- needs-you items */
 
-export type EscalationView = {
+export type NeedsYouView = {
   id: string
   reason: string
   status: string
@@ -251,42 +251,42 @@ export type EscalationView = {
   conversation: ConversationView | null
 }
 
-type EscalationRow = {
+type NeedsYouRow = {
   id: string
   reason: string
   status: string
   created_at: string
-  contacts: { name: string | null; email: string | null } | null
+  customers: { name: string | null; email: string | null } | null
   conversations: ConversationRow | null
 }
 
-export async function listEscalations(businessId: string): Promise<EscalationView[]> {
+export async function listNeedsYouItems(businessId: string): Promise<NeedsYouView[]> {
   const { timeZone } = await businessTimeZone(businessId)
   const { data, error } = await db()
-    .from("escalations")
-    .select(`id, reason, status, created_at, contacts(name, email), conversations(${CONVERSATION_SELECT})`)
+    .from("needs_you_items")
+    .select(`id, reason, status, created_at, customers(name, email), conversations(${CONVERSATION_SELECT})`)
     .eq("business_id", businessId)
     .order("created_at", { ascending: false })
-  if (error || !data) fail("list escalations", error)
-  return (data as unknown as EscalationRow[]).map((e) => ({
+  if (error || !data) fail("list needs-you items", error)
+  return (data as unknown as NeedsYouRow[]).map((e) => ({
     id: e.id,
     reason: e.reason,
     status: e.status,
-    who: e.contacts?.name ?? e.contacts?.email ?? "Unknown contact",
-    email: e.contacts?.email ?? null,
+    who: e.customers?.name ?? e.customers?.email ?? "Unknown customer",
+    email: e.customers?.email ?? null,
     when: whenLabel(timeZone, e.created_at),
     createdAt: e.created_at,
     conversation: e.conversations ? toConversationView(timeZone, e.conversations) : null,
   }))
 }
 
-export async function countOpenEscalations(businessId: string): Promise<number> {
+export async function countOpenNeedsYou(businessId: string): Promise<number> {
   const { data, error } = await db()
-    .from("escalations")
+    .from("needs_you_items")
     .select("id")
     .eq("business_id", businessId)
     .eq("status", "open")
-  if (error || !data) fail("count escalations", error)
+  if (error || !data) fail("count needs-you items", error)
   return data.length
 }
 
@@ -336,9 +336,9 @@ export async function getDashboard(businessId: string): Promise<DashboardView> {
   const avgJobValue = cfg.avg_job_value ?? 0
 
   const trendStart = new Date(new Date(week.start).getTime() - 7 * 7 * 864e5).toISOString()
-  const [conversations, escalations, bookingsRes] = await Promise.all([
+  const [conversations, needsYouItems, bookingsRes] = await Promise.all([
     listConversations(businessId),
-    listEscalations(businessId),
+    listNeedsYouItems(businessId),
     db()
       .from("bookings")
       .select("id, created_at, conversation_id")
@@ -390,7 +390,7 @@ export async function getDashboard(businessId: string): Promise<DashboardView> {
     inRange(isoOf(b.created_at), new Date(new Date(week.start).getTime() - 7 * 864e5).toISOString(), week.start)
   ).length
 
-  const open = escalations.filter((e) => e.status === "open")
+  const open = needsYouItems.filter((e) => e.status === "open")
   return {
     week: {
       weekLabel: week.label,
@@ -411,7 +411,7 @@ export async function getDashboard(businessId: string): Promise<DashboardView> {
         why: e.email ?? "No email on file",
         due: e.when,
       })),
-      autoResolved: escalations.filter((e) => e.status !== "open" && inWeek(e.createdAt)).length,
+      autoResolved: needsYouItems.filter((e) => e.status !== "open" && inWeek(e.createdAt)).length,
     },
     trend,
     recent: conversations.slice(0, 6),
@@ -451,7 +451,7 @@ export async function getCalendarWeek(businessId: string): Promise<CalendarWeekV
   const week = currentWeek(tz)
   const { data, error } = await db()
     .from("bookings")
-    .select("id, service, slot_start, slot_end, created_at, contacts(name, email), conversations(channel, messages(agent))")
+    .select("id, service, slot_start, slot_end, created_at, customers(name, email), conversations(channel, messages(agent))")
     .eq("business_id", businessId)
     .gte("slot_start", week.start)
     .lt("slot_start", week.end)
@@ -493,7 +493,7 @@ export async function getCalendarWeek(businessId: string): Promise<CalendarWeekV
     slot_start: string
     slot_end: string
     created_at: string
-    contacts: { name: string | null; email: string | null } | null
+    customers: { name: string | null; email: string | null } | null
     conversations: { channel: string; messages: { agent: string | null }[] } | null
   }
   const appointments = (data as unknown as Row[]).map((b): CalendarAppointment => {
@@ -505,7 +505,7 @@ export async function getCalendarWeek(businessId: string): Promise<CalendarWeekV
       start: s.hour + s.minute / 60,
       length: (new Date(b.slot_end).getTime() - new Date(b.slot_start).getTime()) / 36e5,
       service: b.service,
-      patient: b.contacts?.name ?? b.contacts?.email ?? "Unknown contact",
+      patient: b.customers?.name ?? b.customers?.email ?? "Unknown customer",
       bookedBy: {
         agent: agents.has("sales") ? "Sales → Booking" : "Booking",
         channel: capitalize(b.conversations?.channel ?? "chat"),
@@ -567,13 +567,13 @@ const AGENT_FACTS: Record<AgentTag | "admin", { name: string; job: string; tools
   sales: {
     name: "Sales",
     job: "Answers pre-booking questions from your details, captures new leads, and hands them to Booking.",
-    tools: ["Save a contact", "Hand off to Booking"],
+    tools: ["Save a customer", "Hand off to Booking"],
     handoffLine: "Let me get you to our team",
   },
   support: {
     name: "Support",
     job: "Answers existing customers from your details and their own record; logs anything it can't answer.",
-    tools: ["Read the person's own record", "Log an escalation", "Hand off to Booking"],
+    tools: ["Read the person's own record", "Add to Needs you", "Hand off to Booking"],
     handoffLine: "Let me pull that up for you",
   },
   admin: {
@@ -591,9 +591,9 @@ export async function getAgentsView(businessId: string): Promise<AgentView[]> {
     const iso = new Date(s).toISOString()
     return iso >= week.start && iso < week.end
   }
-  const [conversations, escalations, bookingsRes] = await Promise.all([
+  const [conversations, needsYouItems, bookingsRes] = await Promise.all([
     listConversations(businessId),
-    listEscalations(businessId),
+    listNeedsYouItems(businessId),
     db()
       .from("bookings")
       .select("id")
@@ -614,7 +614,7 @@ export async function getAgentsView(businessId: string): Promise<AgentView[]> {
     ]
     if (id === "booking") stats.push({ label: "Bookings this week", one: "Booking this week", value: bookingsRes.data.length })
     if (id === "support") {
-      stats.push({ label: "Escalations this week", one: "Escalation this week", value: escalations.filter((e) => inWeek(e.createdAt)).length })
+      stats.push({ label: "Needs-you items this week", one: "Needs-you item this week", value: needsYouItems.filter((e) => inWeek(e.createdAt)).length })
     }
     return {
       id,

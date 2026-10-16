@@ -147,7 +147,7 @@
       "a_template": "Yes. Choose your preference when you book."
     }
   ],
-  "escalation_keywords": [
+  "emergency_keywords": [
     "chest pain",
     "fainting",
     "can't breathe",

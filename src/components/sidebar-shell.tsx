@@ -20,12 +20,12 @@ const CLOSE_DELAY = 120
 
 export function SidebarShell({
   children,
-  openEscalations = 0,
+  openNeedsYou = 0,
   business,
   businesses,
 }: {
   children: React.ReactNode
-  openEscalations?: number
+  openNeedsYou?: number
   business: { id: string; name: string; ownerName: string | null }
   businesses: { id: string; name: string }[]
 }) {
@@ -59,7 +59,7 @@ export function SidebarShell({
       className="sidebar-hover"
     >
       <AppSidebar
-        openEscalations={openEscalations}
+        openNeedsYou={openNeedsYou}
         business={business}
         businesses={businesses}
         onMouseEnter={() => schedule(true, OPEN_DELAY)}
@@ -72,7 +72,7 @@ export function SidebarShell({
       {/* Same brand wash as the landing page: soft green fading into beige. */}
       <SidebarInset className="pb-20 md:pb-0 bg-background bg-[radial-gradient(70%_45%_at_100%_0%,color-mix(in_oklch,var(--primary)_14%,var(--background))_0%,transparent_70%),radial-gradient(50%_35%_at_0%_100%,color-mix(in_oklch,var(--primary)_6%,var(--background))_0%,transparent_70%)] bg-fixed">
         {children}
-        {/* Phones: bottom tab bar (Today, Conversations, Contacts, Settings). */}
+        {/* Phones: bottom tab bar (Today, Conversations, Customers, Settings). */}
         <MobileTabBar />
       </SidebarInset>
     </SidebarProvider>

@@ -132,7 +132,7 @@ export function NeedsYou({ week }: { week: WeekSummary }) {
       >
         <CardTitle className="text-lg font-semibold">Nothing needs you this week</CardTitle>
         <CardDescription className="text-sm">
-          {week.autoResolved} escalations were resolved automatically.
+          {week.autoResolved} needs-you items were marked done this week.
         </CardDescription>
       </Card>
     )
@@ -164,7 +164,7 @@ export function NeedsYou({ week }: { week: WeekSummary }) {
               asChild
               className="rounded-none border-0 border-t border-border px-0 py-3.5 hover:bg-transparent [a]:hover:bg-transparent"
             >
-              <Link href="/escalations">
+              <Link href="/needs-you">
                 <ItemContent className="min-w-0 gap-0.5">
                   <ItemTitle className="text-base font-medium group-hover/item:underline">
                     {item.who} · {item.action}
@@ -182,7 +182,7 @@ export function NeedsYou({ week }: { week: WeekSummary }) {
 
       <CardFooter className="border-t-0 bg-transparent pt-0 pb-6">
         <Button asChild className={primaryBtn}>
-          <Link href="/escalations">
+          <Link href="/needs-you">
             Review {n === 1 ? "it" : "these"}
             <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
           </Link>

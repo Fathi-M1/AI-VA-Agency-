@@ -22,14 +22,14 @@ export type Ticket = {
 export async function getTicket(business: BusinessProfile, code: string): Promise<Ticket | null> {
   const { data, error } = await db()
     .from("bookings")
-    .select("reference_code, status, service, details, staff_id, requested_time_text, slot_start, slot_end, contacts(name)")
+    .select("reference_code, status, service, details, staff_id, requested_time_text, slot_start, slot_end, customers(name)")
     .eq("business_id", business.id)
     .eq("reference_code", code.toUpperCase())
     .maybeSingle()
   if (error || !data) return null
   const tz = business.config.timezone
   const d = (data.details ?? {}) as { summary?: string; answers?: Record<string, string>; estimate?: Ticket["estimate"] }
-  const name = (data.contacts as unknown as { name: string | null } | null)?.name ?? ""
+  const name = (data.customers as unknown as { name: string | null } | null)?.name ?? ""
   const staff = business.staff.find((m) => m.id === data.staff_id)?.name ?? null
   let confirmed: Ticket["confirmed"] = null
   if (data.status === "confirmed" && data.slot_start) {

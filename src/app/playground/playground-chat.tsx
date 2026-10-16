@@ -33,9 +33,9 @@ const AGENT_LABEL = {
 const TOOL_LABEL: Record<string, string> = {
   check_availability: "Checked Cal.com availability",
   book_appointment: "Created booking in Cal.com",
-  capture_contact: "Saved contact",
+  capture_customer: "Saved customer",
   get_my_record: "Read customer record",
-  create_escalation: "Escalated to the team",
+  create_needs_you_item: "Added to Needs you",
   ask_booking_question: "Asked a booking question",
   record_answer: "Saved an answer",
   quote_estimate: "Worked out the estimate",

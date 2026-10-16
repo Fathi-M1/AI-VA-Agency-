@@ -1,9 +1,9 @@
 "use client"
 
-// Person detail, opened from a Contacts row inside the shadcn Sheet.
+// Person detail, opened from a Customers row inside the shadcn Sheet.
 // Parts (all already pulled): shadcn Avatar, Tabs (MIT); Origin UI comp-420 status
 // badges and Timeline (https://coss.com/origin, MIT).
-// Real data only: the contact row and its bookings + conversations from Supabase.
+// Real data only: the customer row and its bookings + conversations from Supabase.
 // (The identity box, notes and Text/Call/Book buttons were removed: no real source.)
 import * as React from "react"
 import Link from "next/link"
@@ -24,18 +24,18 @@ import {
 import { SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { avatarTint, initials } from "@/lib/avatar"
-import type { ContactView } from "@/server/db/views"
+import type { CustomerView } from "@/server/db/views"
 
-export type ContactStatus = "Open escalation" | "Booked by AI"
-export type ContactRow = ContactView & { statuses: ContactStatus[]; order: number }
+export type CustomerStatus = "Needs you" | "Booked by AI"
+export type CustomerRow = CustomerView & { statuses: CustomerStatus[]; order: number }
 
 // Restrained: amber only for what needs you, the accent only for the AI.
 export const statusTone = {
-  "Open escalation": "warning",
+  "Needs you": "warning",
   "Booked by AI": "accent",
 } as const
 
-export function ContactDetail({ c }: { c: ContactRow }) {
+export function CustomerDetail({ c }: { c: CustomerRow }) {
   return (
     <>
       <SheetHeader className="gap-0 border-b border-border px-7 pt-7 pb-6">
@@ -47,7 +47,7 @@ export function ContactDetail({ c }: { c: ContactRow }) {
           </Avatar>
           <div className="min-w-0">
             <SheetTitle className="text-2xl font-semibold tracking-[-0.01em]">{c.name}</SheetTitle>
-            <SheetDescription className="text-sm">First contact {c.firstSeen}</SheetDescription>
+            <SheetDescription className="text-sm">First seen {c.firstSeen}</SheetDescription>
           </div>
         </div>
         {c.statuses.length ? (

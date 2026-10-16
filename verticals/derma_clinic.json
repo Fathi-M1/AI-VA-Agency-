@@ -155,7 +155,7 @@
       "a_template": "For some treatments, yes. The clinic will advise you."
     }
   ],
-  "escalation_keywords": [
+  "emergency_keywords": [
     "severe reaction",
     "swelling",
     "blistering",

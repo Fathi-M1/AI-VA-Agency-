@@ -133,7 +133,7 @@
       "a_template": "Yes. Our barbers are {staff_names}."
     }
   ],
-  "escalation_keywords": [
+  "emergency_keywords": [
     "cut",
     "bleeding",
     "allergic reaction"

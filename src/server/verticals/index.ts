@@ -82,7 +82,7 @@ const PackSchema = z
       .min(1),
     booking_questions: z.array(QuestionSchema),
     faqs: z.array(z.object({ q: z.string().min(1), a_template: z.string().min(1) })),
-    escalation_keywords: z.array(z.string().min(1)).min(1),
+    emergency_keywords: z.array(z.string().min(1)).min(1),
     emergency_instruction: z.string().min(1),
     setup_tips: z.object({ step1: z.string(), step2: z.string(), step3: z.string(), step4: z.string() }),
     _help: z.string(),

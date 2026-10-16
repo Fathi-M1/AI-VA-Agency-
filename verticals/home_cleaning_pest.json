@@ -146,7 +146,7 @@
       "a_template": "The team will tell you how to prepare and how long to stay out."
     }
   ],
-  "escalation_keywords": [
+  "emergency_keywords": [
     "chemical exposure",
     "swallowed pesticide",
     "can't breathe"
