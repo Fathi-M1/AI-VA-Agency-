@@ -57,7 +57,7 @@ function checkSelect(table: string, cols: string, where: string, problems: strin
   const known = columns.get(table)
   if (!known) return problems.push(`${where}: unknown table "${table}"`)
   for (const part of splitTop(cols)) {
-    const embed = part.match(/^(?:\w+:)?(\w+)(?:!\w+)?\((.*)\)$/s)
+    const embed = part.match(/^(?:\w+:)?(\w+)(?:!\w+)?\(([\s\S]*)\)$/)
     if (embed) {
       checkSelect(embed[1], embed[2], where, problems)
       continue
