@@ -2,6 +2,7 @@
 // services, team and team hours. Every read is scoped by business id (or booking link).
 import { configOfRow, getBusinessRow, saveBusinessConfig, type BusinessConfig } from "./business-config"
 import { db } from "./client"
+import { profileFromStorefront } from "./storefront-mapping"
 
 /** A business type id: the name of a pack file in web/verticals (e.g. "salon"). */
 export type Vertical = string
@@ -105,11 +106,13 @@ export async function getBusinessProfile(businessId: string): Promise<BusinessPr
   return withDetails(data)
 }
 
-/** The business behind a public booking link, or null if the link isn't active. */
+/** The business behind a public booking link, or null if the link isn't active. Reads
+ *  through public_storefront (a narrow function an anonymous customer may call), so it
+ *  carries only what customers may see: no owner mobile, no internal settings. */
 export async function getBusinessBySlug(slug: string): Promise<BusinessProfile | null> {
-  const { data, error } = await db().from("businesses").select(COLUMNS).eq("booking_slug", slug).maybeSingle()
+  const { data, error } = await db().rpc("public_storefront", { p_link: slug })
   if (error) fail("load business by link", error)
-  return data ? withDetails(data) : null
+  return profileFromStorefront(data)
 }
 
 /** Active services / team, in display order. */
