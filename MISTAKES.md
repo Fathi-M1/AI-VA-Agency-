@@ -190,3 +190,14 @@ prevention. Read this before building. Never repeat a logged mistake.
   `tsc` clean.
 - **Prevention:** never put backslash escapes in inline heredoc edits; write the edit
   script to a file first (as #7 says) and run `tsc` right after.
+
+## #18 — The honesty test missed the page description
+
+- **Symptom:** after Release 1 went live, the landing page's meta description (the text
+  search results show) still said the agents "book real appointments into your calendar".
+- **Root cause:** the website-honesty test only read `src/components/landing/`; the
+  page metadata lives in `src/app/(marketing)/page.tsx`.
+- **Fix:** the test now scans the landing components, every file under
+  `src/app/(marketing)/` and the root layout; description reworded to match the hero.
+- **Prevention:** a copy test scans every file that renders public text (pages,
+  layouts, metadata), not just the component folder; check the live HTML after a release.
