@@ -89,7 +89,7 @@ export async function POST(request: Request, { params }: RouteContext<"/api/book
       })
       const picked = q.options!.find((o) => o.toLowerCase() === (out.value ?? "").trim().toLowerCase()) ?? null
       await logToConversation(business.id, sessionId, "web", [
-        { role: "user", agent: null, content: `(${q.ask}) ${text}` },
+        { role: "customer", agent: null, content: `(${q.ask}) ${text}` },
         { role: "agent", agent: "booking", content: picked ? `Picked "${picked}" from the description.` : "Couldn't tell which option fits." },
       ])
       return Response.json({ picked })
@@ -111,7 +111,7 @@ Rules:
     })
 
     if (raw.intent === "question") {
-      await logToConversation(business.id, sessionId, "web", [{ role: "user", agent: null, content: text }])
+      await logToConversation(business.id, sessionId, "web", [{ role: "customer", agent: null, content: text }])
       return Response.json({ intent: "question" })
     }
 
@@ -128,7 +128,7 @@ Rules:
       .filter(Boolean)
       .join(" · ")
     await logToConversation(business.id, sessionId, "web", [
-      { role: "user", agent: null, content: text },
+      { role: "customer", agent: null, content: text },
       { role: "agent", agent: "booking", content: summary ? `Filled in from the message: ${summary}` : "Couldn't fill anything in from the message." },
     ])
     return Response.json({ intent: "booking", filled: fill, missing })

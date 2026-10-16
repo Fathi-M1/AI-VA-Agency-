@@ -3,7 +3,7 @@ import type { Metadata } from "next"
 import { SidebarShell } from "@/components/sidebar-shell"
 import { Toaster } from "@/components/ui/sonner"
 import { getBusinessRow } from "@/server/db/business-config"
-import { countOpenEscalations } from "@/server/db/views"
+import { countOpenNeedsYou } from "@/server/db/views"
 import { getCurrentBusinessId, listBusinesses } from "@/server/tenant"
 
 // The browser tab shows the business's own name.
@@ -14,16 +14,16 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function AppLayout({ children }: LayoutProps<"/">) {
   const businessId = await getCurrentBusinessId()
-  const [business, openEscalations, businesses] = await Promise.all([
+  const [business, openNeedsYou, businesses] = await Promise.all([
     getBusinessRow(businessId),
-    // The sidebar's escalation badge shows the real open count.
-    countOpenEscalations(businessId),
+    // The sidebar's Needs you badge shows the real open count.
+    countOpenNeedsYou(businessId),
     listBusinesses(),
   ])
   return (
     <>
       <SidebarShell
-        openEscalations={openEscalations}
+        openNeedsYou={openNeedsYou}
         business={{ id: business.id, name: business.name, ownerName: business.config.owner_name ?? null }}
         businesses={businesses}
       >

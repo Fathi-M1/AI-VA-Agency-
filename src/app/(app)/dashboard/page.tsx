@@ -44,7 +44,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
     `After hours: ${week.afterHours}`,
     `Booked: ${week.booked}`,
     `Average first reply: ${week.firstReplySeconds}s`,
-    `Open escalations: ${week.needsYou.length}`,
+    `Needs you (open): ${week.needsYou.length}`,
     `Recovered: ${week.avgJobValue > 0 ? usd(week.recovered) : "$0 (no average job value set)"}`,
     "",
   ].join("\n")

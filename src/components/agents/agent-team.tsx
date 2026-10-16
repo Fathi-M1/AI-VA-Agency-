@@ -26,7 +26,7 @@ import { avatarTint } from "@/lib/avatar"
 import { eyebrow, panel, quiet } from "@/lib/styles"
 import type { AgentView } from "@/server/db/views"
 
-const outcomeTone = { Booked: "accent", Escalated: "warning", Open: "hollow" } as const
+const outcomeTone = { Booked: "accent", "Needs you": "warning", Open: "hollow" } as const
 
 export function AgentTeam({ agents }: { agents: AgentView[] }) {
   const [openId, setOpenId] = useState<AgentView["id"] | null>(null)

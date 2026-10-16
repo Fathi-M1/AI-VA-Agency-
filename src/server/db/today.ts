@@ -4,14 +4,15 @@ import { cache } from "react"
 import { TZDate } from "@date-fns/tz"
 
 import { getBusinessProfile, type BusinessProfile } from "./business-profile"
+import { getMetrics, weekRange } from "../metrics"
 import { db } from "./client"
 
 function fail(what: string, error: { message: string } | null): never {
   throw new Error(`DB ${what} failed: ${error?.message ?? "no data"}`)
 }
 
-/** Confirmed appointments: our own confirmed requests, and Cal.com bookings (Cruz). */
-export const CONFIRMED = ["confirmed", "accepted"]
+/** Confirmed appointments (one booking system for everyone). */
+export const CONFIRMED = ["confirmed"]
 
 /** The business and the moments Today is measured from (cached per request). */
 export const todayBase = cache(async (businessId: string) => {
@@ -21,9 +22,6 @@ export const todayBase = cache(async (businessId: string) => {
   const now = new TZDate(nowMs, tz)
   const dayStart = new TZDate(now.getFullYear(), now.getMonth(), now.getDate(), tz)
   const dayEnd = new TZDate(now.getFullYear(), now.getMonth(), now.getDate() + 1, tz)
-  const dow = (now.getDay() + 6) % 7 // Monday = 0
-  const weekStart = new TZDate(now.getFullYear(), now.getMonth(), now.getDate() - dow, tz)
-  const weekEnd = new TZDate(now.getFullYear(), now.getMonth(), now.getDate() - dow + 7, tz)
   const iso = (d: Date) => new Date(d.getTime()).toISOString()
   // "Since your last visit"; first visit: since setup.
   const since = profile.last_seen_at ?? profile.setup_completed_at ?? iso(dayStart)
@@ -34,7 +32,7 @@ export const todayBase = cache(async (businessId: string) => {
     hour: now.getHours(),
     dateLabel: new Intl.DateTimeFormat("en-US", { timeZone: tz, weekday: "long", month: "short", day: "numeric" }).format(now),
     day: { start: iso(dayStart), end: iso(dayEnd) },
-    week: { start: iso(weekStart), end: iso(weekEnd) },
+    week: weekRange(nowMs, tz), // the one week definition (server/metrics-core.ts)
     since,
     firstVisit: !profile.last_seen_at,
   }
@@ -54,7 +52,7 @@ export const todaysAppointments = cache(async (businessId: string): Promise<Appo
   const { day, profile } = await todayBase(businessId)
   const { data, error } = await db()
     .from("bookings")
-    .select("id, service, slot_start, staff_id, contacts(name, email)")
+    .select("id, service, slot_start, staff_id, customers(name, email)")
     .eq("business_id", businessId)
     .in("status", CONFIRMED)
     .gte("slot_start", day.start)
@@ -62,7 +60,7 @@ export const todaysAppointments = cache(async (businessId: string): Promise<Appo
     .order("slot_start")
   if (error) fail("list today's appointments", error)
   return (data ?? []).map((b) => {
-    const c = b.contacts as unknown as { name: string | null; email: string | null } | null
+    const c = b.customers as unknown as { name: string | null; email: string | null } | null
     return {
       id: b.id,
       start: b.slot_start as string,
@@ -89,6 +87,8 @@ export type BookingRequest = {
   conversationId: string | null
   /** set by the booking form (migration 005); null for chat requests */
   referenceCode: string | null
+  /** private ticket token (the ticket link) */
+  ticketToken: string | null
   preferredDay: string | null
   preferredTimeOfDay: "morning" | "afternoon" | "evening" | null
   source: "form" | "chat"
@@ -106,13 +106,13 @@ export const needsYou = cache(async (businessId: string) => {
     db()
       .from("bookings")
       // "*" so this works whichever migrations have run (missing columns read as undefined).
-      .select("*, contacts(name)")
+      .select("*, customers(name)")
       .eq("business_id", businessId)
       .eq("status", "requested")
       .order("created_at", { ascending: false }),
     db()
-      .from("escalations")
-      .select("id, created_at, reason, conversation_id, contacts(name, email)")
+      .from("needs_you_items")
+      .select("id, created_at, reason, conversation_id, customers(name, email)")
       .eq("business_id", businessId)
       .eq("status", "open")
       .order("created_at", { ascending: false }),
@@ -121,7 +121,7 @@ export const needsYou = cache(async (businessId: string) => {
   if (escs.error) fail("list open items", escs.error)
   const requests: BookingRequest[] = (reqs.data ?? []).map((r) => {
     const d = (r.details ?? {}) as { summary?: string; estimate?: BookingRequest["estimate"] }
-    const c = r.contacts as unknown as { name: string | null } | null
+    const c = r.customers as unknown as { name: string | null } | null
     return {
       id: r.id,
       createdAt: r.created_at,
@@ -135,13 +135,14 @@ export const needsYou = cache(async (businessId: string) => {
       staffId: r.staff_id,
       conversationId: r.conversation_id,
       referenceCode: r.reference_code ?? null,
+      ticketToken: r.ticket_token ?? null,
       preferredDay: r.preferred_day ?? null,
       preferredTimeOfDay: r.preferred_time_of_day ?? null,
       source: r.source === "form" ? "form" : "chat",
     }
   })
   const items: OpenItem[] = (escs.data ?? []).map((e) => {
-    const c = e.contacts as unknown as { name: string | null; email: string | null } | null
+    const c = e.customers as unknown as { name: string | null; email: string | null } | null
     return {
       id: e.id,
       createdAt: e.created_at,
@@ -160,17 +161,17 @@ export type Handled = { id: string; customer: string; outcome: string; at: strin
 type ConvRow = {
   id: string
   started_at: string
-  contacts: { name: string | null; email: string | null } | null
+  customers: { name: string | null; email: string | null } | null
   messages: { role: string; agent: string | null }[]
   bookings: { status: string; requested_time_text: string | null }[]
-  escalations: { reason: string }[]
+  needs_you_items: { reason: string }[]
 }
 
 function outcomeOf(c: ConvRow) {
-  if (c.escalations.some((e) => e.reason.startsWith("Emergency words"))) return "Emergency message shown"
+  if (c.needs_you_items.some((e) => e.reason.startsWith("Emergency words"))) return "Emergency message shown"
   if (c.bookings.some((b) => b.requested_time_text !== null)) return "Sent a booking request"
   if (c.bookings.length) return "Booked an appointment"
-  if (c.escalations.length) return "Asked something the team needs to answer"
+  if (c.needs_you_items.length) return "Asked something the team needs to answer"
   const agents = new Set(c.messages.map((m) => m.agent).filter(Boolean))
   if (agents.has("sales")) return "Asked about prices and services"
   if (agents.has("support")) return "Asked a question"
@@ -179,12 +180,11 @@ function outcomeOf(c: ConvRow) {
 }
 
 export const handledSince = cache(async (businessId: string) => {
-  const { since } = await todayBase(businessId)
-  const { data, error, count } = await db()
+  const { since, nowMs } = await todayBase(businessId)
+  const { data, error } = await db()
     .from("conversations")
     .select(
-      "id, started_at, contacts(name, email), messages(role, agent), bookings(status, requested_time_text), escalations(reason)",
-      { count: "exact" }
+      "id, started_at, customers(name, email), messages(role, agent), bookings(status, requested_time_text), needs_you_items(reason)"
     )
     .eq("business_id", businessId)
     .gte("started_at", since)
@@ -192,12 +192,14 @@ export const handledSince = cache(async (businessId: string) => {
     .limit(5)
   if (error) fail("list handled conversations", error)
   const rows = (data ?? []) as unknown as ConvRow[]
+  // The count comes from the one metrics module; the list shows the latest five.
+  const total = (await getMetrics(businessId, since, new Date(nowMs).toISOString())).conversations
   return {
-    total: count ?? rows.length,
+    total,
     recent: rows.map(
       (c): Handled => ({
         id: c.id,
-        customer: c.contacts?.name ?? c.contacts?.email ?? "New customer",
+        customer: c.customers?.name ?? c.customers?.email ?? "New customer",
         outcome: outcomeOf(c),
         at: c.started_at,
       })
@@ -208,27 +210,10 @@ export const handledSince = cache(async (businessId: string) => {
 /* ---------------------------------------------------------------- this week */
 
 export const weekCounts = cache(async (businessId: string) => {
+  // The same numbers as the Dashboard: one definition in server/metrics.ts.
   const { week } = await todayBase(businessId)
-  const head = { count: "exact" as const, head: true }
-  const [convs, reqs, confirmed] = await Promise.all([
-    db().from("conversations").select("id", head).eq("business_id", businessId).gte("started_at", week.start).lt("started_at", week.end),
-    db()
-      .from("bookings")
-      .select("id", head)
-      .eq("business_id", businessId)
-      .not("requested_time_text", "is", null)
-      .gte("created_at", week.start)
-      .lt("created_at", week.end),
-    db()
-      .from("bookings")
-      .select("id", head)
-      .eq("business_id", businessId)
-      .in("status", CONFIRMED)
-      .gte("slot_start", week.start)
-      .lt("slot_start", week.end),
-  ])
-  for (const r of [convs, reqs, confirmed]) if (r.error) fail("count this week", r.error)
-  return { conversations: convs.count ?? 0, requests: reqs.count ?? 0, confirmed: confirmed.count ?? 0 }
+  const m = await getMetrics(businessId, week.start, week.end)
+  return { conversations: m.conversations, requests: m.requests, confirmed: m.confirmed }
 })
 
 /** Has any booking request ever been confirmed? (checklist item 3) */

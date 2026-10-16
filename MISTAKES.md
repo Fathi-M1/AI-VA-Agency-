@@ -191,6 +191,16 @@ prevention. Read this before building. Never repeat a logged mistake.
 - **Prevention:** never put backslash escapes in inline heredoc edits; write the edit
   script to a file first (as #7 says) and run `tsc` right after.
 
+## #17 — A commit ran even though the type-check failed
+
+- **Symptom:** commit 2c3ea5e went in while `tsc` reported TS1501 (a regex `/s` flag
+  needs ES2018; this project targets ES2017).
+- **Root cause:** the command was `tsc && echo OK; git commit` — the `;` let the
+  commit run whatever `tsc` returned.
+- **Fix:** replaced the flag with `[\s\S]`; `tsc` clean; follow-up commit ebe820e.
+- **Prevention:** chain every check before a commit with `&&`, never `;`. Don't use
+  regex flags newer than the tsconfig target (`s`, named groups in old targets).
+
 ## #18 — The honesty test missed the page description
 
 - **Symptom:** after Release 1 went live, the landing page's meta description (the text

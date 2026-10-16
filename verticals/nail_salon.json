@@ -153,7 +153,7 @@
       "a_template": "Usually about 2 to 3 weeks. Your technician can tell you more."
     }
   ],
-  "escalation_keywords": [
+  "emergency_keywords": [
     "infection",
     "swelling",
     "allergic reaction",

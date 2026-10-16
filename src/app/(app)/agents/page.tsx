@@ -13,7 +13,7 @@ export default async function AgentsPage({ searchParams }: PageProps<"/agents">)
   const agents = await getAgentsView(businessId)
 
   return (
-    // Same page column as the Dashboard, Conversations and Escalations.
+    // Same page column as the Dashboard, Conversations and Needs you.
     <div className="mx-auto w-full max-w-[1280px] px-5 pt-7 pb-16 sm:px-10 sm:pt-[34px] xl:px-14">
       <SiteHeader
         className="mb-10"

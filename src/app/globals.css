@@ -110,7 +110,7 @@
 
 :root {
   /* Quiet premium operator tool: warm paper neutrals, one green accent.
-     The accent marks THE action, live status and the escalation count, nothing else. */
+     The accent marks THE action, live status and the Needs you count, nothing else. */
   --background: oklch(0.967 0.007 85);        /* paper  #f6f4ef */
   --foreground: oklch(0.215 0.006 85);        /* ink    #1b1a17 */
   --card: oklch(0.994 0.004 85);              /* card   #fffdf9 */
@@ -127,7 +127,7 @@
   --accent: oklch(0.94 0.009 85);
   --accent-foreground: oklch(0.215 0.006 85);
   --destructive: oklch(0.52 0.16 30);
-  --warning: oklch(0.72 0.15 70);             /* amber: escalations only (Origin comp-421 hue) */
+  --warning: oklch(0.72 0.15 70);             /* amber: Needs you only (Origin comp-421 hue) */
   --warning-foreground: oklch(0.5 0.12 62);   /* amber for small text (~5:1 on paper) */
   /* Visit types (Calendar): low-chroma hues, shown as soft tints. Green is not
      used here: it stays the accent, which marks AI bookings. */

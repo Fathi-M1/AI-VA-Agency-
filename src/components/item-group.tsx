@@ -25,10 +25,10 @@ import {
 } from "@/components/ui/item"
 import type { ConversationView, Outcome } from "@/server/db/views"
 
-// Same colours as the Conversations screen: booked = green, escalated = amber.
+// Same colours as the Conversations screen: booked = green, needs you = amber.
 const tone: Record<Outcome, "accent" | "warning" | "hollow"> = {
   Booked: "accent",
-  Escalated: "warning",
+  "Needs you": "warning",
   Open: "hollow",
 }
 
@@ -58,7 +58,7 @@ export default function RecentActivity({ items }: { items: ConversationView[] })
                 <Link href={`/conversations?open=${c.id}`}>
                 <ItemMedia>
                   <Avatar className="size-9">
-                    {c.contactId ? (
+                    {c.customerId ? (
                       <AvatarFallback className={`text-xs font-medium ${avatarTint(c.customer)}`}>
                         {initials(c.customer)}
                       </AvatarFallback>

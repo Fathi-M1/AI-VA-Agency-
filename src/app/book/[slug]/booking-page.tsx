@@ -287,7 +287,7 @@ export function BookingPage({
           email,
           consent,
         })
-        if (res.ok) return router.push(`/book/${store.slug}/r/${res.code}`)
+        if (res.ok) return router.push(`/book/${store.slug}/t/${res.token}`)
         if ("emergency" in res) return showEmergency(res.emergency)
         if ("errors" in res) {
           setErrors(res.errors)

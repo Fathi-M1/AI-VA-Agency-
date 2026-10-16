@@ -51,7 +51,7 @@ export function requestsContext(profile: BusinessProfile): RequestsContext {
       restrictedAdvice: c.restricted_advice ?? [],
       emergencyLine: c.emergency_instruction ?? c.emergency_line,
       // the business's own list + its business type's emergency words
-      emergencyKeywords: [...new Set([...(c.rules?.emergency_keywords ?? []), ...pack.escalation_keywords])],
+      emergencyKeywords: [...new Set([...(c.rules?.emergency_keywords ?? []), ...pack.emergency_keywords])],
     },
   }
 }
@@ -297,8 +297,8 @@ ${factsText(ctx)}
 Your job:
 - Answer questions about services, prices, hours, the team, payment and areas using only the facts above. Prices left blank are confirmed by the team.
 - If they want to book, call handoff_to_booking with a one-sentence summary.
-- If the answer isn't in the facts: call create_escalation with a one-sentence reason in plain English, then reply exactly: "${UNKNOWN_LINE}"
-- Refunds or complaints: call create_escalation, then reply exactly: "${PASS_LINE}"
+- If the answer isn't in the facts: call create_needs_you_item with a one-sentence reason in plain English, then reply exactly: "${UNKNOWN_LINE}"
+- Refunds or complaints: call create_needs_you_item, then reply exactly: "${PASS_LINE}"
 
 Rules: never invent anything; never give medical or professional advice; keep replies short and friendly.`
 }
@@ -315,15 +315,15 @@ Your job:
 - Answer hours, location/areas and other questions from the facts above.
 - Questions about their own requests or appointments: call get_my_record. If it says they're not identified, ask for the mobile number they used, then call it again. Answer only from what it returns. A "requested" item is not confirmed yet.
 - They want to book or change a booking: call handoff_to_booking.
-- If the answer isn't in the facts: call create_escalation with a one-sentence reason, then reply exactly: "${UNKNOWN_LINE}"
-- Refunds or complaints: call create_escalation, then reply exactly: "${PASS_LINE}"
+- If the answer isn't in the facts: call create_needs_you_item with a one-sentence reason, then reply exactly: "${UNKNOWN_LINE}"
+- Refunds or complaints: call create_needs_you_item, then reply exactly: "${PASS_LINE}"
 
 Rules: never invent anything; never say a request is confirmed unless get_my_record says "confirmed"; keep replies short and friendly.`
 }
 
-const ESCALATION_TOOL: Tool = {
+const NEEDS_YOU_TOOL: Tool = {
   type: "function",
-  name: "create_escalation",
+  name: "create_needs_you_item",
   description: "Tell the team about something you can't answer, or a refund or complaint, so they follow up.",
   parameters: {
     type: "object",
@@ -332,7 +332,7 @@ const ESCALATION_TOOL: Tool = {
   },
 }
 
-export const SALES_REQUESTS_TOOLS: Tool[] = [ESCALATION_TOOL, handoffTool("booking")]
+export const SALES_REQUESTS_TOOLS: Tool[] = [NEEDS_YOU_TOOL, handoffTool("booking")]
 
 export const SUPPORT_REQUESTS_TOOLS: Tool[] = [
   {
@@ -341,7 +341,7 @@ export const SUPPORT_REQUESTS_TOOLS: Tool[] = [
     description: "Read this person's own booking requests and bookings. Only works once they've given their mobile number.",
     parameters: { type: "object", properties: {} },
   },
-  ESCALATION_TOOL,
+  NEEDS_YOU_TOOL,
   handoffTool("booking"),
 ]
 

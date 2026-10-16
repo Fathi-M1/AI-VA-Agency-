@@ -110,7 +110,7 @@
       "a_template": "{business_address|Please contact us for directions.}"
     }
   ],
-  "escalation_keywords": [
+  "emergency_keywords": [
     "emergency",
     "injured",
     "fire",

@@ -10,7 +10,7 @@ import {
 import { cn } from "@/lib/utils"
 
 /* Origin UI Timeline, styled once to the product's quiet ink treatment and reused
-   for "What the AI did", escalation activity and contact history. */
+   for "What the AI did", needs-you activity and customer history. */
 export function TimelineList({
   items,
 }: {

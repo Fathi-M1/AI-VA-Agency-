@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils"
 const TABS = [
   { title: "Today", href: "/today", icon: HomeIcon },
   { title: "Conversations", href: "/conversations", icon: MessageSquareIcon },
-  { title: "Contacts", href: "/contacts", icon: UsersIcon },
+  { title: "Customers", href: "/customers", icon: UsersIcon },
   { title: "Settings", href: "/settings", icon: SettingsIcon },
 ]
 
