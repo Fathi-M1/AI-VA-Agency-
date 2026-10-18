@@ -24,7 +24,11 @@ async function productionToday(): Promise<PGlite> {
 }
 
 test("the files in supabase/sql-editor are up to date with supabase/migrations", () => {
-  for (const [name, content] of Object.entries(buildFiles())) assert.equal(file(name), content, `${name} is stale: run node scripts/build-sql-editor.mjs`)
+  // (line endings ignored: git on Windows checks files out with CRLF)
+  const lf = (s: string) => s.replaceAll("\r\n", "\n")
+  for (const [name, content] of Object.entries(buildFiles())) {
+    assert.equal(lf(file(name)), lf(content), `${name} is stale: run node scripts/build-sql-editor.mjs`)
+  }
 })
 
 test("backup → before-check → migrate → after-check: every row kept, every check ok, history recorded", async () => {

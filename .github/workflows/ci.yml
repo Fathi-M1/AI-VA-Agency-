@@ -1,6 +1,7 @@
 # Checks every change before it can reach production (Phase 0 section 11):
-# type-check, lint and unit tests on every push to staging and every pull request to main.
-# The security suite joins this workflow once it runs without live credentials.
+# type-check, lint, unit tests, the database + security suites (local Postgres in Node, no
+# live credentials), a build with marker secrets, and the browser-bundle scan, on every push
+# to staging and every pull request to main. Nothing here touches the real Supabase project.
 name: CI
 
 on:
@@ -30,3 +31,15 @@ jobs:
         run: npm run lint
       - name: Unit tests
         run: npm run test:unit
+      - name: Database and row-level security tests (local Postgres, never production)
+        run: npm run test:db
+      - name: Build with marker secrets (no real keys)
+        run: npx next build
+        env:
+          SUPABASE_URL: http://127.0.0.1:54321
+          SUPABASE_SERVICE_ROLE_KEY: bundle-test-service-role-marker
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: test-publishable-key
+          GROQ_API_KEY: bundle-test-groq-marker
+      - name: Security test 7 - no server secret in the browser bundle
+        run: npm run test:bundle
