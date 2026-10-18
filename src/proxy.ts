@@ -10,7 +10,7 @@ import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
 import { needsSignIn, signInPath } from "@/server/auth-gate"
-import { hasValidCredentials, isPublicRequest } from "@/server/site-lock"
+import { asksForPassword, hasValidCredentials, isPublicRequest } from "@/server/site-lock"
 
 function locked(request: NextRequest) {
   if (isPublicRequest(request.nextUrl.pathname, request.method, request.headers.get("next-action"))) return false
@@ -48,10 +48,10 @@ async function ownerGate(request: NextRequest) {
 
 export async function proxy(request: NextRequest) {
   if (locked(request)) {
-    return new NextResponse("Authentication required.", {
-      status: 401,
-      headers: { "WWW-Authenticate": 'Basic realm="AI VA Agency", charset="UTF-8"', "Cache-Control": "no-store" },
-    })
+    // The password box only for a real page visit, never for background loads (asksForPassword).
+    const headers: Record<string, string> = { "Cache-Control": "no-store" }
+    if (asksForPassword(request.headers)) headers["WWW-Authenticate"] = 'Basic realm="AI VA Agency", charset="UTF-8"'
+    return new NextResponse("Authentication required.", { status: 401, headers })
   }
   if (needsSignIn(request.nextUrl.pathname)) return ownerGate(request)
   return NextResponse.next()
