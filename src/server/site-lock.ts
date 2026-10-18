@@ -31,3 +31,13 @@ export function hasValidCredentials(authorization: string | null, user: string |
   const passOk = timingSafeEqual(digest(decoded.slice(sep + 1)), digest(password))
   return userOk && passOk
 }
+
+/** Should a locked response ask for the password? Only for a real page visit. Background
+ *  loads (link prefetch, page data for client navigation, images, scripts) get a plain 401
+ *  without the prompt, so the public landing page never pops a password box just because
+ *  it links to a locked page. Requests without fetch metadata (curl, old browsers) are asked. */
+export function asksForPassword(headers: Headers) {
+  if (headers.get("rsc") || headers.get("next-router-prefetch") || headers.get("purpose") === "prefetch") return false
+  const mode = headers.get("sec-fetch-mode")
+  return mode === null || mode === "navigate"
+}
