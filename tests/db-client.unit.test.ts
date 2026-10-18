@@ -42,8 +42,11 @@ function files(dir: string): string[] {
 
 // Every place that may use the service role, and why (listed in the final report).
 const SERVICE_ROLE_ALLOWED = new Set([
-  "src/app/api/book/[slug]/ask/route.ts", // agent run answering a customer of ONE business (by booking link)
-  "src/app/api/agent/route.ts", // builder console agent run (builder flag checked first)
+  "src/app/api/book/[slug]/route.ts", // customer chat agent run for ONE business (by booking link)
+  "src/app/api/book/[slug]/ask/route.ts", // "Questions? Ask us" agent run for ONE business (by booking link)
+  "src/app/api/book/[slug]/parse/route.ts", // booking form reading + conversation log, ONE business (by booking link)
+  "src/app/book/[slug]/actions.ts", // booking form conversation log, ONE business (by booking link)
+  "src/app/api/agent/route.ts", // builder console agent run (builder flag + membership checked first)
 ])
 
 test("only the allow-listed entry points use asServiceRole, and nothing else reads the service key", () => {

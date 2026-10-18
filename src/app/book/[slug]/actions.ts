@@ -16,7 +16,12 @@ import {
 import { normalizeMobile } from "@/lib/format"
 import { linkVisitCustomer, logToConversation, safetyCheck } from "@/server/agent/orchestrator"
 import { loadStorefront } from "@/server/booking-page"
-import { db } from "@/server/db/client"
+import { asServiceRole, db } from "@/server/db/client"
+
+// Writing to this business's conversation (the agent's log) needs the service role; the
+// business comes only from the booking link. The booking request itself goes through the
+// narrow public function as an anonymous customer.
+const asLog = <T,>(fn: () => Promise<T>) => asServiceRole("booking form conversation log (one business, by booking link)", fn)
 
 export type SubmitInput = {
   sessionId: string
@@ -75,7 +80,7 @@ export async function submitRequest(slug: string, input: SubmitInput): Promise<S
     .filter((q) => q.type === "text" && fill.answers[q.id])
     .map((q) => fill.answers[q.id])
   if (typed.length) {
-    const emergency = await safetyCheck(business.id, sessionId, "web", typed.join("\n"))
+    const emergency = await asLog(() => safetyCheck(business.id, sessionId, "web", typed.join("\n")))
     if (emergency) return { ok: false, emergency }
   }
 
@@ -87,9 +92,9 @@ export async function submitRequest(slug: string, input: SubmitInput): Promise<S
   const summary = shortDetails(spec, fill.answers, staffName)
 
   try {
-    const conversationId = await logToConversation(business.id, sessionId, "web", [
+    const conversationId = await asLog(() => logToConversation(business.id, sessionId, "web", [
       { role: "agent", agent: "booking", content: `Booking request sent from the form: ${summary} · ${day.long} · ${TOD_LABEL[tod]}.` },
-    ])
+    ]))
     // The same narrow function the public storefront uses: customer by mobile, booking
     // request, reference code and private ticket token, in one transaction.
     const { data, error } = await db().rpc("create_booking_request", {
@@ -118,7 +123,7 @@ export async function submitRequest(slug: string, input: SubmitInput): Promise<S
       return { ok: false, error: "We couldn't send your request. Check your connection and try again." }
     }
     const made = data as { ticket_token: string; reference_code: string; customer_id: string }
-    await linkVisitCustomer(business.id, sessionId, { id: made.customer_id, name, mobile })
+    await asLog(() => linkVisitCustomer(business.id, sessionId, { id: made.customer_id, name, mobile }))
     return { ok: true, token: made.ticket_token, code: made.reference_code }
   } catch (err) {
     console.error("[book/submit]", err instanceof Error ? err.message : "unknown error")

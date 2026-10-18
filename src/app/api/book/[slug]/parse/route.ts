@@ -6,6 +6,7 @@ import { missingFor, shortDetails, validateFill, type RawFill } from "@/lib/book
 import { extractJson } from "@/server/agent/llm"
 import { logToConversation, safetyCheck } from "@/server/agent/orchestrator"
 import { loadStorefront, nowIn, type Storefront } from "@/server/booking-page"
+import { asServiceRole } from "@/server/db/client"
 
 const LABELS = { morning: "Morning", afternoon: "Afternoon", evening: "Evening" } as const
 
@@ -53,7 +54,7 @@ const FILL_SCHEMA = (questionIds: string[]) => ({
   },
 })
 
-export async function POST(request: Request, { params }: RouteContext<"/api/book/[slug]/parse">) {
+async function handle(request: Request, { params }: RouteContext<"/api/book/[slug]/parse">) {
   const { slug } = await params
   const body = (await request.json().catch(() => null)) as { sessionId?: unknown; text?: unknown; questionId?: unknown; service?: unknown } | null
   const sessionId = typeof body?.sessionId === "string" ? body.sessionId.slice(0, 100) : ""
@@ -136,4 +137,10 @@ Rules:
     console.error("[book/parse]", err instanceof Error ? err.message : "unknown error")
     return Response.json({ error: "failed" }, { status: 500 })
   }
+}
+
+// The agent writes this business's conversation, so it runs with the service role; the
+// business comes only from the booking link (never from the request body).
+export function POST(request: Request, ctx: RouteContext<"/api/book/[slug]/parse">) {
+  return asServiceRole("booking form reading + conversation log (one business, by booking link)", () => handle(request, ctx))
 }

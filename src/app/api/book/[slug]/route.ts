@@ -3,8 +3,9 @@
 import { handleMessage } from "@/server/agent/orchestrator"
 import { greetingFor } from "@/lib/booking-copy"
 import { getBusinessBySlug } from "@/server/db/business-profile"
+import { asServiceRole } from "@/server/db/client"
 
-export async function POST(request: Request, { params }: RouteContext<"/api/book/[slug]">) {
+async function handle(request: Request, { params }: RouteContext<"/api/book/[slug]">) {
   const { slug } = await params
   const body = (await request.json().catch(() => null)) as {
     sessionId?: unknown
@@ -32,4 +33,10 @@ export async function POST(request: Request, { params }: RouteContext<"/api/book
     console.error("[book]", err instanceof Error ? err.message : "unknown error")
     return Response.json({ error: "failed" }, { status: 500 })
   }
+}
+
+// The agent writes this business's conversation, so it runs with the service role; the
+// business comes only from the booking link (never from the request body).
+export function POST(request: Request, ctx: RouteContext<"/api/book/[slug]">) {
+  return asServiceRole("customer chat agent run (one business, by booking link)", () => handle(request, ctx))
 }

@@ -3,8 +3,9 @@
 // request comes back as "fill the form" (fillForm). Same conversation as the visit.
 import { handleMessage } from "@/server/agent/orchestrator"
 import { loadStorefront } from "@/server/booking-page"
+import { asServiceRole } from "@/server/db/client"
 
-export async function POST(request: Request, { params }: RouteContext<"/api/book/[slug]/ask">) {
+async function handle(request: Request, { params }: RouteContext<"/api/book/[slug]/ask">) {
   const { slug } = await params
   const body = (await request.json().catch(() => null)) as {
     sessionId?: unknown
@@ -29,4 +30,10 @@ export async function POST(request: Request, { params }: RouteContext<"/api/book
     console.error("[book/ask]", err instanceof Error ? err.message : "unknown error")
     return Response.json({ error: "failed" }, { status: 500 })
   }
+}
+
+// The agent writes this business's conversation, so it runs with the service role; the
+// business comes only from the booking link (never from the request body).
+export function POST(request: Request, ctx: RouteContext<"/api/book/[slug]/ask">) {
+  return asServiceRole("customer questions agent run (one business, by booking link)", () => handle(request, ctx))
 }
