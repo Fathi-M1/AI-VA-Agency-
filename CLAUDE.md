@@ -37,7 +37,7 @@ Read this file, `docs/BLUEPRINT.md`, and `MISTAKES.md` at the start of every ses
 ## Working habits
 - Log every mistake in `MISTAKES.md`: symptom / root cause / fix / prevention. Never repeat a logged mistake.
 - Never run `next build` while `npm run dev` is running.
-- Database changes go through migration files in the repo (Supabase CLI), never the SQL editor.
+- Database changes are migration files in the repo (`supabase/migrations/`). The owner applies them by pasting the generated files in `supabase/sql-editor/` into the Supabase SQL editor, in order (owner's decision, Oct 19, 2026): backup inside the database → before-check → all migrations in one transaction, recorded in the migration history → after-check. Regenerate with `node scripts/build-sql-editor.mjs`. Never ask the owner to type SQL by hand or run migrations one file at a time.
 - Until the pilot there is ONE Supabase project (production) and development runs on localhost. Before running any migration, back up the database. Tests that create users or businesses clean them up afterward.
 - A separate staging Supabase project must exist before the pilot phase (Phase 4).
 - Test data uses only @example.com emails or the owner's own email and 0917-000-xxxx style numbers. Never type a real person's contact details.
