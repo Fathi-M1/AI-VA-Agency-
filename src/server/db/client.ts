@@ -32,13 +32,17 @@ function serviceClient(): SupabaseClient {
 // Loaded on first use: the request's cookie store only exists inside a Next.js request.
 const cookieStore = async () => (await import("next/headers")).cookies()
 
-/** The request's cookies; outside a request there are none, so the client is anonymous (least access). */
+/** The request's cookies. Outside Next.js (unit tests) there are none, so the client is
+ *  anonymous (least access). Inside Next.js, errors from cookies() must propagate: one of
+ *  them is how Next.js learns a page depends on the request and must not be pre-rendered. */
 async function readCookies() {
+  let headers: typeof import("next/headers")
   try {
-    return (await cookieStore()).getAll()
+    headers = await import("next/headers")
   } catch {
     return []
   }
+  return (await headers.cookies()).getAll()
 }
 
 /** The current user's session client (a new one per call: cheap, and never shared across requests). */

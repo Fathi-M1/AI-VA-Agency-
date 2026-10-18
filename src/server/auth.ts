@@ -4,6 +4,7 @@
 // user's session, so row-level security applies to these queries too.
 import { cache } from "react"
 import { notFound, redirect } from "next/navigation"
+import { connection } from "next/server"
 
 import { checkAccess, type Membership, type Need, type Role } from "./auth-core"
 import { signInPath } from "./auth-gate"
@@ -13,6 +14,7 @@ export type { Role } from "./auth-core"
 
 /** The signed-in user's id (verified session), or null. Once per request. */
 export const getUserId = cache(async (): Promise<string | null> => {
+  await connection() // depends on who is asking: never pre-rendered at build time
   const { data } = await db().auth.getClaims()
   return data?.claims?.sub ?? null
 })

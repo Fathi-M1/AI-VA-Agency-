@@ -234,3 +234,17 @@ prevention. Read this before building. Never repeat a logged mistake.
 - **Prevention:** before any commit, `git diff --cached --stat` and check the file list;
   for a quick side commit in the middle of other work, use `git commit <path>` (commits
   only that path) instead of `git add` + `git commit`.
+
+## #21 — Sign-in branch failed to build on Vercel (owner page pre-rendered)
+
+- **Symptom:** Vercel preview for `feat/google-signin` failed: "Error occurred prerendering
+  page /app/businesses … NEXT_PUBLIC_SUPABASE_URL is not set".
+- **Root cause:** (1) the session client caught *every* error from `cookies()`, including
+  the signal Next.js uses to mark a page as request-time, so Next tried to pre-render a
+  signed-in page at build time; (2) I ran `tsc` and unit tests on the branch but never
+  `next build` before pushing.
+- **Fix:** only "outside Next.js" (the import failing in unit tests) counts as anonymous;
+  `getUserId()` calls `connection()` so anything that checks the user is request-time.
+  `next build` passes; every /app page and /console is dynamic (ƒ).
+- **Prevention:** run `next build` (dev server stopped) before pushing any branch Vercel
+  builds; never swallow errors from Next.js request APIs.
