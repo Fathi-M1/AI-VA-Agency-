@@ -1,6 +1,8 @@
-// "Need help?" on /setup: a Setup assistant that answers owner questions in plain
+// "Need help?" on onboarding: a Setup assistant that answers owner questions in plain
 // English. It has no tools, so it cannot change any data. No conversation is kept.
+// Signed-in users only (it calls the model, so it must not be open to the public).
 import { runAgentTurn, userInput } from "@/server/agent/llm"
+import { requireUser } from "@/server/auth"
 
 const STEPS = [
   "Welcome",
@@ -24,6 +26,7 @@ Rules:
 }
 
 export async function POST(request: Request) {
+  await requireUser("/app/onboarding")
   const body = (await request.json().catch(() => null)) as { question?: unknown; step?: unknown; businessType?: unknown } | null
   const question = typeof body?.question === "string" ? body.question.trim().slice(0, 500) : ""
   const step = typeof body?.step === "number" ? body.step : 0

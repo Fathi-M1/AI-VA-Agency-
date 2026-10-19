@@ -21,7 +21,7 @@ test("the browser bundle contains no server secret or its variable name", () => 
   const leaks = []
   for (const f of files(STATIC).filter((f) => /\.(js|css|html|json|map)$/.test(f))) {
     const src = readFileSync(f, "utf8")
-    for (const s of ["bundle-test-service-role-marker", "bundle-test-groq-marker", "SUPABASE_SERVICE_ROLE_KEY", "GROQ_API_KEY", "CALCOM_API_KEY", "SITE_LOCK_PASSWORD"]) {
+    for (const s of ["bundle-test-service-role-marker", "bundle-test-groq-marker", "SUPABASE_SERVICE_ROLE_KEY", "GROQ_API_KEY", "CALCOM_API_KEY"]) {
       if (src.includes(s)) leaks.push(`${f}: ${s}`)
     }
   }

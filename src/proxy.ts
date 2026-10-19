@@ -1,23 +1,14 @@
-// Runs before every request.
-// 1. EMERGENCY HOTFIX (temporary, until the owner decides to remove it after Google sign-in
-//    is set up): every request except the landing page "/" and static assets needs the
-//    site-lock username and password. Covers server actions too (POSTs to page paths).
-// 2. Owner pages (/app/...) and the builder console: refreshes the Supabase sign-in
-//    session cookie and sends signed-out visitors to /sign-in (Phase 0 §4). This is only
-//    the quick check; every owner page and action still checks membership itself.
-//    Docs: https://supabase.com/docs/guides/auth/server-side/nextjs (@supabase/ssr in proxy)
+// Runs before owner pages (/app/...) and the builder console (/console): refreshes the
+// Supabase sign-in session cookie and sends signed-out visitors to /sign-in (Phase 0 §4).
+// This is only the quick check; every owner page and action still checks membership itself.
+// Everything else (the website, /sign-in, the booking pages) is public and never reaches here.
+// Docs: https://supabase.com/docs/guides/auth/server-side/nextjs (@supabase/ssr in proxy)
 import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
-import { needsSignIn, signInPath } from "@/server/auth-gate"
-import { asksForPassword, hasValidCredentials, isPublicRequest } from "@/server/site-lock"
+import { signInPath } from "@/server/auth-gate"
 
-function locked(request: NextRequest) {
-  if (isPublicRequest(request.nextUrl.pathname, request.method, request.headers.get("next-action"))) return false
-  return !hasValidCredentials(request.headers.get("authorization"), process.env.SITE_LOCK_USER, process.env.SITE_LOCK_PASSWORD)
-}
-
-async function ownerGate(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request })
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
@@ -40,25 +31,13 @@ async function ownerGate(request: NextRequest) {
   }
   // Fails closed: without the Supabase settings nobody counts as signed in.
   if (!signedIn) {
-    const to = new URL(signInPath(request.nextUrl.pathname, request.nextUrl.search), request.url)
-    return NextResponse.redirect(to)
+    return NextResponse.redirect(new URL(signInPath(request.nextUrl.pathname, request.nextUrl.search), request.url))
   }
   return response
 }
 
-export async function proxy(request: NextRequest) {
-  if (locked(request)) {
-    // The password box only for a real page visit, never for background loads (asksForPassword).
-    const headers: Record<string, string> = { "Cache-Control": "no-store" }
-    if (asksForPassword(request.headers)) headers["WWW-Authenticate"] = 'Basic realm="AI VA Agency", charset="UTF-8"'
-    return new NextResponse("Authentication required.", { status: 401, headers })
-  }
-  if (needsSignIn(request.nextUrl.pathname)) return ownerGate(request)
-  return NextResponse.next()
-}
-
 export const config = {
-  // Everything except Next's static files, image optimizer, the favicon, and the
-  // landing page's own images (all public, no data).
-  matcher: ["/((?!_next/static|_next/image|icon.svg|favicon.ico|landing/).*)"],
+  // Only the pages that need a signed-in user. Membership is still re-checked on every
+  // owner page and action; this just refreshes the session and bounces signed-out visitors.
+  matcher: ["/app/:path*", "/console/:path*"],
 }

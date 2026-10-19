@@ -1,15 +1,11 @@
 // Security test 1 (Phase 0 §12) against a running site, signed out (no session cookie):
-//   BASE_URL=http://localhost:3100 SITE_LOCK_USER=… SITE_LOCK_PASSWORD=… npm run test:security-http
-// The site lock is still on, so requests carry the lock credentials (from env vars, never
-// the repo); what's tested is the sign-in gate behind it.
+//   BASE_URL=http://localhost:3100 npm run test:security-http
+// Owner pages must redirect a signed-out visitor to /sign-in.
 import assert from "node:assert/strict"
 import { test } from "node:test"
 
 const BASE = (process.env.BASE_URL ?? "http://localhost:3000").replace(/\/$/, "")
-const USER = process.env.SITE_LOCK_USER
-const PASS = process.env.SITE_LOCK_PASSWORD
-const auth = USER && PASS ? { Authorization: `Basic ${btoa(`${USER}:${PASS}`)}` } : {}
-const get = (path) => fetch(BASE + path, { headers: auth, redirect: "manual" })
+const get = (path) => fetch(BASE + path, { redirect: "manual" })
 
 const OWNER_PAGES = [
   "/app",

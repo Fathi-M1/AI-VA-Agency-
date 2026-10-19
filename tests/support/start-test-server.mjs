@@ -1,7 +1,6 @@
 // Starts the built app (next start) on port 3100 with throwaway test values, for the HTTP
-// security tests and Playwright. Nothing points at the real Supabase project: the
-// Supabase address is a local port with nothing on it, and the site lock uses test-only
-// credentials. Build first with the same NEXT_PUBLIC_* values (see tests/bundle.build.test.mjs).
+// security tests and Playwright. Nothing points at the real Supabase project: the Supabase
+// address is a local port with nothing on it. Build first with the same NEXT_PUBLIC_* values.
 import { spawn } from "node:child_process"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -15,8 +14,6 @@ const env = {
   NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54321",
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "test-publishable-key",
   GROQ_API_KEY: "bundle-test-groq-marker",
-  SITE_LOCK_USER: "locktest",
-  SITE_LOCK_PASSWORD: "locktest-only-not-a-real-password",
 }
 const child = spawn("npx", ["next", "start", "-p", "3100"], { env, cwd: WEB, stdio: "inherit", shell: true })
 child.on("exit", (code) => process.exit(code ?? 0))
