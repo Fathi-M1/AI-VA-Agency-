@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { CalendarPlusIcon, MapPinIcon, MessageCircleIcon, RotateCcwIcon } from "lucide-react"
+import { CalendarPlusIcon, CheckIcon, ClockIcon, MapPinIcon, MessageCircleIcon, RotateCcwIcon, XIcon } from "lucide-react"
 
 import { estimateText } from "@/lib/booking-engine"
 import { DEFAULT_BRAND } from "@/lib/setup"
@@ -44,12 +44,29 @@ export default async function TicketPage({ params }: PageProps<"/book/[slug]/t/[
   }
 
   const store = isVertical(business.vertical) && business.booking_slug ? storefrontOf(business) : null
-  const status =
-    ticket.status === "confirmed"
-      ? { label: "Confirmed", cls: "bg-[oklch(0.93_0.06_150)] text-[oklch(0.35_0.09_150)]" }
-      : ticket.status === "declined"
-        ? { label: "Not available", cls: "bg-muted text-foreground" }
-        : { label: "Waiting for confirmation", cls: "bg-[color-mix(in_oklch,var(--warning)_25%,var(--card))] text-[oklch(0.38_0.09_60)]" }
+  const confirmed = ticket.status === "confirmed"
+  const declined = ticket.status === "declined"
+  // Status is the hero: an icon, a plain-English headline, and what happens next.
+  const view = confirmed
+    ? {
+        label: "Confirmed",
+        icon: <CheckIcon className="size-7" aria-hidden="true" />,
+        ring: "bg-[oklch(0.93_0.06_150)] text-[oklch(0.35_0.09_150)]",
+        sub: ticket.confirmed?.label ?? "",
+      }
+    : declined
+      ? {
+          label: "Not available",
+          icon: <XIcon className="size-7" aria-hidden="true" />,
+          ring: "bg-muted text-foreground",
+          sub: `Sorry, ${business.name} can't take this request. You can request another time below.`,
+        }
+      : {
+          label: "Waiting for confirmation",
+          icon: <ClockIcon className="size-7" aria-hidden="true" />,
+          ring: "bg-[color-mix(in_oklch,var(--warning)_28%,var(--card))] text-[oklch(0.38_0.09_60)]",
+          sub: `${business.name} will confirm by text or call. Keep this page — it updates on its own.`,
+        }
 
   // "Request another time": back to the form with the same service and details.
   const again = new URLSearchParams({ service: ticket.service })
@@ -59,9 +76,14 @@ export default async function TicketPage({ params }: PageProps<"/book/[slug]/t/[
   const rows: [string, string][] = [
     ["Service", ticket.service],
     ...(ticket.details && ticket.details !== ticket.service ? ([["Details", ticket.details.replace(`${ticket.service} · `, "")]] as [string, string][]) : []),
-    ...(ticket.teamMember && !ticket.confirmed ? ([["Team member", ticket.teamMember]] as [string, string][]) : []),
-    ticket.confirmed ? ["When", ticket.confirmed.label] : ["Preferred time", ticket.preferred ?? "—"],
+    ...(ticket.teamMember ? ([["Team member", ticket.teamMember]] as [string, string][]) : []),
+    confirmed && ticket.confirmed ? ["When", ticket.confirmed.label] : ["Preferred time", ticket.preferred ?? "—"],
     ...(ticket.estimate ? ([["Estimate", estimateText(ticket.estimate)]] as [string, string][]) : []),
+  ]
+  // Progress: Requested is always done; Confirmed lights up when confirmed.
+  const steps = [
+    { label: "Requested", done: true },
+    { label: declined ? "Declined" : "Confirmed", done: confirmed || declined },
   ]
 
   return (
@@ -72,19 +94,24 @@ export default async function TicketPage({ params }: PageProps<"/book/[slug]/t/[
       <main className="mx-auto mt-8 w-full max-w-[560px] px-4">
         <article className="overflow-hidden rounded-3xl border border-border/80 bg-card shadow-[0_24px_60px_-36px_rgb(0_0_0/0.35)]">
           <div className="h-1.5 bg-[var(--brand)]" aria-hidden="true" />
-          <div className="px-6 pt-6 pb-7 text-center">
-            <p className="text-base text-muted-foreground">
-              {ticket.firstName ? `${ticket.firstName}'s booking request at` : "Booking request at"} {business.name}
-            </p>
-            <h1 className="mt-3 font-mono text-4xl font-semibold tracking-[0.12em] sm:text-5xl">{ticket.code}</h1>
-            <p className={cn("mt-4 inline-flex rounded-full px-4 py-1.5 text-base font-semibold", status.cls)}>{status.label}</p>
-            {ticket.status === "requested" ? (
-              <p className="mt-4 text-base text-foreground/85">
-                {business.name} will confirm by text or call. You can come back to this page anytime.
-              </p>
-            ) : null}
-            {ticket.status === "confirmed" && ticket.confirmed ? <p className="mt-4 text-lg font-semibold">{ticket.confirmed.label}</p> : null}
-            {ticket.status === "declined" ? <p className="mt-4 text-base">Sorry, {business.name} can&apos;t take this request.</p> : null}
+          <div className="px-6 pt-7 pb-6 text-center">
+            {/* Status is the hero */}
+            <span className={cn("inline-flex size-16 items-center justify-center rounded-full", view.ring)}>{view.icon}</span>
+            <h1 className="mt-4 font-serif text-3xl leading-tight sm:text-4xl">{view.label}</h1>
+            {view.sub ? <p className="mx-auto mt-2 max-w-[42ch] text-base text-foreground/80">{view.sub}</p> : null}
+
+            {/* Requested → Confirmed progress */}
+            <div className="mt-6 flex items-center justify-center gap-2" aria-hidden="true">
+              {steps.map((s, i) => (
+                <div key={s.label} className="flex items-center gap-2">
+                  <span className={cn("flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium", s.done ? "bg-[var(--brand)] text-white" : "bg-muted text-muted-foreground")}>
+                    {s.done ? <CheckIcon className="size-3.5" /> : null}
+                    {s.label}
+                  </span>
+                  {i < steps.length - 1 ? <span className={cn("h-px w-6", confirmed ? "bg-[var(--brand)]" : "bg-border")} /> : null}
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* perforation */}
@@ -101,6 +128,10 @@ export default async function TicketPage({ params }: PageProps<"/book/[slug]/t/[
                 <dd className="font-medium break-words">{v}</dd>
               </div>
             ))}
+            <div className="grid grid-cols-[8rem_1fr] gap-3 py-3 text-base">
+              <dt className="text-muted-foreground">Reference</dt>
+              <dd className="font-mono font-medium tracking-wider">{ticket.code}</dd>
+            </div>
           </dl>
           {ticket.estimate?.notes.length ? (
             <div className="px-6 pb-2">

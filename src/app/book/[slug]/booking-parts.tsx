@@ -161,7 +161,12 @@ export function TeamPicker({ spec, value, onPick }: { spec: BookingSpec; value: 
   )
 }
 
-export function DayChips({
+const WEEKDAY_INITIALS = ["S", "M", "T", "W", "T", "F", "S"]
+
+// Compact month calendar for the next ~2 weeks (clearer than a scrolling row of chips).
+// Closed days are shown but disabled. Requests mode: pick a day, then a time of day; the
+// business confirms the exact time.
+export function DayCalendar({
   days,
   value,
   isOpen,
@@ -172,34 +177,57 @@ export function DayChips({
   isOpen: (d: DayOption) => boolean
   onPick: (v: string) => void
 }) {
+  if (!days.length) return null
+  const lead = days[0].weekday // blank cells before the first day, to line up the weekday columns
+  const monthOf = (v: string) => new Date(`${v}T00:00:00`).toLocaleString("en-US", { month: "long", year: "numeric" })
+  const first = monthOf(days[0].value)
+  const last = monthOf(days[days.length - 1].value)
+  const monthLabel = first === last ? first : `${first.split(" ")[0]} – ${last}`
+
   return (
-    <div role="radiogroup" aria-label="Day" className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-2 [scrollbar-width:thin]">
-      {days.map((d) => {
-        const open = isOpen(d)
-        const selected = value === d.value
-        return (
-          <button
-            key={d.value}
-            type="button"
-            role="radio"
-            aria-checked={selected}
-            aria-label={`${d.long}${open ? "" : ", closed"}`}
-            disabled={!open}
-            onClick={() => onPick(d.value)}
-            className={cn(
-              "flex min-h-16 min-w-[4.75rem] shrink-0 flex-col items-center justify-center rounded-2xl border px-3 text-base transition",
-              selected
-                ? "border-[var(--brand)] bg-[var(--brand)] font-semibold text-white"
-                : open
-                  ? "border-border/80 bg-card hover:border-[color-mix(in_oklch,var(--brand)_45%,transparent)]"
-                  : "cursor-not-allowed border-dashed border-border bg-muted/40 text-muted-foreground"
-            )}
-          >
-            <span>{d.label}</span>
-            {!open ? <span className="text-xs">Closed</span> : null}
-          </button>
-        )
-      })}
+    <div role="radiogroup" aria-label="Day">
+      <p className="mb-2 text-base font-medium">{monthLabel}</p>
+      <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-muted-foreground">
+        {WEEKDAY_INITIALS.map((w, i) => (
+          <div key={i} className="py-1">
+            {w}
+          </div>
+        ))}
+      </div>
+      <div className="mt-1 grid grid-cols-7 gap-1.5">
+        {Array.from({ length: lead }).map((_, i) => (
+          <div key={`b${i}`} aria-hidden="true" />
+        ))}
+        {days.map((d) => {
+          const open = isOpen(d)
+          const selected = value === d.value
+          const dayNum = Number(d.value.slice(8, 10))
+          const isToday = d.value === days[0].value
+          return (
+            <button
+              key={d.value}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              aria-label={`${d.long}${open ? "" : ", closed"}`}
+              disabled={!open}
+              onClick={() => onPick(d.value)}
+              className={cn(
+                "relative flex aspect-square min-h-11 items-center justify-center rounded-xl text-base transition",
+                selected
+                  ? "bg-[var(--brand)] font-semibold text-white"
+                  : open
+                    ? "bg-card ring-1 ring-border hover:ring-[color-mix(in_oklch,var(--brand)_55%,transparent)]"
+                    : "cursor-not-allowed text-muted-foreground/40 line-through"
+              )}
+            >
+              {dayNum}
+              {isToday && !selected ? <span className="absolute bottom-1.5 size-1 rounded-full bg-[var(--brand)]" aria-hidden="true" /> : null}
+            </button>
+          )
+        })}
+      </div>
+      <p className="mt-3 text-sm text-muted-foreground">Crossed-out days are closed. Pick a day, then a time of day.</p>
     </div>
   )
 }

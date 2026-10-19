@@ -245,7 +245,7 @@ function blankPriceHint(s: DraftService) {
 function RowHead({ perUnit }: { perUnit: boolean }) {
   return (
     <div className="hidden grid-cols-[3rem_minmax(0,1fr)_9.5rem_9.5rem] gap-3 border-b border-border/70 px-4 py-2.5 text-sm font-medium text-muted-foreground lg:grid">
-      <span className="sr-only">Offered</span>
+      <span>Offer?</span>
       <span>Service</span>
       <span>{perUnit ? "Time per unit" : "Time"}</span>
       <span>{perUnit ? "Price per unit" : "Price"}</span>
@@ -415,7 +415,7 @@ export function ServicesStep({ draft, update, pack, err, touch }: StepProps) {
 
   return (
     <div>
-      <Heading title="Your services" sub="We added common services. Turn off what you don't offer and add your prices." />
+      <Heading title="Your services" sub="Tick the ones you offer and set a price. Leave a price blank for “price on request”. Don’t see one? Add it at the bottom." />
       <section aria-label="Services" className={surface}>
         <RowHead perUnit={perUnit} />
         <ul className="divide-y divide-border/70">

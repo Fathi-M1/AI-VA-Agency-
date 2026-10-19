@@ -33,7 +33,7 @@ import { StorefrontHeader } from "./storefront-header"
 import { AskPanel, useAsk } from "./ask-panel"
 import {
   brandBtn,
-  DayChips,
+  DayCalendar,
   highlightCls,
   NumberStepper,
   OptionTiles,
@@ -433,7 +433,7 @@ export function BookingPage({
         ) : null}
         <div className={hl("day")}>
           <p className="mb-3 text-base font-medium">Day</p>
-          <DayChips days={store.days} value={day} isOpen={(d) => worksOn(spec, staffFilter, d.weekday)} onPick={pickDay} />
+          <DayCalendar days={store.days} value={day} isOpen={(d) => worksOn(spec, staffFilter, d.weekday)} onPick={pickDay} />
           {err("day")}
         </div>
         <div className={hl("time_of_day")}>
