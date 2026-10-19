@@ -14,6 +14,7 @@ import { TZDate } from "@date-fns/tz"
 import { NeedsYouList, type DateOption } from "./needs-you-list"
 import { Checklist } from "./today-client"
 import { AppLink } from "@/components/app-link"
+import { BookingLink } from "@/components/flow/booking-link"
 
 const minutesAgo = (nowMs: number, iso: string) => {
   const m = Math.max(0, Math.round((nowMs - new Date(iso).getTime()) / 60000))
@@ -62,6 +63,22 @@ export async function SummarySentence({ businessId }: { businessId: string }) {
 }
 
 /* ---------------------------------------------------------------- checklist */
+
+// Always visible (as long as the business has a link), so a first-time owner can't miss it.
+export async function BookingLinkSection({ businessId }: { businessId: string }) {
+  const { profile } = await todayBase(businessId)
+  if (!profile.booking_slug) return null
+  const url = await bookingUrl(profile.booking_slug)
+  return (
+    <GlassCard className="p-5" aria-labelledby="link-h">
+      <CardTitle id="link-h" title="Your booking link" />
+      <p className="mt-1 text-sm text-muted-foreground">Share this so customers can book you — it opens your AI front desk.</p>
+      <div className="mt-3">
+        <BookingLink url={url} />
+      </div>
+    </GlassCard>
+  )
+}
 
 export async function ChecklistSection({ businessId }: { businessId: string }) {
   const { profile } = await todayBase(businessId)

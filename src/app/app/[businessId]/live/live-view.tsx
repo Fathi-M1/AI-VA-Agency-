@@ -78,9 +78,8 @@ export function LiveView({
   return (
     <FlowCanvas>
       <main className="mx-auto flex min-h-svh w-full max-w-[1280px] flex-col gap-6 px-4 pt-4 md:px-6 md:pt-10 lg:px-10">
-        {/* Row 1: launch hero (+ phone preview from tablet up) */}
-        <div className="grid items-center gap-8 lg:grid-cols-2">
-          <HeroPanel className="p-6 sm:p-8 lg:p-10">
+        {/* Row 1: launch hero with the booking link inside it */}
+        <HeroPanel className="p-6 sm:p-8 lg:p-10">
             <CircleCheckIcon ref={check} size={56} className="text-[oklch(0.9_0.1_145)]" aria-hidden="true" />
             <h1 className="mt-5 font-serif text-[2.25rem] leading-[1.05] tracking-[-0.01em] lg:text-5xl">{name} is live!</h1>
             <p className="mt-3 text-lg text-primary-foreground/85">Your AI team is ready to take booking requests.</p>
@@ -123,20 +122,6 @@ export function LiveView({
               See it as a customer <ExternalLinkIcon className="size-4" aria-hidden="true" />
             </Link>
           </HeroPanel>
-
-          {/* Phone-frame live preview of the real booking page (tablet: centered under the hero) */}
-          <figure className="mx-auto hidden flex-col items-center gap-3 md:flex">
-            <div className="h-[600px] w-[330px] overflow-hidden rounded-[2.75rem] border-[10px] border-foreground/85 bg-background shadow-2xl">
-              <iframe
-                src={`/book/${slug}`}
-                title={`${name} booking page preview`}
-                className="h-[714px] w-[390px] origin-top-left scale-[0.795] border-0"
-                loading="lazy"
-              />
-            </div>
-            <figcaption className="text-base text-muted-foreground">This is what your customers see.</figcaption>
-          </figure>
-        </div>
 
         {/* Row 2: share panel (7/12) + relay (5/12) */}
         <div className="grid gap-6 lg:grid-cols-12">

@@ -33,6 +33,8 @@ export type SubmitInput = {
   mobile: string
   email: string
   consent: boolean
+  /** What the customer first typed on the page ("Fill it for me"), kept for the transcript. */
+  note?: string
 }
 
 export type SubmitResult =
@@ -92,8 +94,12 @@ export async function submitRequest(slug: string, input: SubmitInput): Promise<S
   const summary = shortDetails(spec, fill.answers, staffName)
 
   try {
+    // One conversation per real request: the customer's own words (if they used "Fill it
+    // for me"), then what Booking sent. The customer is named by create_booking_request below.
+    const note = String(input.note ?? "").trim().slice(0, 500)
     const conversationId = await asLog(() => logToConversation(business.id, sessionId, "web", [
-      { role: "agent", agent: "booking", content: `Booking request sent from the form: ${summary} · ${day.long} · ${TOD_LABEL[tod]}.` },
+      ...(note ? [{ role: "customer" as const, agent: null, content: note }] : []),
+      { role: "agent", agent: "booking", content: `Booking request sent: ${summary} · ${day.long} · ${TOD_LABEL[tod]}.` },
     ]))
     // The same narrow function the public storefront uses: customer by mobile, booking
     // request, reference code and private ticket token, in one transaction.

@@ -40,6 +40,28 @@ export function SeenBeacon({ businessId }: { businessId: string }) {
   return null
 }
 
+/** Re-loads Today when the owner returns to the tab, so new booking requests and
+ *  appointments appear without a manual refresh. Throttled so it never loops. */
+export function RefreshOnReturn() {
+  const router = useRouter()
+  React.useEffect(() => {
+    let last = Date.now()
+    const refresh = () => {
+      if (document.visibilityState !== "visible") return
+      if (Date.now() - last < 10_000) return // at most once per 10s
+      last = Date.now()
+      router.refresh()
+    }
+    document.addEventListener("visibilitychange", refresh)
+    window.addEventListener("focus", refresh)
+    return () => {
+      document.removeEventListener("visibilitychange", refresh)
+      window.removeEventListener("focus", refresh)
+    }
+  }, [router])
+  return null
+}
+
 /** Today's header menu (phones; desktop has the same in the sidebar's account menu). */
 export function TodayMenu() {
   return (

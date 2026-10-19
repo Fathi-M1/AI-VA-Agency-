@@ -56,6 +56,7 @@ export function AppSidebar({
   openNeedsYou = 0,
   business,
   businesses,
+  onMenuOpenChange,
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
   /** Real count of open needs-you items (Supabase), read by the app layout. */
@@ -64,6 +65,8 @@ export function AppSidebar({
   business: { id: string; name: string; ownerName: string | null }
   /** The businesses the signed-in user belongs to (account menu). */
   businesses: { id: string; name: string }[]
+  /** Keeps the sidebar open while the account menu is open (avoids hover-close flicker). */
+  onMenuOpenChange?: (open: boolean) => void
 }) {
   const pathname = usePathname()
   const toApp = useAppPath()
@@ -77,7 +80,7 @@ export function AppSidebar({
       {...props}
     >
       <SidebarHeader className="px-3 pt-6 pb-0 group-data-[collapsible=icon]:px-2">
-        <TeamSwitcher current={business} businesses={businesses} />
+        <TeamSwitcher current={business} businesses={businesses} onOpenChange={onMenuOpenChange} />
       </SidebarHeader>
 
       <SidebarContent className="px-2 pt-[27px] group-data-[collapsible=icon]:px-0">

@@ -2,13 +2,12 @@
 // doesn't chat: it reads the customer's words and picks values from THIS business's
 // real options (Groq structured output), then the server keeps only valid values.
 // Safety net first; every text is saved to the visit's conversation (channel "web").
-import { missingFor, shortDetails, validateFill, type RawFill } from "@/lib/booking-engine"
+import { missingFor, validateFill, type RawFill } from "@/lib/booking-engine"
 import { extractJson } from "@/server/agent/llm"
-import { logToConversation, safetyCheck } from "@/server/agent/orchestrator"
+import { safetyCheck } from "@/server/agent/orchestrator"
 import { loadStorefront, nowIn, type Storefront } from "@/server/booking-page"
 import { asServiceRole } from "@/server/db/client"
 
-const LABELS = { morning: "Morning", afternoon: "Afternoon", evening: "Evening" } as const
 
 function context(store: Storefront, tz: string) {
   const { now } = nowIn(tz)
@@ -89,10 +88,8 @@ async function handle(request: Request, { params }: RouteContext<"/api/book/[slu
         },
       })
       const picked = q.options!.find((o) => o.toLowerCase() === (out.value ?? "").trim().toLowerCase()) ?? null
-      await logToConversation(business.id, sessionId, "web", [
-        { role: "customer", agent: null, content: `(${q.ask}) ${text}` },
-        { role: "agent", agent: "booking", content: picked ? `Picked "${picked}" from the description.` : "Couldn't tell which option fits." },
-      ])
+      // Reading a form field is not a conversation: nothing is logged until the request is
+      // actually sent (submitRequest), so the owner never sees a stray "Unknown customer".
       return Response.json({ picked })
     }
 
@@ -111,27 +108,13 @@ Rules:
       schema: FILL_SCHEMA(questionIds),
     })
 
-    if (raw.intent === "question") {
-      await logToConversation(business.id, sessionId, "web", [{ role: "customer", agent: null, content: text }])
-      return Response.json({ intent: "question" })
-    }
+    // A question goes to "Ask us" (the agent, /ask route), which records that conversation.
+    if (raw.intent === "question") return Response.json({ intent: "question" })
 
     const fill = validateFill(store.spec, store.days, raw)
     const missing = missingFor(store.spec, fill)
-    const staffName =
-      fill.staffId === "any" ? "Anyone available" : store.spec.staff.find((m) => m.id === fill.staffId)?.name
-    const day = store.days.find((d) => d.value === fill.day)
-    const summary = [
-      fill.answers.service ? shortDetails(store.spec, fill.answers, staffName) : "",
-      day?.long ?? "",
-      fill.timeOfDay ? LABELS[fill.timeOfDay] : "",
-    ]
-      .filter(Boolean)
-      .join(" · ")
-    await logToConversation(business.id, sessionId, "web", [
-      { role: "customer", agent: null, content: text },
-      { role: "agent", agent: "booking", content: summary ? `Filled in from the message: ${summary}` : "Couldn't fill anything in from the message." },
-    ])
+    // Nothing logged here — the request (with the customer's words) is recorded only when
+    // they actually submit it (submitRequest), as one named conversation.
     return Response.json({ intent: "booking", filled: fill, missing })
   } catch (err) {
     console.error("[book/parse]", err instanceof Error ? err.message : "unknown error")

@@ -10,6 +10,7 @@ import { requireMember } from "@/server/auth"
 
 import {
   AppointmentsSection,
+  BookingLinkSection,
   ChecklistSection,
   HandledSection,
   NeedsYouSection,
@@ -17,7 +18,7 @@ import {
   SummarySentence,
   WeekSection,
 } from "./sections"
-import { SeenBeacon, TodayMenu } from "./today-client"
+import { RefreshOnReturn, SeenBeacon, TodayMenu } from "./today-client"
 
 export const metadata: Metadata = { title: "Today" }
 
@@ -66,6 +67,13 @@ export default async function TodayPage({ params }: PageProps<"/app/[businessId]
         </div>
       </HeroPanel>
 
+      {/* Always-visible booking link, so a first-time owner can share it right away. */}
+      <div className="mt-5 md:mt-6">
+        <Section>
+          <BookingLinkSection businessId={businessId} />
+        </Section>
+      </div>
+
       {/* Row 2. Each section renders once: on phones the two columns dissolve ("contents")
           into one list and the checklist moves first; from tablet up they are columns. */}
       <div className="mt-5 flex flex-col gap-6 md:mt-6 md:grid md:grid-cols-12">
@@ -101,6 +109,7 @@ export default async function TodayPage({ params }: PageProps<"/app/[businessId]
       </div>
 
       <SeenBeacon businessId={businessId} />
+      <RefreshOnReturn />
     </div>
   )
 }

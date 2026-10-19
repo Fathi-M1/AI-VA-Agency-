@@ -81,14 +81,9 @@ export default async function SignInPage({ searchParams }: PageProps<"/sign-in">
           </form>
 
           <p className="mt-6 text-sm text-muted-foreground">We only use your name and email to sign you in — nothing else.</p>
+          <p className="mt-2 text-sm text-muted-foreground">New here? Signing in sets up your business right after.</p>
 
-          <p className="mt-10 text-sm text-muted-foreground">
-            New here?{" "}
-            <Link href="/app/onboarding" className="font-medium text-primary underline-offset-4 hover:underline">
-              Set up your business
-            </Link>
-          </p>
-          <Link href="/" className="mt-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
+          <Link href="/" className="mt-10 inline-flex items-center gap-1.5 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
             ← Back to the website
           </Link>
         </div>

@@ -77,6 +77,7 @@ export function BookingPage({
   const [magic, setMagic] = React.useState("")
   const [magicBusy, setMagicBusy] = React.useState(false)
   const [magicError, setMagicError] = React.useState<string | null>(null)
+  const [requestNote, setRequestNote] = React.useState("") // the customer's own words, kept for the transcript
   const [unsure, setUnsure] = React.useState<Record<string, { open: boolean; text: string; busy: boolean; note?: string }>>({})
   const [receiptOpen, setReceiptOpen] = React.useState(false)
   const [askOpen, setAskOpen] = React.useState(false)
@@ -168,6 +169,7 @@ export function BookingPage({
   const magicFill = async (text: string) => {
     const t = text.trim()
     if (!t || magicBusy) return
+    setRequestNote(t)
     setMagicBusy(true)
     setMagicError(null)
     setNotice(null)
@@ -286,6 +288,7 @@ export function BookingPage({
           mobile,
           email,
           consent,
+          note: requestNote,
         })
         if (res.ok) return router.push(`/book/${store.slug}/t/${res.token}`)
         if ("emergency" in res) return showEmergency(res.emergency)

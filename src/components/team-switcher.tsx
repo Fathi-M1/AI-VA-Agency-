@@ -39,16 +39,18 @@ const Initial = ({ name, className = "", glass = false }: { name: string; classN
 export function TeamSwitcher({
   current,
   businesses,
+  onOpenChange,
 }: {
   current: { id: string; name: string; ownerName: string | null }
   businesses: { id: string; name: string }[]
+  onOpenChange?: (open: boolean) => void
 }) {
   const { isMobile } = useSidebar()
 
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <DropdownMenu>
+        <DropdownMenu onOpenChange={onOpenChange}>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"

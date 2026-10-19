@@ -30,11 +30,25 @@ export function SidebarShell({
   businesses: { id: string; name: string }[]
 }) {
   const [open, setOpen] = React.useState(false)
+  // The account/business dropdown portals its menu outside the sidebar, so opening it fires
+  // a blur-close and then a refocus — the flicker when switching business. While it's open,
+  // the sidebar stays expanded and hover-close is ignored.
+  const menuOpen = React.useRef(false)
   const timer = React.useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const schedule = (next: boolean, delay: number) => {
+    if (!next && menuOpen.current) return
     if (timer.current) clearTimeout(timer.current)
     timer.current = setTimeout(() => setOpen(next), delay)
+  }
+  const onMenuOpenChange = (isOpen: boolean) => {
+    menuOpen.current = isOpen
+    if (isOpen) {
+      if (timer.current) clearTimeout(timer.current)
+      setOpen(true)
+    } else {
+      schedule(false, CLOSE_DELAY)
+    }
   }
   React.useEffect(() => () => {
     if (timer.current) clearTimeout(timer.current)
@@ -62,6 +76,7 @@ export function SidebarShell({
         openNeedsYou={openNeedsYou}
         business={business}
         businesses={businesses}
+        onMenuOpenChange={onMenuOpenChange}
         onMouseEnter={() => schedule(true, OPEN_DELAY)}
         onMouseLeave={() => schedule(false, CLOSE_DELAY)}
         onFocusCapture={() => schedule(true, 0)}
