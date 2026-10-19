@@ -525,7 +525,7 @@ export function BookingPage({
   )
 
   return (
-    <div className="min-h-svh bg-background" style={{ "--brand": store.brand } as React.CSSProperties}>
+    <div className="force-light min-h-svh bg-background" style={{ "--brand": store.brand } as React.CSSProperties}>
       <div ref={topRef} />
       <StorefrontHeader titleAs="h1" name={store.name} status={store.status} chips={store.chips} address={store.address} />
 

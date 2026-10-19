@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: PageProps<"/book/[slug]">): P
 }
 
 const NotActive = () => (
-  <FlowCanvas className="flex items-center justify-center px-4">
+  <FlowCanvas className="force-light flex items-center justify-center px-4">
     <main className="mx-auto max-w-[480px] text-center">
       <p className="text-lg">This booking link isn&apos;t active. Please contact the business directly.</p>
     </main>

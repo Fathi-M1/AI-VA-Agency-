@@ -166,7 +166,7 @@ export function BookChat({
   const numberChips = !busy && last?.kind === "agent" && last.numberReply
 
   return (
-    <div className="flex min-h-svh flex-col bg-background bg-[radial-gradient(90%_40%_at_100%_0%,color-mix(in_oklch,var(--primary)_12%,var(--background))_0%,transparent_70%)]">
+    <div className="force-light flex min-h-svh flex-col bg-background bg-[radial-gradient(90%_40%_at_100%_0%,color-mix(in_oklch,var(--primary)_12%,var(--background))_0%,transparent_70%)]">
       <div className="mx-auto flex w-full max-w-[480px] flex-1 flex-col">
         {/* Header */}
         <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-border/70 bg-background/85 px-4 py-3 backdrop-blur-xl">
@@ -282,7 +282,7 @@ export function BookChat({
               e.preventDefault()
               send(text)
             }}
-            className="flex items-center gap-2 rounded-2xl border border-primary/15 bg-card/90 p-1.5 pl-4 shadow-[0_12px_40px_-18px_color-mix(in_oklch,var(--primary)_55%,transparent),inset_0_1px_0_rgb(255_255_255/0.7)] backdrop-blur-xl"
+            className="flex items-center gap-2 rounded-2xl border border-primary/15 bg-card/90 p-1.5 pl-4 shadow-[var(--elevate-raised)] backdrop-blur-xl"
           >
             <label htmlFor="book-msg" className="sr-only">
               Message
@@ -340,7 +340,7 @@ function LineView({
   if (line.kind === "customer") {
     return (
       <div className={cn("flex flex-col items-end gap-1", enter)}>
-        <p className="max-w-[85%] rounded-2xl rounded-br-md bg-[linear-gradient(135deg,oklch(0.48_0.085_150),var(--primary)_60%,oklch(0.35_0.06_158))] px-4 py-2.5 text-base text-primary-foreground shadow-[0_8px_20px_-12px_color-mix(in_oklch,var(--primary)_70%,transparent)]">
+        <p className="max-w-[85%] rounded-2xl rounded-br-md bg-[linear-gradient(135deg,oklch(0.48_0.085_150),var(--primary)_60%,oklch(0.35_0.06_158))] px-4 py-2.5 text-base text-primary-foreground shadow-sm">
           {line.text}
         </p>
         {line.status === "failed" ? (

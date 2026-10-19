@@ -161,6 +161,37 @@
   --sidebar-ring: oklch(0.405 0.07 155);
 }
 
+/* The customer storefront is always light (design-system.md), even if the owner set the
+   app to dark on their device. This re-asserts the light palette on the storefront's root
+   so it wins over a .dark on <html>. Keep in sync with :root. */
+.force-light {
+  color-scheme: light;
+  --background: oklch(0.967 0.007 85);
+  --foreground: oklch(0.215 0.006 85);
+  --card: oklch(0.994 0.004 85);
+  --card-foreground: oklch(0.215 0.006 85);
+  --popover: oklch(0.994 0.004 85);
+  --popover-foreground: oklch(0.215 0.006 85);
+  --primary: oklch(0.405 0.07 155);
+  --primary-foreground: oklch(0.99 0.004 85);
+  --secondary: oklch(0.94 0.009 85);
+  --secondary-foreground: oklch(0.215 0.006 85);
+  --muted: oklch(0.94 0.009 85);
+  --muted-foreground: oklch(0.5 0.012 80);
+  --subtle: oklch(0.555 0.012 80);
+  --accent: oklch(0.94 0.009 85);
+  --accent-foreground: oklch(0.215 0.006 85);
+  --destructive: oklch(0.52 0.16 30);
+  --warning: oklch(0.72 0.15 70);
+  --warning-foreground: oklch(0.5 0.12 62);
+  --border: oklch(0.912 0.011 85);
+  --input: oklch(0.868 0.015 85);
+  --ring: oklch(0.405 0.07 155);
+  --elevate-raised: inset 0 1px 0 rgb(255 255 255 / 0.7), 0 14px 40px -28px color-mix(in oklch, var(--primary) 55%, transparent);
+  --elevate-overlay: 0 24px 60px -28px color-mix(in oklch, var(--primary) 45%, transparent);
+  --elevate-hero: 0 24px 60px -32px color-mix(in oklch, var(--primary) 80%, transparent);
+}
+
 .dark {
   /* Same system in the dark: warm near-black paper, the one green accent (brighter for
      contrast), amber reserved for needs you / waiting. Mirrors :root semantics. */

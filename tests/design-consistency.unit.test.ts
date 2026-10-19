@@ -24,12 +24,13 @@ const bespokeElevation = (src.match(/shadow-\[[^\]]+\]/g) ?? [])
     const layers = m.slice(8, -1).split(/,(?![^(]*\))/)
     return !layers.every((l) => l.includes("inset")) // every layer inset = decorative, allowed
   }).length
-// Divergent primary CTAs still to route through the one pill (brandCls + PillButton +
-// raw green gradients). Owner recipes primaryBtn/secondaryBtn are the system, not counted.
-const divergentCTAs = (src.match(/brandCls|PillButton|bg-\[linear-gradient\(135deg/g) ?? []).length
+// Divergent primary CTAs still to route through the one pill: PillButton + raw green
+// gradients. (primaryBtn/secondaryBtn are the owner system; brandCls is the sanctioned
+// customer --brand pill — neither is divergent.)
+const divergentCTAs = (src.match(/PillButton|bg-\[linear-gradient\(135deg/g) ?? []).length
 
-// Budgets = the count after Stage B. Only ever lower these (Stage C storefront, Stage D onboarding).
-const BUDGET = { strayRadii: 7, bespokeElevation: 16, divergentCTAs: 22 }
+// Budgets = the count after Stage C. Only ever lower these (Stage D onboarding/landing).
+const BUDGET = { strayRadii: 7, bespokeElevation: 13, divergentCTAs: 19 }
 
 test("off-scale corner radii only go down (use rounded-lg/2xl/full)", () => {
   assert.ok(strayRadii <= BUDGET.strayRadii, `stray radii ${strayRadii} > ${BUDGET.strayRadii}`)

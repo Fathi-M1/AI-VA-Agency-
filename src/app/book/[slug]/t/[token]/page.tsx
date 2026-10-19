@@ -37,7 +37,7 @@ export default async function TicketPage({ params }: PageProps<"/book/[slug]/t/[
 
   if (!business || !ticket) {
     return (
-      <div className="flex min-h-svh items-center justify-center bg-background px-4">
+      <div className="force-light flex min-h-svh items-center justify-center bg-background px-4">
         <p className="max-w-[480px] text-center text-lg">We can&apos;t find this ticket. Check the link or contact the business.</p>
       </div>
     )
@@ -87,12 +87,12 @@ export default async function TicketPage({ params }: PageProps<"/book/[slug]/t/[
   ]
 
   return (
-    <div className="min-h-svh bg-background pb-16" style={{ "--brand": brand } as React.CSSProperties}>
+    <div className="force-light min-h-svh bg-background pb-16" style={{ "--brand": brand } as React.CSSProperties}>
       <StorefrontHeader name={business.name} status={store?.status} address={store?.address} />
       <TicketRefresher waiting={ticket.status === "requested"} />
 
       <main className="mx-auto mt-8 w-full max-w-[560px] px-4">
-        <article className="overflow-hidden rounded-3xl border border-border/80 bg-card shadow-[0_24px_60px_-36px_rgb(0_0_0/0.35)]">
+        <article className="overflow-hidden rounded-3xl border border-border/80 bg-card shadow-[var(--elevate-raised)]">
           <div className="h-1.5 bg-[var(--brand)]" aria-hidden="true" />
           <div className="px-6 pt-7 pb-6 text-center">
             {/* Status is the hero */}
