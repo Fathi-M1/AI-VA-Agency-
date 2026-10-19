@@ -30,7 +30,7 @@ export default function DashboardError({
             Your AI team is still answering calls and booking. Only this report
             is affected.
           </p>
-          <Button onClick={() => retry()} className="mt-4 h-9 rounded-[9px] px-4 text-sm font-semibold">
+          <Button onClick={() => retry()} className="mt-4 h-9 rounded-lg px-4 text-sm font-semibold">
             Try again
           </Button>
         </AlertDescription>

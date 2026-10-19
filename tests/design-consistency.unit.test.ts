@@ -1,7 +1,7 @@
-// Design-system guardrail (docs/DESIGN-SYSTEM.md). It doesn't force a big-bang refactor;
-// it RATCHETS: the known inconsistencies may only go down, never up. As Stage B/C/D migrate
-// surfaces to the system, lower these budgets. A new stray radius/shadow/legacy button makes
-// the test fail, so inconsistency can't creep back in.
+// Design-system guardrail (docs/DESIGN-SYSTEM.md). It ratchets: the known inconsistencies
+// may only go DOWN, never up. As each stage migrates surfaces to the system, lower the
+// budgets. A new stray radius / bespoke elevation / divergent CTA fails the test, so
+// inconsistency can't creep back in.
 import assert from "node:assert/strict"
 import { readdirSync, readFileSync, statSync } from "node:fs"
 import { join } from "node:path"
@@ -14,27 +14,31 @@ function files(dir: string): string[] {
   })
 }
 const src = files("src").map((f) => readFileSync(f, "utf8")).join("\n")
-const count = (re: RegExp) => (src.match(re) ?? []).length
 
-// Allowed: the 3-radius scale (rounded-lg / rounded-2xl / rounded-full) and the
-// radius token min(var(--radius…)). A bare rounded-[Npx] is off-scale debt.
+// Off-scale corner radii (allowed scale: rounded-lg/2xl/full + the radius token).
 const strayRadii = (src.match(/rounded-\[[^\]]+\]/g) ?? []).filter((m) => !m.includes("var(--radius")).length
-// Allowed: shadow-[var(--elevate-*)]. A literal shadow-[…] is bespoke-elevation debt.
-const bespokeShadows = (src.match(/shadow-\[[^\]]+\]/g) ?? []).filter((m) => !m.includes("var(--elevate")).length
-// Legacy primary/secondary CTA helpers to retire in favour of one Button.
-const legacyButtons = count(/brandCls|primaryBtn|secondaryBtn|secondaryBtnCls/g)
+// Bespoke ELEVATION (drop shadows). Token shadows and pure-inset highlights are allowed.
+const bespokeElevation = (src.match(/shadow-\[[^\]]+\]/g) ?? [])
+  .filter((m) => !m.includes("var(--elevate"))
+  .filter((m) => {
+    const layers = m.slice(8, -1).split(/,(?![^(]*\))/)
+    return !layers.every((l) => l.includes("inset")) // every layer inset = decorative, allowed
+  }).length
+// Divergent primary CTAs still to route through the one pill (brandCls + PillButton +
+// raw green gradients). Owner recipes primaryBtn/secondaryBtn are the system, not counted.
+const divergentCTAs = (src.match(/brandCls|PillButton|bg-\[linear-gradient\(135deg/g) ?? []).length
 
-// Budgets = the baseline when the system was codified (Stage A). Only ever lower these.
-const BUDGET = { strayRadii: 36, bespokeShadows: 36, legacyButtons: 18 }
+// Budgets = the count after Stage B. Only ever lower these (Stage C storefront, Stage D onboarding).
+const BUDGET = { strayRadii: 7, bespokeElevation: 16, divergentCTAs: 22 }
 
 test("off-scale corner radii only go down (use rounded-lg/2xl/full)", () => {
-  assert.ok(strayRadii <= BUDGET.strayRadii, `stray radii ${strayRadii} > budget ${BUDGET.strayRadii} — use the 3-step scale, or lower the budget if you removed some`)
+  assert.ok(strayRadii <= BUDGET.strayRadii, `stray radii ${strayRadii} > ${BUDGET.strayRadii}`)
 })
-test("bespoke shadows only go down (use shadow-[var(--elevate-*)])", () => {
-  assert.ok(bespokeShadows <= BUDGET.bespokeShadows, `bespoke shadows ${bespokeShadows} > budget ${BUDGET.bespokeShadows} — use an elevation token`)
+test("bespoke elevation only goes down (use shadow-[var(--elevate-*)])", () => {
+  assert.ok(bespokeElevation <= BUDGET.bespokeElevation, `bespoke elevation ${bespokeElevation} > ${BUDGET.bespokeElevation}`)
 })
-test("legacy button helpers only go down (use the one Button)", () => {
-  assert.ok(legacyButtons <= BUDGET.legacyButtons, `legacy button helpers ${legacyButtons} > budget ${BUDGET.legacyButtons} — route through Button`)
+test("divergent primary CTAs only go down (use the one pill)", () => {
+  assert.ok(divergentCTAs <= BUDGET.divergentCTAs, `divergent CTAs ${divergentCTAs} > ${BUDGET.divergentCTAs}`)
 })
 
 test("elevation tokens exist in both themes", () => {
@@ -47,5 +51,5 @@ test("elevation tokens exist in both themes", () => {
 test("dark mode keeps the green brand (not the default grey/blue shadcn dark)", () => {
   const css = readFileSync("src/app/globals.css", "utf8")
   const dark = css.slice(css.indexOf(".dark {"))
-  assert.match(dark, /--primary: oklch\(0\.[0-9]+ 0\.1[0-9] 15[0-9]\)/, "dark --primary should be a green (hue ~150-159), not grey")
+  assert.match(dark, /--primary: oklch\(0\.[0-9]+ 0\.1[0-9] 15[0-9]\)/, "dark --primary should be a green (hue ~150-159)")
 })

@@ -306,7 +306,7 @@ export function ConversationsDataTable({
                 placeholder="Search a name or anything said"
                 value={filterValue("search")}
                 onChange={(e) => setFilter("search", e.target.value)}
-                className="h-9 w-72 rounded-[9px] border-input bg-card pl-9 text-sm max-sm:w-full"
+                className="h-9 w-72 rounded-lg border-input bg-card pl-9 text-sm max-sm:w-full"
               />
             </label>
             <Filter label="Channel" value={filterValue("channel") || ALL} onChange={(v) => setFilter("channel", v)} options={channels} />
@@ -315,7 +315,7 @@ export function ConversationsDataTable({
             {filtering ? (
               <Button
                 variant="ghost"
-                className="h-9 rounded-[9px] px-2.5 text-xs text-muted-foreground"
+                className="h-9 rounded-lg px-2.5 text-xs text-muted-foreground"
                 onClick={() => table.resetColumnFilters()}
               >
                 Clear
@@ -395,7 +395,7 @@ export function ConversationsDataTable({
         <Button
           variant="outline"
           size="sm"
-          className="rounded-[9px] border-input bg-transparent"
+          className="rounded-lg border-input bg-transparent"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
@@ -404,7 +404,7 @@ export function ConversationsDataTable({
         <Button
           variant="outline"
           size="sm"
-          className="rounded-[9px] border-input bg-transparent"
+          className="rounded-lg border-input bg-transparent"
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >
@@ -438,7 +438,7 @@ function Filter({
       <SelectTrigger
         aria-label={label}
         data-active={value !== ALL}
-        className="h-9! rounded-[9px] border-input bg-transparent px-3 text-sm data-[active=true]:border-foreground/40 data-[active=true]:bg-card"
+        className="h-9! rounded-lg border-input bg-transparent px-3 text-sm data-[active=true]:border-foreground/40 data-[active=true]:bg-card"
       >
         <SelectValue />
       </SelectTrigger>

@@ -322,14 +322,14 @@ export function CustomerBook({
                 placeholder="Search name, phone or email"
                 value={filterValue("search")}
                 onChange={(e) => setFilter("search", e.target.value)}
-                className="h-9 w-72 rounded-[9px] border-input bg-card pl-9 text-sm max-sm:w-full"
+                className="h-9 w-72 rounded-lg border-input bg-card pl-9 text-sm max-sm:w-full"
               />
             </label>
             <Select value={filterValue("segment") || "all"} onValueChange={(v) => setFilter("segment", v)}>
               <SelectTrigger
                 aria-label="Show"
                 data-active={!!filterValue("segment")}
-                className="h-9! rounded-[9px] border-input bg-transparent px-3 text-sm data-[active=true]:border-foreground/40 data-[active=true]:bg-card"
+                className="h-9! rounded-lg border-input bg-transparent px-3 text-sm data-[active=true]:border-foreground/40 data-[active=true]:bg-card"
               >
                 <SelectValue />
               </SelectTrigger>
@@ -414,7 +414,7 @@ export function CustomerBook({
         <Button
           variant="outline"
           size="sm"
-          className="rounded-[9px] border-input bg-transparent"
+          className="rounded-lg border-input bg-transparent"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
@@ -423,7 +423,7 @@ export function CustomerBook({
         <Button
           variant="outline"
           size="sm"
-          className="rounded-[9px] border-input bg-transparent"
+          className="rounded-lg border-input bg-transparent"
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >

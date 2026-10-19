@@ -27,7 +27,7 @@ import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/c
 const Initial = ({ name, className = "", glass = false }: { name: string; className?: string; glass?: boolean }) => (
   <div
     aria-hidden="true"
-    className={`flex aspect-square shrink-0 items-center justify-center rounded-[10px] font-serif leading-none text-white ${
+    className={`flex aspect-square shrink-0 items-center justify-center rounded-lg font-serif leading-none text-white ${
       glass
         ? "border border-white/25 bg-white/15 shadow-[inset_0_1px_0_rgb(255_255_255/0.3)] backdrop-blur-xl"
         : "bg-[linear-gradient(135deg,oklch(0.6_0.1_150)_0%,var(--primary)_55%,oklch(0.32_0.06_158)_100%)] shadow-[inset_0_1px_0_rgb(255_255_255/0.25)]"

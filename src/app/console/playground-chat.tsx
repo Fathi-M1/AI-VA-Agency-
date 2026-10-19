@@ -138,7 +138,7 @@ export function PlaygroundChat({
             setLines([])
           }}
         >
-          <SelectTrigger id="pg-business" className="h-9 min-w-56 rounded-[9px] bg-card text-sm">
+          <SelectTrigger id="pg-business" className="h-9 min-w-56 rounded-lg bg-card text-sm">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -190,17 +190,17 @@ export function PlaygroundChat({
               </span>
               <div className="ml-auto flex gap-2">
                 {voice.state === "listening" ? (
-                  <Button type="button" variant="outline" className="h-9 gap-2 rounded-[9px]" onClick={voice.stopListening}>
+                  <Button type="button" variant="outline" className="h-9 gap-2 rounded-lg" onClick={voice.stopListening}>
                     <SquareIcon aria-hidden="true" /> Stop listening
                   </Button>
                 ) : voice.state === "speaking" ? (
-                  <Button type="button" variant="outline" className="h-9 gap-2 rounded-[9px]" onClick={voice.stopSpeaking}>
+                  <Button type="button" variant="outline" className="h-9 gap-2 rounded-lg" onClick={voice.stopSpeaking}>
                     <SquareIcon aria-hidden="true" /> Stop speaking
                   </Button>
                 ) : (
                   <Button
                     type="button"
-                    className="h-9 gap-2 rounded-[9px]"
+                    className="h-9 gap-2 rounded-lg"
                     disabled={busy || voice.state === "thinking"}
                     onClick={voice.listen}
                   >
@@ -238,9 +238,9 @@ export function PlaygroundChat({
           placeholder="Type a message"
           autoComplete="off"
           autoFocus
-          className="h-10 rounded-[9px] bg-card text-sm"
+          className="h-10 rounded-lg bg-card text-sm"
         />
-        <Button type="submit" disabled={busy || !draft.trim()} className="h-10 rounded-[9px] px-4">
+        <Button type="submit" disabled={busy || !draft.trim()} className="h-10 rounded-lg px-4">
           Send
         </Button>
       </form>

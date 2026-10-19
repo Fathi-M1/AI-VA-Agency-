@@ -62,7 +62,7 @@ const DAYS: [Weekday, string][] = [
   ["sun", "Sunday"],
 ]
 
-const field = "h-10 rounded-[9px] border-input bg-card text-sm"
+const field = "h-10 rounded-lg border-input bg-card text-sm"
 // The right-hand column of a responsive Field: fixed share of the width, so the
 // label column and the controls line up across every group.
 const control = "w-full @md/field-group:w-[min(34rem,56%)]! @md/field-group:shrink-0"
@@ -272,7 +272,7 @@ export function SettingsForm({
                     placeholder="Answer"
                     value={f.answer}
                     onChange={(e) => set("faqs", v.faqs.map((x, j) => (j === i ? { ...x, answer: e.target.value } : x)))}
-                    className="min-h-16 resize-none rounded-[9px] border-input bg-background text-sm"
+                    className="min-h-16 resize-none rounded-lg border-input bg-background text-sm"
                   />
                 </div>
               ))}
@@ -291,7 +291,7 @@ export function SettingsForm({
             <Legend title="Safety" body="When the AI stops and hands over to you. It never improvises on these." />
             <FieldGroup>
               <Row label="Emergency instruction" htmlFor="emerg" hint="Read word for word when an emergency word is heard.">
-                <Textarea id="emerg" value={v.emergencyLine} onChange={(e) => set("emergencyLine", e.target.value)} className={`min-h-24 resize-none rounded-[9px] border-input bg-card text-sm ${control}`} />
+                <Textarea id="emerg" value={v.emergencyLine} onChange={(e) => set("emergencyLine", e.target.value)} className={`min-h-24 resize-none rounded-lg border-input bg-card text-sm ${control}`} />
               </Row>
               <FieldSeparator />
               <Row label="Emergency words" htmlFor="kw" hint="One per line. Any of these stops the AI and reads the instruction.">
@@ -302,7 +302,7 @@ export function SettingsForm({
                     setKeywordsText(e.target.value)
                     setDirty(true)
                   }}
-                  className={`min-h-28 resize-none rounded-[9px] border-input bg-card text-sm ${control}`}
+                  className={`min-h-28 resize-none rounded-lg border-input bg-card text-sm ${control}`}
                 />
               </Row>
               <FieldSeparator />
@@ -314,7 +314,7 @@ export function SettingsForm({
                     setAdviceText(e.target.value)
                     setDirty(true)
                   }}
-                  className={`min-h-20 resize-none rounded-[9px] border-input bg-card text-sm ${control}`}
+                  className={`min-h-20 resize-none rounded-lg border-input bg-card text-sm ${control}`}
                 />
               </Row>
               <FieldSeparator />
@@ -436,7 +436,7 @@ export function SettingsForm({
                 <span className="font-medium">Unsaved changes</span>
                 <span className="text-muted-foreground"> · the AI keeps using the old settings until you save</span>
               </p>
-              <Button type="button" variant="ghost" className="h-10 rounded-[9px] px-3 text-sm text-muted-foreground" onClick={discard}>
+              <Button type="button" variant="ghost" className="h-10 rounded-lg px-3 text-sm text-muted-foreground" onClick={discard}>
                 Discard
               </Button>
               <Button type="submit" className={primaryBtn} disabled={pending}>

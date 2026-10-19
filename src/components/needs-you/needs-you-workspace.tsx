@@ -53,11 +53,11 @@ export function NeedsYouWorkspace({ items }: { items: NeedsYouView[] }) {
       }
       actions={
         <Tabs value={view} onValueChange={(v) => setView(v as "open" | "resolved")}>
-          <TabsList className="h-9! rounded-[9px] bg-secondary">
-            <TabsTrigger value="open" className="rounded-[7px] px-3 text-sm">
+          <TabsList className="h-9! rounded-lg bg-secondary">
+            <TabsTrigger value="open" className="rounded-md px-3 text-sm">
               Open · {open.length}
             </TabsTrigger>
-            <TabsTrigger value="resolved" className="rounded-[7px] px-3 text-sm">
+            <TabsTrigger value="resolved" className="rounded-md px-3 text-sm">
               Resolved · {resolved.length}
             </TabsTrigger>
           </TabsList>
