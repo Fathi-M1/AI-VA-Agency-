@@ -13,8 +13,14 @@ import { cn } from "@/lib/utils"
 export function HeroPanel({ className, children }: { className?: string; children: React.ReactNode }) {
   return (
     <section
+      // Always a green panel, so its text stays light in BOTH themes (the global
+      // --primary-foreground flips to dark ink in dark mode — wrong on green). In dark the
+      // green deepens so it sits on near-black instead of glowing.
+      style={{ "--primary-foreground": "oklch(0.97 0.012 85)" } as React.CSSProperties}
       className={cn(
-        "relative overflow-hidden rounded-3xl bg-[linear-gradient(150deg,oklch(0.36_0.065_156)_0%,var(--primary)_38%,color-mix(in_oklch,var(--primary)_58%,oklch(0.92_0.03_85))_100%)] text-primary-foreground shadow-[var(--elevate-hero)]",
+        "relative overflow-hidden rounded-3xl text-primary-foreground shadow-[var(--elevate-hero)]",
+        "bg-[linear-gradient(150deg,oklch(0.36_0.065_156)_0%,var(--primary)_38%,color-mix(in_oklch,var(--primary)_58%,oklch(0.92_0.03_85))_100%)]",
+        "dark:bg-[linear-gradient(150deg,oklch(0.3_0.05_156)_0%,oklch(0.38_0.07_155)_55%,oklch(0.31_0.05_150)_100%)]",
         className
       )}
     >

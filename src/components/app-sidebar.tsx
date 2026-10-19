@@ -76,7 +76,7 @@ export function AppSidebar({
       collapsible="icon"
       // Expanded on hover it overlays the page; the edge shadow and the transform
       // slide live in globals.css (.sidebar-hover).
-      className="border-r border-sidebar-border [&_[data-slot=sidebar-inner]]:bg-[linear-gradient(170deg,oklch(0.34_0.062_157)_0%,var(--primary)_55%,color-mix(in_oklch,var(--primary)_75%,oklch(0.92_0.03_85))_100%)]"
+      className="border-r border-sidebar-border [&_[data-slot=sidebar-inner]]:bg-[linear-gradient(170deg,oklch(0.34_0.062_157)_0%,var(--primary)_55%,color-mix(in_oklch,var(--primary)_75%,oklch(0.92_0.03_85))_100%)] dark:[&_[data-slot=sidebar-inner]]:bg-[linear-gradient(170deg,oklch(0.26_0.045_157)_0%,oklch(0.33_0.06_155)_55%,oklch(0.28_0.045_150)_100%)]"
       {...props}
     >
       <SidebarHeader className="px-3 pt-6 pb-0 group-data-[collapsible=icon]:px-2">

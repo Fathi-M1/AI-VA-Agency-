@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react"
 import type { Metadata } from "next"
 import Link from "next/link"
 import { CheckIcon } from "lucide-react"
@@ -33,7 +34,10 @@ export default async function SignInPage({ searchParams }: PageProps<"/sign-in">
   return (
     <main className="grid min-h-svh bg-background lg:grid-cols-[1.05fr_1fr]">
       {/* Brand panel (laptop and up) */}
-      <section className="relative hidden overflow-hidden bg-[linear-gradient(150deg,oklch(0.36_0.065_156)_0%,var(--primary)_40%,color-mix(in_oklch,var(--primary)_60%,oklch(0.92_0.03_85))_100%)] p-12 text-primary-foreground lg:flex lg:flex-col xl:p-16">
+      <section
+        style={{ "--primary-foreground": "oklch(0.97 0.012 85)" } as CSSProperties}
+        className="relative hidden overflow-hidden p-12 text-primary-foreground lg:flex lg:flex-col xl:p-16 bg-[linear-gradient(150deg,oklch(0.36_0.065_156)_0%,var(--primary)_40%,color-mix(in_oklch,var(--primary)_60%,oklch(0.92_0.03_85))_100%)] dark:bg-[linear-gradient(150deg,oklch(0.3_0.05_156)_0%,oklch(0.38_0.07_155)_55%,oklch(0.31_0.05_150)_100%)]"
+      >
         <div aria-hidden="true" className="pointer-events-none absolute -right-28 -bottom-44 size-[34rem] rounded-full bg-[radial-gradient(circle,oklch(0.92_0.03_85/0.35)_0%,transparent_70%)]" />
         <div aria-hidden="true" className="pointer-events-none absolute -top-36 -left-28 size-[26rem] rounded-full bg-[radial-gradient(circle,oklch(0.75_0.1_150/0.25)_0%,transparent_70%)]" />
         <Link href="/" aria-label="AI VA Agency home" className="relative inline-flex w-fit">
