@@ -1,3 +1,4 @@
+import { AppearanceToggle } from "@/components/appearance-toggle"
 import { SettingsForm, type SettingsTab } from "@/components/settings/settings-form"
 import { SiteHeader } from "@/components/site-header"
 import type { Weekday } from "@/server/agent/knowledge/types"
@@ -56,6 +57,13 @@ export default async function SettingsPage({ params, searchParams }: PageProps<"
           </div>
         }
       />
+      <section className="mb-8 flex flex-wrap items-center justify-between gap-3 border-b border-border/70 pb-8">
+        <div>
+          <h2 className="font-serif text-2xl leading-tight tracking-[-0.01em]">Appearance</h2>
+          <p className="mt-0.5 text-sm text-muted-foreground">Light or dark, for this device.</p>
+        </div>
+        <AppearanceToggle />
+      </section>
       <SettingsForm
         businessId={businessId}
         initialTab={TABS.includes(tab as SettingsTab) ? (tab as SettingsTab) : "business"}
