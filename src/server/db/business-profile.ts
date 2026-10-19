@@ -111,7 +111,13 @@ export async function getBusinessProfile(businessId: string): Promise<BusinessPr
  *  carries only what customers may see: no owner mobile, no internal settings. */
 export async function getBusinessBySlug(slug: string): Promise<BusinessProfile | null> {
   const { data, error } = await db().rpc("public_storefront", { p_link: slug })
-  if (error) fail("load business by link", error)
+  if (error) {
+    // A customer-facing page: a storefront read that fails shows "link not active", never a
+    // crash. The real cause is logged for operators (Vercel logs) — commonly a wrong anon
+    // key or the function missing from the API's schema cache.
+    console.error("[public_storefront]", slug, error.message)
+    return null
+  }
   return profileFromStorefront(data)
 }
 
