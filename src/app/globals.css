@@ -145,6 +145,12 @@
   --chart-4: oklch(0.85 0.012 80);
   --chart-5: oklch(0.912 0.011 85);
   --radius: 0.5625rem;
+  /* Elevation — 3 named steps (design-system.md). Use shadow-[var(--elevate-*)]; never a
+     bespoke shadow. raised = cards that lift off paper; overlay = sheets/popovers; hero =
+     the green gradient panel only. */
+  --elevate-raised: inset 0 1px 0 rgb(255 255 255 / 0.7), 0 14px 40px -28px color-mix(in oklch, var(--primary) 55%, transparent);
+  --elevate-overlay: 0 24px 60px -28px color-mix(in oklch, var(--primary) 45%, transparent);
+  --elevate-hero: 0 24px 60px -32px color-mix(in oklch, var(--primary) 80%, transparent);
   --sidebar: oklch(0.967 0.007 85);
   --sidebar-foreground: oklch(0.5 0.012 80);
   --sidebar-primary: oklch(0.405 0.07 155);
@@ -156,37 +162,51 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Same system in the dark: warm near-black paper, the one green accent (brighter for
+     contrast), amber reserved for needs you / waiting. Mirrors :root semantics. */
+  --background: oklch(0.185 0.006 85);        /* warm near-black paper */
+  --foreground: oklch(0.95 0.006 85);         /* warm off-white ink */
+  --card: oklch(0.225 0.006 85);
+  --card-foreground: oklch(0.95 0.006 85);
+  --popover: oklch(0.225 0.006 85);
+  --popover-foreground: oklch(0.95 0.006 85);
+  --primary: oklch(0.62 0.11 155);            /* brighter green for dark contrast */
+  --primary-foreground: oklch(0.16 0.02 150);
+  --secondary: oklch(0.27 0.006 85);          /* hover wash */
+  --secondary-foreground: oklch(0.95 0.006 85);
+  --muted: oklch(0.27 0.006 85);
+  --muted-foreground: oklch(0.72 0.01 85);    /* soft text on dark */
+  --subtle: oklch(0.66 0.012 85);
+  --accent: oklch(0.27 0.006 85);
+  --accent-foreground: oklch(0.95 0.006 85);
+  --destructive: oklch(0.65 0.17 30);
+  --warning: oklch(0.78 0.14 75);             /* amber: needs you / waiting */
+  --warning-foreground: oklch(0.82 0.13 75);
+  --service-1: oklch(0.68 0.09 250);
+  --service-2: oklch(0.72 0.11 70);
+  --service-3: oklch(0.68 0.1 305);
+  --service-4: oklch(0.66 0.14 25);
+  --service-5: oklch(0.7 0.09 200);
+  --border: oklch(1 0 0 / 0.12);
+  --input: oklch(1 0 0 / 0.18);
+  --ring: oklch(0.62 0.11 155);
+  --chart-1: oklch(0.62 0.11 155);
+  --chart-2: oklch(0.72 0.01 85);
+  --chart-3: oklch(0.58 0.012 85);
+  --chart-4: oklch(0.45 0.012 85);
+  --chart-5: oklch(0.34 0.008 85);
+  /* Elevation in dark: black-based depth, faint top highlight. */
+  --elevate-raised: inset 0 1px 0 rgb(255 255 255 / 0.04), 0 14px 40px -26px rgb(0 0 0 / 0.65);
+  --elevate-overlay: 0 24px 60px -26px rgb(0 0 0 / 0.72);
+  --elevate-hero: 0 24px 60px -30px rgb(0 0 0 / 0.6);
+  --sidebar: oklch(0.225 0.006 85);
+  --sidebar-foreground: oklch(0.72 0.01 85);
+  --sidebar-primary: oklch(0.62 0.11 155);
+  --sidebar-primary-foreground: oklch(0.16 0.02 150);
+  --sidebar-accent: oklch(0.27 0.006 85);
+  --sidebar-accent-foreground: oklch(0.95 0.006 85);
+  --sidebar-border: oklch(1 0 0 / 0.12);
+  --sidebar-ring: oklch(0.62 0.11 155);
 }
 
 @layer base {

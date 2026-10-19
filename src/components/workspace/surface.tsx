@@ -14,7 +14,7 @@ export function HeroPanel({ className, children }: { className?: string; childre
   return (
     <section
       className={cn(
-        "relative overflow-hidden rounded-3xl bg-[linear-gradient(150deg,oklch(0.36_0.065_156)_0%,var(--primary)_38%,color-mix(in_oklch,var(--primary)_58%,oklch(0.92_0.03_85))_100%)] text-primary-foreground shadow-[0_24px_60px_-32px_color-mix(in_oklch,var(--primary)_80%,transparent)]",
+        "relative overflow-hidden rounded-3xl bg-[linear-gradient(150deg,oklch(0.36_0.065_156)_0%,var(--primary)_38%,color-mix(in_oklch,var(--primary)_58%,oklch(0.92_0.03_85))_100%)] text-primary-foreground shadow-[var(--elevate-hero)]",
         className
       )}
     >
@@ -41,7 +41,7 @@ export function GlassCard({
   return (
     <Tag
       className={cn(
-        "relative rounded-2xl border border-border/80 bg-card/85 shadow-[inset_0_1px_0_rgb(255_255_255/0.7),0_14px_40px_-28px_color-mix(in_oklch,var(--primary)_55%,transparent)] backdrop-blur",
+        "relative rounded-2xl border border-border/80 bg-card/85 shadow-[var(--elevate-raised)] backdrop-blur",
         className
       )}
       {...props}

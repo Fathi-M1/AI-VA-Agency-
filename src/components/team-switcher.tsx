@@ -9,7 +9,8 @@
 // in ink; Lucide icons instead of IconPlaceholder.
 import * as React from "react"
 import Link from "next/link"
-import { ChevronsUpDownIcon, LogOutIcon, PlusIcon } from "lucide-react"
+import { ChevronsUpDownIcon, LogOutIcon, MoonIcon, PlusIcon, SunIcon } from "lucide-react"
+import { useTheme } from "next-themes"
 
 import { signOut } from "@/app/auth/actions"
 import { appPath } from "@/lib/app-path"
@@ -35,6 +36,24 @@ const Initial = ({ name, className = "", glass = false }: { name: string; classN
     {name.charAt(0).toLowerCase()}
   </div>
 )
+
+// Light / dark for the owner app (customers never see this; the storefront stays light).
+function ThemeToggle() {
+  const { resolvedTheme, setTheme } = useTheme()
+  const dark = resolvedTheme === "dark"
+  return (
+    <DropdownMenuItem
+      className="gap-2 p-2"
+      onSelect={(e) => {
+        e.preventDefault()
+        setTheme(dark ? "light" : "dark")
+      }}
+    >
+      {dark ? <SunIcon className="size-4" aria-hidden="true" /> : <MoonIcon className="size-4" aria-hidden="true" />}
+      {dark ? "Light mode" : "Dark mode"}
+    </DropdownMenuItem>
+  )
+}
 
 export function TeamSwitcher({
   current,
@@ -85,6 +104,8 @@ export function TeamSwitcher({
                 <span className="font-medium text-muted-foreground">Add business</span>
               </Link>
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <ThemeToggle />
             <DropdownMenuSeparator />
             <form action={signOut}>
               <DropdownMenuItem asChild className="w-full gap-2 p-2">
