@@ -110,15 +110,17 @@ export async function getBusinessProfile(businessId: string): Promise<BusinessPr
  *  through public_storefront (a narrow function an anonymous customer may call), so it
  *  carries only what customers may see: no owner mobile, no internal settings. */
 export async function getBusinessBySlug(slug: string): Promise<BusinessProfile | null> {
-  const { data, error } = await db().rpc("public_storefront", { p_link: slug })
-  if (error) {
-    // A customer-facing page: a storefront read that fails shows "link not active", never a
-    // crash. The real cause is logged for operators (Vercel logs) — commonly a wrong anon
-    // key or the function missing from the API's schema cache.
-    console.error("[public_storefront]", slug, error.message)
+  // A customer-facing page: a storefront read that fails shows "link not active", never a
+  // crash. Catches both a returned error and a thrown one (e.g. the Supabase env vars
+  // missing at runtime). The real cause is logged for operators (Vercel logs).
+  try {
+    const { data, error } = await db().rpc("public_storefront", { p_link: slug })
+    if (error) throw new Error(error.message)
+    return profileFromStorefront(data)
+  } catch (err) {
+    console.error("[public_storefront]", slug, err instanceof Error ? err.message : err)
     return null
   }
-  return profileFromStorefront(data)
 }
 
 /** Active services / team, in display order. */
